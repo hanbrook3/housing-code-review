@@ -1039,6 +1039,30 @@ td{font-size:11.2px}
   h2{break-after:avoid}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+.pd-hit{background:#fef9c3;border:1px solid #fde68a;border-radius:4px;padding:1px 4px;color:#92400e;font-weight:700}
+.pd-hit-badge{display:inline-block;font-size:9px;font-weight:800;color:#fff;background:#d97706;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle}
+.pd-why{margin-top:6px;padding:6px 9px;border-radius:6px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:10.5px;line-height:1.5;font-weight:700}
+.pd-why b{color:#b45309}
+.pd-nope{margin:0;padding:6px 9px;border-radius:6px;background:#f1f5f9;border:1px solid #cbd5e1;color:#475569;font-size:11px;line-height:1.5;font-weight:600}
+.pd-nope b{color:#334155}
+.pd-legend{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 9px;font-size:10px;color:#64748b}
+.pd-legend span{display:inline-flex;align-items:center;gap:5px}
+.pd-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;border:1px solid}
+.pd-legend .lg-y{background:#fef9c3;border-color:#fde68a}
+.pd-legend .lg-g{background:#f1f5f9;border-color:#cbd5e1}
+.pd-legend .lg-a{background:#fef2f2;border-color:#fecaca}
+.pd-legend .lg-v{background:#fffbeb;border-color:#fde68a}
+.pd-concl{font-size:11.5px;font-weight:800;margin:0 0 5px;padding:5px 9px;border-radius:6px;line-height:1.45}
+.pd-c-A{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.pd-c-V{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.pd-c-N{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1}
+.pd-c-R{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.pd-concl .cw{font-weight:900;padding:1px 7px;border-radius:5px;margin-right:5px}
+.pd-c-A .cw{background:#b91c1c;color:#fff}
+.pd-c-V .cw{background:#b45309;color:#fff}
+.pd-c-N .cw{background:#64748b;color:#fff}
+.pd-c-R .cw{background:#047857;color:#fff}
+#permitExtra .grid7{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
 </style>
 </head>
 <body>
@@ -1154,7 +1178,7 @@ td{font-size:11.2px}
       <option value="factory">공장·창고시설</option>
       <option value="etc">기타 건축물</option>
     </select></div>
-    <div><label>세대수 / 객실·실 수</label><input type="number" id="sU" value="100" min="1"></div>
+    <div><label>세대수 / 객실·실 수</label><input type="number" id="sU" value="280" min="1"></div>
     <div><label>사업방식</label>
     <select id="sP">
       <option value="p">민간분양</option>
@@ -1166,9 +1190,9 @@ td{font-size:11.2px}
       <option value="wa">직장주택조합</option>
       <option value="gen">일반 건축 (비주택)</option>
     </select></div>
-    <div><label>최고 층수</label><input type="number" id="sF" value="15" min="1"></div>
-    <div><label>대지면적 (㎡)</label><input type="number" id="sS" value="3000" min="50" step="100"></div>
-    <div><label>연면적 (㎡)</label><input type="number" id="sA" value="10000" min="100" step="500"></div>
+    <div><label>최고 층수</label><input type="number" id="sF" value="7" min="1"></div>
+    <div><label>대지면적 (㎡)</label><input type="number" id="sS" value="30000" min="50" step="100"></div>
+    <div><label>연면적 (㎡)</label><input type="number" id="sA" value="62000" min="100" step="500"></div>
   </div>
   <div class="meta" id="meta"></div>
   <div class="city-info" id="cityInfo" style="display:none"></div>
@@ -1183,6 +1207,23 @@ td{font-size:11.2px}
 <h2 id="step2"><span class="h2num">STEP 2</span>인허가절차 체크사항</h2>
 <div class="section-kicker">핵심 인허가 체크사항</div>
 <div class="dash" id="dashGrid"></div>
+
+<div class="section-kicker">추가 입지·계획 정보 (선택 시 판정 정교화)</div>
+<div class="panel" id="permitExtra">
+  <div class="grid7">
+    <div><label>도시교통정비지역 구분</label><select id="xTraffic"><option value="">미선택(조례DB 기준)</option><option value="urban">도시교통정비지역</option><option value="region">교통권역</option><option value="none">해당 없음</option></select></div>
+    <div><label>지하 굴착깊이</label><select id="xExcav"><option value="">미선택</option><option value="u10">10m 미만</option><option value="d1020">10m~20m</option><option value="o20">20m 이상</option></select></div>
+    <div><label>경관지구·중점경관관리구역</label><select id="xScenic"><option value="">미선택</option><option value="yes">해당</option><option value="no">해당 없음</option></select></div>
+    <div><label>교육환경보호구역(학교 200m)</label><select id="xEdu"><option value="">미선택</option><option value="yes">해당</option><option value="no">해당 없음</option></select></div>
+    <div><label>매장유산 유존지역·고시구역</label><select id="xHeritage"><option value="">미선택</option><option value="yes">해당</option><option value="no">해당 없음</option></select></div>
+    <div><label>자연재해위험개선지구·해일위험지구</label><select id="xDisaster"><option value="">미선택</option><option value="yes">해당</option><option value="no">해당 없음</option></select></div>
+    <div><label>소규모 환경평가 입지(용도지역)</label><select id="xEnvLoc"><option value="">미선택</option><option value="urban">도시지역(주거·상업·공업)</option><option value="green">도시지역 녹지지역</option><option value="mng_b">보전관리지역</option><option value="mng_p">생산관리지역</option><option value="mng_c">계획관리지역</option><option value="farm">농림지역</option><option value="nature">자연환경보전지역</option><option value="gb">개발제한구역</option></select></div>
+    <div><label>지구단위계획에 따른 사업</label><select id="xDistrict"><option value="">미선택</option><option value="yes">해당(지구단위계획 시행)</option><option value="no">해당 없음</option></select></div>
+  </div>
+  <div style="margin-top:8px;font-size:10.5px;color:#64748b">※ 미선택 시 면적·용도 등 기본정보로만 판정하며, 위치·계획 정보가 필요한 항목은 '검토'로 표시됩니다. 선택하면 해당/비해당으로 확정 반영됩니다.</div>
+</div>
+<div class="section-kicker">심의 · 영향평가 · 사전검토 상세 (대상기준 / 대상여부)</div>
+<div id="permitDetail"></div>
 
 <div class="section-kicker">인허가 절차 타임라인</div>
 <div class="tl-wrap">
@@ -1742,7 +1783,7 @@ const ORDINANCE_COVERAGE=getOrdinanceCoverage();
 const URBAN_DEFAULT_REGIONS=['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시'];
 
 const BL={A:'bA',V:'bV',R:'bR',N:'bN'};
-const BT={A:'해당(의무)',V:'확인필요',R:'권장',N:'미해당'};
+const BT={A:'대상',V:'검토',R:'권장',N:'비대상'};
 const RC={A:'rqA',V:'rqV',R:'rqR'};
 let openState={}, filter='all';
 let userTouched={pkRatios:false, ptPct:false, trafficUrban:false};
@@ -1989,6 +2030,14 @@ function getInputs(){
     f:Math.max(1,parseInt(document.getElementById('sF').value)||1),
     s:Math.max(50,parseInt(document.getElementById('sS').value)||50),
     fa:Math.max(100,parseInt(document.getElementById('sA').value)||100),
+    xTraffic:(document.getElementById('xTraffic')||{}).value||'',
+    xExcav:(document.getElementById('xExcav')||{}).value||'',
+    xScenic:(document.getElementById('xScenic')||{}).value||'',
+    xEdu:(document.getElementById('xEdu')||{}).value||'',
+    xHeritage:(document.getElementById('xHeritage')||{}).value||'',
+    xDisaster:(document.getElementById('xDisaster')||{}).value||'',
+    xEnvLoc:(document.getElementById('xEnvLoc')||{}).value||'',
+    xDistrict:(document.getElementById('xDistrict')||{}).value||'',
   };
 }
 
@@ -2005,6 +2054,7 @@ function regionLabel(I){
 function buildItems(I){
   const r=I.r, c=I.c, u=I.u, pt=I.pt, f=I.f, fa=I.fa, s=I.s, z=I.z;
   const use=I.use||'apt';
+  const xTraffic=I.xTraffic||'',xExcav=I.xExcav||'',xScenic=I.xScenic||'',xEdu=I.xEdu||'',xHeritage=I.xHeritage||'',xDisaster=I.xDisaster||'',xEnvLoc=I.xEnvLoc||'',xDistrict=I.xDistrict||'';
   const isHousing=HOUSING_USES.includes(use);   // 주택법·주택건설기준 적용 (아파트·주상복합·연립다세대)
   const isOffi=use==='offi';                     // 오피스텔 (준주택, 건축법 적용)
   const isNonResid=!isHousing && !isOffi;        // 순수 비주거
@@ -2928,64 +2978,192 @@ function buildItems(I){
     nt:['<b>등급</b>: 최우수(90↑)/우수(80↑)','<b>분야</b>: 매개·내부·위생·안내·기타시설',seoul?'<b>서울시</b>: 민간 대형 공동주택 의무화 조례 확인':null].filter(Boolean)});
 
   /* ============ 8. 교육·교통·환경 ============ */
-  a({c:7,t:'교통영향평가',s:u>=100||fa>=50000?'V':'N',
-    th:'도시교통정비촉진법 시행령 별표2',
-    rq:u>=100||fa>=50000?`지자체 교통과 사전 협의 — 도시교통정비지역 ${ord&&ord.urban?'(해당)':'(확인 필요)'}`:'대상 외 가능',
-    lg:['도시교통정비 촉진법 제15조·제17조','동법 시행령 별표1·별표2'],
-    nt:['<b>일반 대상</b>: 도시교통정비지역 100세대 또는 100,000㎡ 이상','<b>간이평가</b>: 50세대 또는 50,000㎡ 이상','<b>절차</b>: 평가서 → 심의위원회 → 사업계획승인','⚠ 「교통영향평가」 탭에서 자동 판정']});
+  // ===== 교통영향평가 (도시교통정비 촉진법 시행령 별표1 제2호, 개정 2024.2.6.) =====
+  let urbanArea = !!(ord && ord.urban);
+  let trafRegion = urbanArea ? 'urban' : '';
+  if(xTraffic) trafRegion = xTraffic;
+  const inUrban = trafRegion==='urban', inRegion = trafRegion==='region';
+  const TRAFFIC_TH = {apt:[60000,90000], offi:[25000,37500], biz:[25000,37500], lodge:[40000,60000], medical:[25000,37500], culture:[15000,22500]};
+  const trafThM = TRAFFIC_TH[use];
+  let trafS, trafThr, trafRq, trafHit='';
+  if(use==='mixed'){
+    trafS='V'; trafThr='복합용도 건축물 — 용도별 합산식(Swa) 1만㎡ 이상이면 대상 (별표1 제2호 나목)';
+    trafRq='주상복합은 용도별 연면적 합산식(Swa)으로 판정 — 지자체 교통과 확인'; trafHit='복합용도';
+  } else if(use==='row'){
+    trafS='N'; trafThr='연립·다세대 — 건축물 교통영향평가 대상 아님 (제2호가목은 아파트만 해당)'; trafRq='교통영향평가 건축물 대상 외';
+  } else if(trafThM){
+    const useHit = use==='apt'?'아파트':(use==='lodge'?'숙박':(['offi','biz','medical'].includes(use)?'일반업무·오피스텔·병원':USE_L[use]));
+    if(trafRegion==='none'){
+      trafS='N'; trafThr=`${USE_L[use]} — 도시교통정비지역·교통권역 미해당 (대상 아님)`; trafRq='도시교통정비지역·교통권역 외';
+    } else {
+      const bar = inRegion ? trafThM[1] : trafThM[0];
+      if(fa>=bar){ trafS=(inUrban||inRegion)?'A':'V'; trafHit=useHit; } else trafS='N';
+      trafThr=`${USE_L[use]} — 도시교통정비지역 ${trafThM[0].toLocaleString()}㎡ / 교통권역 ${trafThM[1].toLocaleString()}㎡ 이상 (현재 ${fa.toLocaleString()}㎡, 적용 ${bar.toLocaleString()}㎡)`;
+      trafRq = trafS==='A' ? '교통영향평가 대상 — 평가서 작성 후 심의' : (trafS==='V' ? '도시교통정비지역/교통권역 선택 시 확정 — 상단 추가정보 드롭다운' : '대상 규모 미만');
+    }
+  } else {
+    trafS='V'; trafThr=`${USE_L[use]} — 용도별 대상규모 상이 (별표1 제2호 참조)`; trafRq='해당 용도 대상규모 확인';
+  }
+  a({c:7,t:'교통영향평가',s:trafS, hit:trafHit,
+    th:trafThr + (xTraffic?'':' · (추가정보 미선택: 도시교통정비지역/교통권역)'),
+    rq:trafRq,
+    lg:['도시교통정비 촉진법 제15조','동법 시행령 별표1 제2호 (개정 2024. 2. 6.)'],
+    nt:['<b>아파트</b>: 도시교통정비지역 60,000㎡ / 교통권역 90,000㎡ 이상','<b>일반업무·오피스텔·병원</b>: 25,000 / 37,500㎡ 이상','<b>숙박</b>: 40,000 / 60,000㎡ 이상','<b>복합용도(주상복합)</b>: 용도별 합산식 Swa 1만㎡ 이상','<b>절차</b>: 평가서 → 심의 → 건축허가·사업계획승인 전','⚠ 도시교통정비지역·교통권역 지정 여부는 지자체 확인']});
 
-  a({c:7,t:'교육환경평가',s:u>=100?'V':'N',
-    th:'학교 인접 또는 일정 규모 이상',
-    rq:u>=100?'교육환경 영향 검토 + 교육청 사전 협의':'소규모 미해당 가능',
-    lg:['교육환경 보호에 관한 법률 제6조의3','학교용지 확보 등에 관한 특례법'],
-    nt:['<b>대상</b>: 일정 규모 이상 공동주택','<b>평가</b>: 학생 수요·학교 신증설','<b>학교용지 부담금</b>: 대규모 사업','정확한 대상 교육청 협의']});
+  // ===== 교육환경평가 (교육환경 보호에 관한 법률 제6조, 시행 2026.6.3.) =====
+  const eduScale = ren || f>=21 || fa>=100000;
+  let eduS, eduHit='';
+  if(!eduScale) eduS='N';
+  else if(xEdu==='yes'){ eduS='A'; eduHit = ren?'정비구역으로 지정':'건축법 제11조'; }
+  else if(xEdu==='no') eduS='N';
+  else { eduS='V'; eduHit = ren?'정비구역으로 지정':'건축법 제11조'; }
+  a({c:7,t:'교육환경평가',s:eduS, hit:eduHit,
+    th: !eduScale
+      ? `대상규모(21층↑·연면적 10만㎡↑) 미만·비정비 — 현재 ${f}층/${fa.toLocaleString()}㎡`
+      : (xEdu==='no' ? '교육환경보호구역 밖 — 교육환경평가 대상 아님'
+         : `교육환경보호구역(학교경계 200m) 내 + ${ren?'정비사업':'21층 이상 또는 연면적 10만㎡ 이상'} ${xEdu==='yes'?'→ 대상':'(보호구역 여부 선택 시 확정)'}`),
+    rq: eduS==='A' ? '교육환경평가서 작성 → 관할 교육감 승인(시·도 교육환경보호위원회 심의)'
+        : (eduS==='V' ? '교육환경보호구역(학교 200m) 해당 여부 선택 시 확정 — 상단 추가정보 드롭다운' : '교육환경평가 대상 외'),
+    lg:['교육환경 보호에 관한 법률 제6조·제8조','동법 시행령'],
+    nt:[
+      '<b>대상 (법 제6조제1항)</b>:',
+      '&nbsp;&nbsp;• 교육환경보호구역 내 건축법 제11조①단서 규모(21층 이상 또는 연면적 합계 10만㎡ 이상) 건축 (제5호)',
+      '&nbsp;&nbsp;• 교육환경보호구역이 정비구역으로 지정·고시되어 정비사업 시행 (제4호)',
+      '&nbsp;&nbsp;• 학교 설립자·도시군관리계획 입안자·학교용지 개발사업시행자 (제1~3호)',
+      '<b>교육환경보호구역(법 제8조)</b>: 절대보호구역(학교 출입문 50m)·상대보호구역(학교경계 200m)',
+      '<b>승인</b>: 관할 교육감 — 시·도 교육환경보호위원회 심의',
+      '⚠ 보호구역 해당 여부는 인근 학교 위치 기준 현장 확인',
+    ]});
 
-  a({c:7,t:'환경영향평가',s:fa>=100000?'V':(fa>=30000?'V':'N'),
-    th:'환경영향평가법 시행령 별표3',
-    rq:fa>=100000?'환경영향평가 대상 검토':(fa>=30000?'소규모 환경영향평가 검토':'미해당 가능'),
-    lg:['환경영향평가법 제22조','환경영향평가법 시행령 별표3·별표4'],
-    nt:['<b>환경영향평가</b>: 대규모 도시개발·공동주택','<b>소규모</b>: 도시지역 외 일정 면적','<b>평가</b>: 자연환경/생활환경/사회·경제','정확한 대상 환경부·지자체 확인']});
+  // ===== 환경영향평가 / 소규모 환경영향평가 (환경영향평가법 시행령 별표3·별표4) =====
+  let envS, envThr, envRq, envHit='';
+  if((isHousing && s>=300000) || (ren && s>=300000)){
+    envS='A'; envThr=`주택건설/정비사업 사업면적 300,000㎡ 이상 — 현재 대지 ${s.toLocaleString()}㎡`;
+    envRq='환경영향평가 대상 — 평가서 작성·유역(지방)환경청 협의'; envHit = ren?'정비사업(주거환경개선 제외)':'주택법 주택건설';
+  } else if(s>=250000){
+    envS='V'; envThr=`도시개발 250,000㎡·주택건설/정비 300,000㎡ 이상 — 사업유형 확인 (현재 대지 ${s.toLocaleString()}㎡)`;
+    envRq='사업유형(도시개발/주택/정비)에 따라 환경영향평가 대상 여부 확인'; envHit='도시개발사업';
+  } else {
+    envS='N'; envThr=`환경영향평가(별표3) 대상규모(주택·정비 30만㎡·도시개발 25만㎡) 미만 — 현재 대지 ${s.toLocaleString()}㎡`;
+    envRq='대규모 환경영향평가 대상 외 — 소규모 환경영향평가는 아래 별도 항목에서 입지·지구단위계획으로 판정';
+  }
+  a({c:7,t:'환경영향평가',s:envS, hit:envHit,
+    th:envThr,
+    rq:envRq,
+    lg:['환경영향평가법 제22조','환경영향평가법 시행령 별표3 (개정 2025. 9. 23.)'],
+    nt:[
+      '<b>[환경영향평가 · 별표3] 사업면적 기준</b>',
+      '&nbsp;&nbsp;※ <b>사업면적 = 사업부지(대지) 면적</b> — 건축물 연면적 아님',
+      '&nbsp;&nbsp;• 도시개발사업·공공지원민간임대 공급촉진지구: 25만㎡ 이상',
+      '&nbsp;&nbsp;• 정비사업(주거환경개선 제외): 30만㎡ 이상',
+      '&nbsp;&nbsp;• 주택법 주택건설·대지조성사업: 30만㎡ 이상',
+      '&nbsp;&nbsp;• 택지개발·공공주택지구 조성: 30만㎡ 이상',
+      '<b>평가항목</b>: 자연생태·대기·수질·토지이용·소음·경관·사회경제 등',
+      '<b>협의기관</b>: 유역(지방)환경청 — 승인·인가 전',
+      '※ 소규모 환경영향평가(별표4)는 아래 「소규모 환경영향평가」 항목 참조',
+    ]});
+
+  // ===== 소규모 환경영향평가 (환경영향평가법 제43조·시행령 별표4, 개정 2025.10.1.) =====
+  const SENV_TH={green:10000,mng_b:5000,mng_p:7500,mng_c:10000,farm:7500,nature:5000,gb:5000};
+  const SENV_LABEL={urban:'도시지역(주거·상업·공업)',green:'도시지역 녹지지역',mng_b:'보전관리지역',mng_p:'생산관리지역',mng_c:'계획관리지역',farm:'농림지역',nature:'자연환경보전지역',gb:'개발제한구역'};
+  let senvS='N',senvThr,senvRq,senvHit='';
+  if(xEnvLoc==='' && xDistrict===''){
+    senvS='V'; senvThr='소규모 환경영향평가 입지(용도지역)·지구단위계획 여부 미선택'; senvRq='상단 추가정보에서 「소규모 환경평가 입지」·「지구단위계획 사업」 선택 시 확정';
+  } else if(xEnvLoc==='' || xEnvLoc==='urban'){
+    if(xDistrict==='yes'){
+      senvS = s>=60000?'A':'N'; if(senvS==='A') senvHit='도시지역';
+      senvThr=`도시지역 + 지구단위계획에 따른 사업 — 6만㎡ 이상 (현재 대지 ${s.toLocaleString()}㎡)`;
+      senvRq = s>=60000?'소규모 환경영향평가 대상 — 평가서 작성·유역(지방)환경청 협의 (승인·인가 전)':'도시지역 지구단위계획 사업이나 6만㎡ 미만 — 대상 외';
+    } else if(xDistrict==='no'){
+      senvS='N'; senvThr='도시지역 일반(지구단위계획·체육·기반시설 등 특정사업 아님) — 소규모 대상 아님'; senvRq='도시지역 일반 건축은 소규모 환경영향평가 대상 외';
+    } else {
+      senvS='V'; senvThr='도시지역 — 지구단위계획 사업 여부 선택 시 확정 (지구단위계획 + 6만㎡ 이상이면 대상)'; senvRq='상단 「지구단위계획에 따른 사업」 선택 시 확정';
+    }
+  } else if(SENV_TH[xEnvLoc]!==undefined){
+    const th0=SENV_TH[xEnvLoc];
+    senvS = s>=th0?'A':'N';
+    if(senvS==='A') senvHit = (xEnvLoc==='green')?'녹지지역':(xEnvLoc==='mng_b'?'보전관리지역':(xEnvLoc==='mng_p'?'생산관리지역':(xEnvLoc==='mng_c'?'계획관리지역':(xEnvLoc==='farm'?'농림지역':(xEnvLoc==='nature'?'자연환경보전지역':'개발제한구역')))));
+    senvThr=`${SENV_LABEL[xEnvLoc]} — 사업계획 면적 ${th0.toLocaleString()}㎡ 이상 (현재 대지 ${s.toLocaleString()}㎡)`;
+    senvRq = s>=th0?'소규모 환경영향평가 대상 — 평가서 작성·유역(지방)환경청 협의 (승인·인가 전)':'기준 면적 미만 — 대상 외';
+  }
+  a({c:7,t:'소규모 환경영향평가',s:senvS, hit:senvHit,
+    th:senvThr,
+    rq:senvRq,
+    lg:['환경영향평가법 제43조','환경영향평가법 시행령 별표4 (개정 2025. 10. 1.) 제1호'],
+    nt:[
+      '<b>[소규모 환경영향평가 · 별표4] 입지(용도지역)별 사업계획 면적</b>',
+      '&nbsp;&nbsp;※ <b>면적 = 사업부지(대지) 면적 기준</b> — 건축물 연면적 아님',
+      '&nbsp;&nbsp;• 도시지역: 6만㎡(녹지지역 1만㎡) 이상 — 지구단위계획·체육·기반시설 등 특정사업',
+      '&nbsp;&nbsp;• 보전관리지역 5천㎡ / 생산관리지역 7,500㎡ / 계획관리지역 1만㎡',
+      '&nbsp;&nbsp;• 농림지역 7,500㎡ · 자연환경보전지역 5천㎡ · 개발제한구역 5천㎡',
+      '&nbsp;&nbsp;• 광역상수도 호소 상류 1km: 공동주택 5천㎡(그 밖 7,500㎡)',
+      '<b>지구단위계획 사업(도시지역, 별표4 제1호가목5))</b>: 지구단위계획에 따라 시행하는 사업은 6만㎡(녹지 1만㎡) 이상이면 대상',
+      '<b>협의기관</b>: 유역(지방)환경청 — 승인·인가 전',
+      '⚠ 입지(용도지역)·지구단위계획 여부는 상단 추가정보 드롭다운에서 선택',
+    ]});
 
   const afterUnderground = isAfterDate(LAW_DATES.undergroundSafety);
-  a({c:7,t:`지하안전영향평가${afterUnderground?'':' ⚠ 구법'}`,s:afterUnderground?'V':'N',
+  let usS, usHit='';
+  if(!afterUnderground) usS='N';
+  else if(xExcav==='o20'){ usS='A'; usHit='굴착깊이 20m'; }
+  else if(xExcav==='d1020'||xExcav==='u10') usS='N';
+  else usS='V';
+  a({c:7,t:`지하안전평가${afterUnderground?'':' ⚠ 구법'}`,s:usS, hit:usHit,
     th:afterUnderground
-      ?`굴착 깊이 <b>20m 이상</b> 굴착공사 또는 터널공사 (지하안전법 2018.1.1. 시행)`
-      :`<b>2018.1.1. 이전</b> — 지하안전법 미시행 (현재 기준 미적용)`,
-    rq:afterUnderground
-      ?'착공 전 지하안전영향평가 실시 — 평가서 작성 → 국토교통부 협의 → 사업계획승인'
-      :`<b>구법 적용</b> (${applyDate} 기준) — 지하안전관리에 관한 특별법 시행 전 (2018.1.1. 이전)이므로 지하안전영향평가 의무 없음`,
-    lg:['지하안전관리에 관한 특별법 제14조','동법 시행령 제13조','법률 제14509호 부칙 (2016.1.7. 제정 → 2018.1.1. 시행)'],
+      ?`굴착깊이 20m 이상 굴착공사 또는 터널(산악·수저 제외) 공사 ${xExcav==='o20'?'→ 대상':(xExcav?'(현재 선택: 20m 미만)':'(굴착깊이 선택 시 확정)')}`
+      :`2018.1.1. 이전 — 지하안전법 미시행 (현재 기준 미적용)`,
+    rq:usS==='A'?'착공 전 지하안전평가 실시 — 평가서 → 국토교통부 협의'
+       :(usS==='V'?'굴착깊이 선택 시 확정 — 상단 추가정보 드롭다운':(afterUnderground?'굴착 20m 미만 — 지하안전평가 대상 외(10~20m는 소규모)':'구법 — 의무 없음')),
+    lg:['지하안전관리에 관한 특별법 제14조','동법 시행령 제13조제1항 (굴착깊이 20m 이상)'],
     nt:[
-      afterUnderground?'<b>지하안전법 시행</b>: 2016.1.7. 제정·공포 → 2018.1.1. 시행':'<b>처분시법주의</b>: 2018.1.1. 이전 → 지하안전영향평가 의무 없음',
-      '<b>대상</b>: 굴착 깊이 20m 이상 (지반 표층 천층 굴착 포함)',
-      '<b>또는</b>: 터널 (산악·하저 제외) 공사',
-      '<b>평가 항목</b>: 지반 안정성, 지하수 변동, 주변 시설물 영향, 침하 예측',
-      '<b>절차</b>: 평가서 → 국토교통부 협의 → 사업계획승인 → 착공',
-      '<b>사후관리</b>: 착공 후 지하안전 점검 및 보고',
+      '<b>대상 (시행령 제13조①)</b>: 굴착깊이 20m 이상 굴착공사 (집수정·EV피트·정화조 제외 최대 굴착깊이) 또는 터널(산악·수저 제외) 공사',
+      '<b>대상사업</b>: 별표1 — 건축법 건축물 건축사업 포함',
+      '<b>평가항목</b>: 지반 안정성, 지하수 변동, 주변 시설물 영향, 침하 예측',
+      '<b>절차</b>: 평가서 → 국토교통부 협의 → 착공',
+      '⚠ 굴착깊이 미확정 시 상단 추가정보에서 선택',
     ]});
 
   const afterUndergroundSmall = isAfterDate(LAW_DATES.undergroundSafety);
-  a({c:7,t:`소규모 지하안전영향평가${afterUnderground?'':' ⚠ 구법'}`,s:afterUndergroundSmall?'V':'N',
+  let ussS, ussHit='';
+  if(!afterUndergroundSmall) ussS='N';
+  else if(xExcav==='d1020'){ ussS='A'; ussHit='굴착깊이 10m'; }
+  else if(xExcav==='u10'||xExcav==='o20') ussS='N';
+  else ussS='V';
+  a({c:7,t:`소규모 지하안전평가${afterUndergroundSmall?'':' ⚠ 구법'}`,s:ussS, hit:ussHit,
     th:afterUndergroundSmall
-      ?`굴착 깊이 <b>10m 이상 ~ 20m 미만</b> (지하안전법 2018.1.1. 시행 — 현재 지하층수 및 굴착 깊이 확인 필요)`
-      :`<b>2018.1.1. 이전</b> — 지하안전법 미시행`,
-    rq:afterUndergroundSmall
-      ?'소규모 지하안전영향평가 실시 (정밀 평가보다 간소화된 절차)'
-      :`<b>구법 적용</b> (${applyDate} 기준) — 소규모 지하안전영향평가 의무 없음`,
-    lg:['지하안전관리에 관한 특별법 제23조','동법 시행령 제19조'],
+      ?`굴착깊이 10m 이상 20m 미만 굴착공사 ${xExcav==='d1020'?'→ 대상':(xExcav?'(현재 선택: 해당 없음)':'(굴착깊이 선택 시 확정)')}`
+      :`2018.1.1. 이전 — 지하안전법 미시행`,
+    rq:ussS==='A'?'소규모 지하안전평가 실시 (간소화 절차)'
+       :(ussS==='V'?'굴착깊이 선택 시 확정 — 상단 추가정보 드롭다운':(afterUndergroundSmall?'굴착 10~20m 아님 — 소규모 대상 외':'구법 — 의무 없음')),
+    lg:['지하안전관리에 관한 특별법 제23조','동법 시행령 제23조 (굴착깊이 10m 이상 20m 미만)'],
     nt:[
-      afterUndergroundSmall?'<b>2018.1.1. 이후</b>: 소규모 지하안전영향평가 적용':'<b>처분시법주의</b>: 2018.1.1. 이전 → 소규모 지하안전영향평가 의무 없음',
-      '<b>대상</b>: 굴착 깊이 10m 이상 ~ 20m 미만',
-      '<b>지자체 협의</b>: 시·도지사 (대도시는 시·군·구청장 위임 가능)',
-      '<b>서울시</b>: 굴토심의와 연계 운영 (10m 이상 굴토심의 + 소규모 지하안전영향평가)',
-      '⚠ 시·군·구별 상이 — 지자체 사전 협의 필수',
+      '<b>대상 (시행령 제23조)</b>: 굴착깊이 10m 이상 20m 미만 굴착공사 (별표1 사업)',
+      '<b>협의</b>: 시·도지사 (대도시는 시·군·구 위임 가능)',
+      '<b>서울시</b>: 굴토심의와 연계 운영',
+      '⚠ 굴착깊이 미확정 시 상단 추가정보에서 선택',
     ]});
 
-  a({c:7,t:'사전재해영향성 검토',s:'V',
-    th:'사업 규모 및 위치에 따라 결정',
-    rq:'사전재해영향성 검토 대상 여부 지자체(재난안전과) 사전 확인',
-    lg:['자연재해대책법 제4조의2','자연재해대책법 시행령 별표1의2'],
-    nt:['⚠ 사업 유형·면적·위치에 따라 대상 여부 상이','지구단위계획 수립 시 의무 (대규모)']});
+  // ===== 재해영향평가 협의 (자연재해대책법 시행령 별표1 비고1, 개정 2025.9.23.) =====
+  const disasterScale = (isHousing && u>=30 && s>=5000);
+  let disS, disHit='';
+  if(xDisaster==='yes'){ disS='A'; disHit='자연재해위험개선지구'; }
+  else if(disasterScale){ disS='A'; disHit='규모 기준'; }
+  else if(s>=5000) disS='V';
+  else disS='N';
+  a({c:7,t:'재해영향평가 협의 (사전재해영향성검토)',s:disS, hit:disHit,
+    th:`주택법 제15조 주택건설사업계획 + 부지면적 5,000㎡ 이상 (현재 부지 ${s.toLocaleString()}㎡)${xDisaster==='yes'?' · 자연재해위험지구 해당(규모 무관)':''}`,
+    rq:disS==='A'
+      ?'사업계획승인 전 재해영향평가 협의 필수 — 평가서 → 시·도(행정안전부) 협의'
+      :(disS==='V'?'개발행위허가 등 부지 5,000㎡ 이상 — 협의 대상 여부 확인':'부지 5,000㎡ 미만 — 협의 대상 외'),
+    lg:['자연재해대책법 제4조','자연재해대책법 시행령 별표1 (개정 2025. 9. 23.) 비고 제1호'],
+    nt:[
+      '<b>개발사업 대상</b>: 주택법 사업계획승인, 개발행위허가, 도시개발 실시계획 등',
+      '<b>규모 기준</b>: 부지면적 5,000㎡ 이상 또는 길이 2km 이상 (사업부지=대지 면적, 연면적 아님)',
+      '<b>소규모 재해영향평가</b>: 현행 자연재해대책법(시행 2026.1.2.)에서 별도 분류 폐지 → 「재해영향평가」로 통합 (구법: 5천~5만㎡ 소규모 / 5만㎡↑ 재해영향평가 구분)',
+      '<b>협의 시기</b>: 주택법 사업계획승인 전',
+      '<b>자연재해위험개선지구·해일위험지구</b>: 규모 무관 전부 협의 대상',
+      '<b>협의 기관</b>: 행정안전부장관 (시·도지사 위임)',
+    ]});
 
   /* ============ 9. 발코니·안전 ============ */
   a({c:8,t:'발코니 대피공간 (시행령 제46조제4항)',s:f>=4?'A':'N',
@@ -3068,56 +3246,89 @@ function buildItems(I){
     ]});
 
   /* ============ 10. 각종 심의 (지자체) ============ */
-  a({c:10,t:'건축위원회 심의',s:(u>=300||f>=10||fa>=5000)?'V':'N',
-    th:`분양 공동주택 10층 이상 또는 300세대 이상 / 일반숙박·일반업무 5,000㎡ 이상 (지자체별 상이)`,
-    rq:(u>=300||f>=10||fa>=5000)?`<b>${cityRef} 건축위원회 심의 대상 가능</b> — 사전 협의 필수`:'대상 외 가능 — 지자체 확인',
-    lg:['건축법 제4조','건축법 시행령 제5조의5',`${cityRef} 건축조례`],
+  // ===== 건축위원회 심의 (건축법 제4조·영 제5조의5 / 주택법 제18조 통합심의) =====
+  const bcHousing = (isHousing && u>=30);
+  const bcMulti = (f>=16);
+  const bcReview = bcHousing || bcMulti || ren;
+  const bcHit = bcHousing?'주택법 사업계획승인 대상':(bcMulti?'다중이용 건축물':(ren?'다른 법령 위임':''));
+  a({c:10,t:'건축위원회 심의',s:bcReview?'A':(fa>=5000?'V':'N'), hit:bcHit,
+    th: bcHousing
+      ? `주택법 사업계획승인 대상(30세대 이상) → 주택법 제18조 통합심의(건축심의 포함) — 현재 ${u}세대`
+      : `다중이용 건축물(16층 이상 등)·특수구조 또는 지정·공고지역 조례 건축물 — 현재 ${f}층`,
+    rq: bcReview
+      ? (bcHousing
+          ? '사업계획승인 신청 시 통합심의 신청하면 의무 시행 (주택법 제18조②) — 건축·도시계획·교통·경관 통합'
+          : (bcMulti ? '16층 이상 — 다중이용 건축물 구조안전 등 건축위 심의 대상' : '정비사업 — 건축위(통합)심의 대상'))
+      : (fa>=5000 ? `${cityRef} 건축조례에 분양 공동주택 세대수 심의기준 없음 — 지정·공고지역(영 제5조의5①8) 해당 여부 확인` : '대상 외 가능'),
+    lg:['건축법 제4조','건축법 시행령 제5조의5제1항','주택법 제18조 (사업계획의 통합심의)','과천시 건축 조례 제9조'],
     nt:[
-      '<b>일반 대상 (지자체별 상이)</b>:',
-      '&nbsp;&nbsp;• 분양 공동주택 10층 이상 또는 300세대 이상',
-      '&nbsp;&nbsp;• 21층 이상 또는 연면적 100,000㎡ 이상',
-      '&nbsp;&nbsp;• 1·2종 근린생활·일반업무·일반숙박 5,000㎡ 이상',
-      '&nbsp;&nbsp;• 다중이용 건축물 (영 제2조제17호)',
-      '<b>절차</b>: 사전 협의 → 도서 제출 → 위원회 상정 → 의결 → 조치계획서 제출',
-      '<b>처리기간</b>: 30일 이내 (지자체별 상이)',
-      seoul?'<b>서울시</b>: 건축위원회 + 도시·건축공동위원회 + 도시계획위원회 등 위원회별 상이':null,
+      '<b>과천시 건축조례</b>: 분양 공동주택 세대수별 건축위 심의 기준 별도 규정 없음 — 영 제5조의5제1항에 위임(조례 제9조⑤)',
+      '<b>영 제5조의5제1항</b>: 다중이용 건축물(16층 이상 또는 문화·판매·운수·의료·숙박·위락 등 5천㎡ 이상)·특수구조 구조안전(제4호), 다른 법령 위임 심의(제7호), 지정·공고지역 조례 건축물(제8호)',
+      '<b>주택법 사업계획승인 대상(30세대 이상)</b>: 주택법 제18조 통합심의 — 건축심의·도시계획·교통영향평가·경관심의를 공동위원회에서 통합 (신청 시 의무)',
+      `<b>본 사업</b>: ${bcHousing?'주택법 통합심의 대상(건축심의 포함)':'주택법 사업계획승인 비대상'} · ${bcMulti?'16층 이상 구조안전 심의 대상':(f+'층 — 다중이용(16층) 구조안전 비대상')}`,
+      '<b>절차</b>: (통합심의) 사업계획승인 신청 + 관련 도서 → 공동위원회 심의 → 결과 반영 승인',
+      seoul?'<b>서울시</b>: 건축위원회 + 도시·건축공동위원회 등 위원회별 상이':null,
     ].filter(Boolean)});
 
-  a({c:10,t:'경관위원회 심의',s:f>=15||fa>=5000?'V':'N',
-    th:`일정 규모 이상 건축물 또는 경관지구 / 경관계획 수립지역 (지자체 조례별)`,
-    rq:f>=15||fa>=5000?`${cityRef} 경관위원회 심의 대상 가능 — 지자체 사전 확인`:'규모 미달 — 경관지구 여부 확인',
-    lg:['경관법 제29조','경관법 시행령',`${cityRef} 경관 조례`],
+  // ===== 경관 심의 (경관법 제28조 / 주택법 제18조 통합심의) =====
+  const scenicHousing = (isHousing && u>=30);
+  let scS, scHit='';
+  if(xScenic==='yes'){ scS='A'; scHit='경관지구의 건축물'; }
+  else if(xScenic==='no') scS='N';
+  else if(scenicHousing){ scS='V'; scHit='주택법 사업계획승인'; }
+  else if(ren||fa>=5000) scS='V';
+  else scS='N';
+  a({c:10,t:'경관위원회 심의',s:scS, hit:scHit,
+    th:`경관지구·중점경관관리구역 또는 조례로 정하는 건축물 (위치·조례 의존)${xScenic==='yes'?' → 해당':(xScenic==='no'?' → 비해당':'')} / 주택법 사업계획승인은 통합심의 포함`,
+    rq:scS==='A'?'경관위원회 심의 대상 — 주택사업은 주택법 제18조 통합심의 포함'
+      :(scS==='V'?(scenicHousing?'사업계획승인 시 경관심의는 통합심의 포함 — 경관지구·중점관리구역 여부 선택 시 확정':`${cityRef} 경관 조례상 심의대상 여부 확인 — 상단 추가정보 드롭다운`):'경관지구·중점경관관리구역 미해당'),
+    lg:['경관법 제28조 (건축물의 경관 심의)','경관법 제29조','주택법 제18조 (통합심의)',`${cityRef} 경관 조례`],
     nt:[
-      '<b>대상 (일반)</b>: 일정 규모 이상 건축물, 경관지구·중점경관관리구역 내, 시·도 경관 조례 기준',
-      '<b>경관계획 수립지역</b>: 사전 경관 검토 의무',
-      '<b>심의 사항</b>: 입면 디자인, 색채·재질, 옥외광고물, 가로경관',
-      '<b>건축위원회 통합심의</b>: 일부 지자체 동시 운영',
-      '⚠ 정확한 대상은 시·군·구 도시디자인과·경관과 확인',
+      '<b>대상 (경관법 제28조제1항)</b>:',
+      '&nbsp;&nbsp;• 경관지구의 건축물 (조례로 제외한 것 외)',
+      '&nbsp;&nbsp;• 중점경관관리구역의 건축물로서 조례로 정하는 건축물',
+      '&nbsp;&nbsp;• 지자체·공공기관·지방공기업이 건축하는 조례로 정하는 건축물',
+      '&nbsp;&nbsp;• 그 밖에 경관관리를 위해 조례로 정하는 건축물',
+      '<b>주택법 사업계획승인(30세대 이상)</b>: 경관심의는 주택법 제18조 통합심의에 포함',
+      '<b>심의사항</b>: 입면·색채·재질, 옥외광고물, 가로·스카이라인 경관',
+      '⚠ 경관지구·중점경관관리구역 지정 및 조례 규모는 시·군·구(경관과) 확인',
     ]});
 
-  a({c:10,t:'건축구조 심의',s:f>=16||['rc','rd'].includes(pt)?'V':'N',
-    th:`다중이용 건축물 · 특수구조 · 16층 이상 · 정비사업 등`,
-    rq:f>=16||['rc','rd'].includes(pt)?'건축구조 심의 — 구조계산서·구조도면 사전 협의':'대상 외 가능 — 지자체 확인',
-    lg:['건축법 제48조의2','건축물의 구조기준 등에 관한 규칙','건축구조기준 KDS'],
+  // ===== 건축물 안전영향평가 / 구조심의 (건축법 제13조의2·영 제10조의3) =====
+  const safetyEval = (f>=50) || (fa>=100000 && f>=16);
+  const structReview = safetyEval || f>=16 || ren;
+  const stHit = safetyEval?(f>=50?'초고층 건축물':'연면적 10만㎡ 이상'):'';
+  a({c:10,t:'건축구조 심의 (안전영향평가)',s:safetyEval?'A':(structReview?'V':'N'), hit:stHit,
+    th: safetyEval
+      ? `건축물 안전영향평가 대상 — 초고층(50층 이상/높이 200m 이상) 또는 연면적 10만㎡ 이상이면서 16층 이상 (현재 ${f}층/${fa.toLocaleString()}㎡)`
+      : `다중이용 건축물(16층 이상)·특수구조 구조 전문위 심의 (현재 ${f}층)`,
+    rq: safetyEval
+      ? '건축허가 전 건축물 안전영향평가 의뢰(안전영향평가기관) → 건축위원회 심의로 확정 (건축법 제13조의2)'
+      : (structReview?'다중이용·특수구조 구조안전 심의 — 구조계산서·구조도면 사전 협의':'대상 외 가능'),
+    lg:['건축법 제13조의2 (건축물 안전영향평가)','건축법 시행령 제10조의3','건축법 제4조의2·영 제5조의5 (구조 전문위)','건축구조기준 KDS'],
     nt:[
-      '<b>대상</b>: 16층 이상 건축물, 다중이용 건축물, 특수구조 건축물',
-      '<b>특수구조</b>: 면진·제진, 비정형 평면, 장스팬 등',
-      '<b>구조심의</b>: 건축구조기술사회·전문위원회 검토',
-      '<b>제출 도서</b>: 구조계산서, 구조도면, 지반조사보고서',
-      '<b>정비사업</b>: 사업시행계획인가 시 구조 검토 필수',
+      '<b>안전영향평가 대상 (영 제10조의3제1항)</b>:',
+      '&nbsp;&nbsp;• 초고층 건축물(50층 이상 또는 높이 200m 이상)',
+      '&nbsp;&nbsp;• 연면적 10만㎡ 이상 + 16층 이상 (두 요건 모두 충족)',
+      '<b>검토항목</b>: 설계기준·하중 적정성, 하중저항시스템, 지반조사·지내력, 굴착에 따른 지하수위·지반안전성',
+      '<b>절차</b>: 건축허가 전 안전영향평가기관 의뢰 → 30일 내 결과 → 건축위원회 심의로 확정',
+      '<b>구조 전문위 심의</b>: 다중이용 건축물(16층 이상 등)·특수구조(면진·제진·비정형·장스팬)',
+      '<b>비용</b>: 건축주 부담',
     ]});
 
-  a({c:10,t:'굴토심의 (지하굴착)',s:'V',
-    th:`굴착 깊이 일정 기준 이상 (서울시: 10m 이상 / 일부 지자체 12~15m 이상)`,
-    rq:`${cityRef} 굴토심의 운영지침에 따른 사전 심의 — 흙막이공법·차수공법·계측계획 검토`,
+  let gtS='V', gtHit='';
+  if(xExcav==='o20'||xExcav==='d1020'){ gtS='A'; gtHit='10m 이상'; }
+  else if(xExcav==='u10') gtS='N';
+  a({c:10,t:'굴토심의 (지하굴착)',s:gtS, hit:gtHit,
+    th:`굴착깊이 일정 기준 이상 (서울시 10m 이상 또는 지하 2층 이상, 일부 지자체 12~15m)${xExcav?(xExcav==='u10'?' → 10m 미만 비해당':' → 해당 가능'):''}`,
+    rq:gtS==='A'?`${cityRef} 굴토심의 — 흙막이·차수 공법, 계측계획 검토`:(gtS==='N'?'굴착 10m 미만 — 통상 굴토심의 대상 외':`${cityRef} 굴토심의 운영지침 확인 — 상단 굴착깊이 선택 시 정교화`),
     lg:[`${cityRef} 굴토심의 운영지침`,'건설기술 진흥법','지하안전관리에 관한 특별법'],
     nt:[
-      '<b>서울시 굴토심의</b>: 지하 굴착 깊이 10m 이상 또는 지하 2층 이상',
-      '<b>심의 사항</b>: 흙막이 공법, 차수 공법, 계측계획, 인접 건축물·시설물 보호',
-      '<b>병행 검토</b>: 지하안전영향평가 (10m 이상) 또는 소규모 지하안전영향평가',
-      '<b>지반조사</b>: 사전 지반조사보고서 필수 (시추, SPT, 지하수위 등)',
+      '<b>서울시 굴토심의</b>: 지하 굴착깊이 10m 이상 또는 지하 2층 이상',
+      '<b>심의사항</b>: 흙막이·차수 공법, 계측계획, 인접 건축물·시설물 보호',
+      '<b>병행</b>: 지하안전평가(20m↑)·소규모 지하안전평가(10~20m)',
       '<b>처리기간</b>: 30~60일 (지자체별)',
-      '⚠ 자치법규정보시스템(elis.go.kr)에서 「○○시 굴토심의」 검색',
+      '⚠ 자치법규정보시스템(elis.go.kr) 「○○시 굴토심의」 확인',
     ]});
 
   a({c:10,t:'도시계획위원회 심의',s:'V',
@@ -3132,17 +3343,23 @@ function buildItems(I){
       '<b>처리기간</b>: 30~60일 (지자체별)',
     ]});
 
-  a({c:10,t:'매장문화재 사전조사 / 문화재 심의',s:s>=30000?'V':'V',
-    th:`개발사업 면적 30,000㎡ 이상 또는 매장문화재 유존지역 (지표·시굴 조사 필요)`,
-    rq:s>=30000?'매장문화재 지표조사 의무 — 문화재청 신고 후 조사':'매장문화재 유존지역 여부 확인 (문화재청 GIS)',
-    lg:['매장문화재 보호 및 조사에 관한 법률 제6조','동법 시행령','문화재보호법'],
+  let hrtS, hrtHit='';
+  if(xHeritage==='yes'){ hrtS='A'; hrtHit='유존지역'; }
+  else if(s>=30000){ hrtS='A'; hrtHit='영향진단 대상'; }
+  else if(xHeritage==='no') hrtS='N';
+  else hrtS='V';
+  a({c:10,t:'매장유산 영향진단 (국가유산영향진단)',s:hrtS, hit:hrtHit,
+    th:`토지 건설공사 사업면적 30,000㎡ 이상 또는 매장유산 유존지역 (현재 대지 ${s.toLocaleString()}㎡)${xHeritage==='yes'?' · 유존지역 해당(면적 무관)':''}`,
+    rq:hrtS==='A'
+      ?'사업계획 수립 완료 전 국가유산영향진단 실시 — 진단보고서 → 국가유산청(시·도 위임) 검토'
+      :(hrtS==='V'?'유존지역·고시구역 해당 여부 선택 시 확정 — 상단 추가정보 드롭다운':'면적 미만·유존지역 외 — 대상 외'),
+    lg:['국가유산영향진단법 제9조제1항','동법 시행령 제5조제1항 (시행 2025.2.14. / 시행령 2025.10.1.)','매장유산 보호 및 조사에 관한 법률 제5조의2제2항'],
     nt:[
-      '<b>지표조사 대상</b>: 사업면적 30,000㎡ 이상 개발사업',
-      '<b>유존지역</b>: 문화재청 GIS 확인 (지표조사가 필요한 유존지역)',
-      '<b>조사 절차</b>: 지표조사 → 시굴조사 → (필요시) 발굴조사',
-      '<b>처리기간</b>: 조사 결과에 따라 수개월~수년',
-      '<b>문화재 심의</b>: 발견 시 문화재청 협의 / 시·도 문화재위원회 심의',
-      '<b>지자체 협의</b>: 시·군·구 문화체육과',
+      '<b>제도 변경</b>: 구 「매장유산(문화재) 보호 및 조사에 관한 법률」 제6조(사업면적 3만㎡ 의무 지표조사)는 2026.5.17. 삭제 → 「국가유산영향진단법」 영향진단으로 통합',
+      '<b>영향진단 대상</b>: 토지 건설공사 사업면적 30,000㎡ 이상 (매장유산 유존지역 면적 등 제외)',
+      '<b>유존지역</b>: 면적 미달이어도 유존지역·시군구 고시구역이면 대상',
+      '<b>절차</b>: 진단보고서 → 국가유산청(시·도 위임) 검토 → 결과 통보',
+      '<b>비용</b>: 원칙 건설공사 시행자 부담',
     ]});
 
   if(ren) a({c:10,t:'정비사업 심의 (도시정비법)',s:'A',
@@ -3510,6 +3727,8 @@ function render(){
 
   // ===== 핵심 요약 대시보드 =====
   renderDashboard(all, I);
+  // ===== 심의·영향평가·사전검토 상세 =====
+  renderPermitDetail(all, I);
   // ===== 인허가 타임라인 =====
   renderTimeline(I);
   // ===== 사업정보 기반 검토결과 =====
@@ -3547,7 +3766,8 @@ function render(){
       const isCollapsed=(itemCollapsed[itemKey]===true)||(allItemsCollapsed && itemCollapsed[itemKey]!==false);
       const isLegacy = item.t.includes('⚠ 구법');
       const rqC=RC[item.s]||'';
-      const rqH=item.s!=='N'?`<div class="rq ${rqC}">${item.rq}</div>`:`<div class="rq" style="background:#f8fafc;color:#94a3b8;border:1px solid #e2e8f0">${item.rq}</div>`;
+      const CWg={A:'대상',V:'검토',N:'비대상',R:'권장'}, CIg={A:'✔',V:'◐',N:'✗',R:'☆'};
+      const conclH=`<div class="pd-concl pd-c-${item.s}"><span class="cw">${CIg[item.s]||'•'} ${CWg[item.s]||'확인'}</span>${item.rq?item.rq:''}</div>`;
       const lgH=item.lg.map(l=>{
         const isCity=l.includes('조례')||l.includes('지침');
         const isUrl=/^https?:\/\//.test(l);
@@ -3570,8 +3790,8 @@ function render(){
           <span class="ci-toggle">▲</span>
         </div>
         <div class="ci-body">
+          ${conclH}
           <div class="thr">${item.th}</div>
-          ${rqH}
           <div class="lrow"><span class="lbl">근거</span>${lgH}</div>
           ${ntH}
           <div style="margin-top:9px;display:flex;justify-content:flex-end">${doneBtn}</div>
@@ -3665,6 +3885,53 @@ function renderDashboard(all, I){
     mk('📊','#fff7ed','영향평가 / 사전검토',assess,'#c2410c')+
     mk('🏅','#ecfdf5','친환경·인증',certs,'var(--rec)')+
     mk('📐','#ecfeff','핵심 수치 제한',limits,'#0e7490');
+}
+
+/* ===== 심의·영향평가·사전검토 상세 (대상기준/대상여부) ===== */
+function renderPermitDetail(all, I){
+  const box=document.getElementById('permitDetail');
+  if(!box) return;
+  const rows=all.filter(i=>i.c===7||i.c===10);
+  if(!rows.length){ box.innerHTML='<div class="result-panel"><div class="dash-empty">현재 입력 기준 표시할 심의·영향평가 항목이 없습니다.</div></div>'; return; }
+  const SL={A:['대상','req'],V:['검토','warn'],N:['비대상','na'],R:['권장','good']};
+  const CAT={7:'영향평가 · 사전검토',10:'지자체 심의'};
+  let html='<div class="pd-legend"><span><i class="lg-a"></i>대상</span><span><i class="lg-v"></i>검토(조건부)</span><span><i class="lg-g"></i>비대상</span><span><i class="lg-y"></i>▶ 해당 기준(대상이 되는 근거)</span><span>※ 위치·계획 정보 필요 항목은 상단 「추가 입지·계획 정보」 선택 시 확정</span></div>'
+    +'<div class="result-panel wide" style="padding:0;overflow-x:auto">'
+    +'<table class="result-table review-matrix"><thead><tr>'
+    +'<th style="width:152px">항목</th><th>대상기준 / 검토사항 (근거 법령)</th><th style="width:74px">대상여부</th>'
+    +'</tr></thead><tbody>';
+  [7,10].forEach(cat=>{
+    const items=rows.filter(i=>i.c===cat);
+    if(!items.length) return;
+    html+=`<tr style="background:#eef2f6"><td colspan="3" style="font-weight:800;color:#111827">${CAT[cat]}</td></tr>`;
+    items.forEach(it=>{
+      const sl=SL[it.s]||['확인','na'];
+      const title=String(it.t||'').replace(' ⚠ 구법','');
+      const CW={A:'대상',V:'검토',N:'비대상',R:'권장'}, CI={A:'✔',V:'◐',N:'✗',R:'☆'};
+      const gistRaw=String(it.th||'').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+      const concl=`<div class="pd-concl pd-c-${it.s}"><span class="cw">${CI[it.s]||'•'} ${CW[it.s]||'확인'}</span>${gistRaw?gistRaw:''}</div>`;
+      const lg=(it.lg||[]).map(x=>`<span class="result-chip">${x}</span>`).join(' ');
+      const hit=(it.s==='A'||it.s==='V')?(it.hit||''):'';
+      let whyTxt='';
+      const nt=(it.nt||[]).map(x=>{
+        const on = hit && x.indexOf(hit)>=0;
+        if(on && !whyTxt) whyTxt = x.replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/^\s*•\s*/,'').trim();
+        return `<li${on?' class="pd-hit"':''}>${x}${on?' <span class="pd-hit-badge">▶ 우리 사업 해당</span>':''}</li>`;
+      }).join('');
+      html+='<tr>'
+        +`<td class="focus">${title}</td>`
+        +'<td>'+concl
+        +(it.rq?`<div class="basis" style="margin-top:4px">${it.rq}</div>`:'')
+        +(lg?`<div style="margin-top:6px">${lg}</div>`:'')
+        +(whyTxt?`<div class="pd-why">▶ 해당 기준: ${whyTxt}</div>`:'')
+        +(nt?`<details style="margin-top:6px"><summary style="cursor:pointer;color:#3156a3;font-weight:700;font-size:10.5px">세부 기준 펼치기</summary><ul class="notes" style="margin-top:6px">${nt}</ul></details>`:'')
+        +'</td>'
+        +`<td><span class="result-chip ${sl[1]}">${sl[0]}</span></td>`
+        +'</tr>';
+    });
+  });
+  html+='</tbody></table></div>';
+  box.innerHTML=html;
 }
 
 /* ===== 사업정보 기반 검토결과 ===== */
@@ -4800,7 +5067,7 @@ document.getElementById('sC').addEventListener('change',function(){
   setTimeout(syncPresetButtonsUI, 50);
 });
 
-['sZ','sP','sB','sU','sF','sS','sA'].forEach(id=>{
+['sZ','sP','sB','sU','sF','sS','sA','xTraffic','xExcav','xScenic','xEdu','xHeritage','xDisaster','xEnvLoc','xDistrict'].forEach(id=>{
   const el=document.getElementById(id);
   if(el){
     el.addEventListener('change',render);
@@ -4855,8 +5122,16 @@ window.addEventListener('resize',scheduleStepNavUpdate);
   if(bar) bar.addEventListener('click',function(){ bizCollapsed=!bizCollapsed; syncBizUI(); });
 })();
 
-// 초기 시·군 셀렉트 채우기
-updateCitySelect();
+// 초기 기본 사업 정보 — 과천 사례 (경기도 과천시 / 제2종일반주거 / 아파트 280세대 / 지상7층 / 대지 30,000㎡ / 연면적 62,000㎡ / 민간분양)
+function setDefaultProject(){
+  const sR=document.getElementById('sR'); if(sR) sR.value='경기도';
+  updateCitySelect();
+  const sC=document.getElementById('sC'); if(sC) sC.value='과천시';
+  const sZ=document.getElementById('sZ'); if(sZ) sZ.value='zone4';
+  const sB=document.getElementById('sB'); if(sB) sB.value='apt';
+  const sP=document.getElementById('sP'); if(sP) sP.value='p';
+}
+setDefaultProject();
 render();
 </script>
 <footer style="max-width:1360px;margin:24px auto 40px;padding:14px 20px;border-top:1px solid #d2dae5;color:#64748b;font-size:11px;line-height:1.7;text-align:center">
