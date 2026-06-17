@@ -6,7 +6,7 @@
 <meta name="author" content="최감용">
 <meta name="application-name" content="건축 사업 법규검토 콘솔">
 <!-- 개발자: 최감용 (Choi Gam-yong) · 본 도구 및 산정 로직의 출처 표기는 재배포·인용 시에도 유지되어야 합니다. Attribution to developer 최감용 must be preserved on redistribution. -->
-<title>건축 사업 법규검토 콘솔 v5.1</title>
+<title>건축 사업 법규검토 콘솔 v5.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1062,6 +1062,12 @@ td{font-size:11.2px}
 .pd-c-V .cw{background:#b45309;color:#fff}
 .pd-c-N .cw{background:#64748b;color:#fff}
 .pd-c-R .cw{background:#047857;color:#fff}
+.pd-var{margin-top:5px;font-size:10px;color:#475569;font-weight:600}
+.pd-var b{color:#0f2740}
+.pd-src{display:inline-block;font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.pd-src.ok{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.pd-src.warn{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.pd-lglbl{font-size:9px;font-weight:800;color:#64748b;margin-right:4px}
 #permitExtra .grid7{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
 </style>
 </head>
@@ -1084,7 +1090,7 @@ td{font-size:11.2px}
 
 <header class="app-header">
   <div class="hdr-inner">
-    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.1 · 개발자 최감용</div>
+    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.2 · 개발자 최감용</div>
     <h1>건축 사업 법규검토 콘솔</h1>
     <div class="hdr-sub">신규 건축 사업 착수 시 적용되는 법적 제한사항을 사업 단계별로 파악하여 설계에 반영하기 위한 통합 검토 도구입니다. 공동주택·주상복합부터 오피스텔·근린생활·업무·숙박·판매·노유자·의료 등 14개 건축물 용도를 지원하며, 용도·사업방식별 인허가 절차와 검토 요건을 자동 점검합니다.</div>
     <div class="hdr-stats" id="hdrStats">
@@ -1403,6 +1409,7 @@ td{font-size:11.2px}
     <li><b>전국 17개 시·도와 앱 선택 목록의 시·군·구·행정시 조례 DB가 수록</b>되어 있습니다. 다만 주차장 조례 비율 데이터는 일반화된 추정치이므로, 정확한 시·군별 적용 비율은 반드시 elis.go.kr에서 해당 시·군의 「주차장 설치 및 관리 조례」 별표를 직접 확인하시기 바랍니다.</li>
     <li>지구단위계획·도시계획·지자체 조례는 수시 변경되므로 반드시 최신 자료를 확인하십시오.</li>
     <li>판례 및 유권해석이 필요한 사항은 별도 전문가 자문을 받으시기 바랍니다.</li>
+    <li><b>v5.2 변경사항 (2026.6)</b>: <b>STEP2 인허가 상세 섹션 신설</b> + 영향평가·심의 판정을 법제처 원문으로 정교화(교통영향평가 60,000/90,000㎡, 환경·소규모 환경영향평가 별표3·별표4, 재해영향평가 5,000㎡, 매장유산 영향진단 3만㎡·국가유산영향진단법 이관, 지하안전평가 20m/10~20m, 교육환경평가, 건축위 통합심의, 경관·건축물 안전영향평가). <b>추가 입지·계획 정보 드롭다운 8종</b>(도시교통정비지역·굴착깊이·경관지구·교육환경보호구역·유존지역·재해위험지구·소규모환경 입지·지구단위계획)으로 위치·계획 조건 반영. <b>대상/검토/비대상 색상 결론 + 해당 기준 강조 + 기준 변수·출처(법제처 원문확인) 표기</b>를 STEP2·STEP3 전체에 적용.</li>
     <li><b>v5.1 변경사항 (2026.5)</b>: <b>건축물 용도 14종 확장</b> (공동주택·주상복합·연립다세대·오피스텔·근린생활·업무·숙박·판매·교육연구·노유자·의료·문화집회·공장·기타) — 비주거 선택 시 주택건설기준 자동 제외 + 용도별 특수 규정(오피스텔 건축기준·숙박업·대규모점포·교육환경평가·복지법·의료법·공연법·공장설립 등) 자동 표시. <b>인허가 절차 타임라인 신설</b> — 주택법(사업계획승인)·건축법(건축허가)·정비사업(도정법) 사업방식별 단계별 순서도 + 병행 심의·영향평가 자동 배치.</li>
     <li><b>v5.0 변경사항</b>: UI 전면 리뉴얼(건축 청사진) + 사업 5단계 배지·필터 + 핵심 요약 대시보드 + 검토완료 체크/진행률 + 인쇄·PDF + 채광/환기창</li>
     <li><b>v4.0 변경사항</b>: LAW_DATES 14개로 확장 → 처분시점 분기 12개 항목 적용</li>
@@ -3895,6 +3902,9 @@ function renderPermitDetail(all, I){
   if(!rows.length){ box.innerHTML='<div class="result-panel"><div class="dash-empty">현재 입력 기준 표시할 심의·영향평가 항목이 없습니다.</div></div>'; return; }
   const SL={A:['대상','req'],V:['검토','warn'],N:['비대상','na'],R:['권장','good']};
   const CAT={7:'영향평가 · 사전검토',10:'지자체 심의'};
+  const VARMAP=[['교통영향평가','건축 연면적 · 용도 · 도시교통정비지역/교통권역'],['교육환경평가','층수 · 연면적 · 정비사업 · 교육환경보호구역(학교 200m)'],['소규모 환경영향평가','입지(용도지역) · 지구단위계획 · 사업부지(대지)면적'],['환경영향평가','사업부지(대지)면적 · 사업유형'],['소규모 지하안전','굴착깊이(10~20m)'],['지하안전평가','굴착깊이(20m 이상)'],['재해영향평가','사업부지(대지)면적 · 주택법 사업계획승인 · 재해위험지구'],['건축위원회','세대수 · 층수 · 사업방식'],['경관위원회','경관지구/중점경관관리구역 · 사업방식'],['건축구조','층수 · 연면적'],['굴토심의','굴착깊이'],['도시계획위원회','지구단위계획 · 도시계획시설 · 용도지역 변경'],['매장유산','사업부지(대지)면적 · 유존지역'],['정비사업','사업방식(재건축·재개발)']];
+  const SRCWARN=['굴토심의','도시계획위원회'];
+  const pickVar=t=>{const f=VARMAP.find(([k])=>t.indexOf(k)>=0);return f?f[1]:'';};
   let html='<div class="pd-legend"><span><i class="lg-a"></i>대상</span><span><i class="lg-v"></i>검토(조건부)</span><span><i class="lg-g"></i>비대상</span><span><i class="lg-y"></i>▶ 해당 기준(대상이 되는 근거)</span><span>※ 위치·계획 정보 필요 항목은 상단 「추가 입지·계획 정보」 선택 시 확정</span></div>'
     +'<div class="result-panel wide" style="padding:0;overflow-x:auto">'
     +'<table class="result-table review-matrix"><thead><tr>'
@@ -3910,6 +3920,10 @@ function renderPermitDetail(all, I){
       const CW={A:'대상',V:'검토',N:'비대상',R:'권장'}, CI={A:'✔',V:'◐',N:'✗',R:'☆'};
       const gistRaw=String(it.th||'').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
       const concl=`<div class="pd-concl pd-c-${it.s}"><span class="cw">${CI[it.s]||'•'} ${CW[it.s]||'확인'}</span>${gistRaw?gistRaw:''}</div>`;
+      const vlabel=pickVar(title);
+      const varLine=vlabel?`<div class="pd-var">기준 변수: <b>${vlabel}</b></div>`:'';
+      const isWarn=SRCWARN.some(k=>title.indexOf(k)>=0);
+      const srcTag=`<span class="pd-src ${isWarn?'warn':'ok'}">${isWarn?'조례·지침 위임':'법제처 원문확인'}</span>`;
       const lg=(it.lg||[]).map(x=>`<span class="result-chip">${x}</span>`).join(' ');
       const hit=(it.s==='A'||it.s==='V')?(it.hit||''):'';
       let whyTxt='';
@@ -3919,10 +3933,10 @@ function renderPermitDetail(all, I){
         return `<li${on?' class="pd-hit"':''}>${x}${on?' <span class="pd-hit-badge">▶ 우리 사업 해당</span>':''}</li>`;
       }).join('');
       html+='<tr>'
-        +`<td class="focus">${title}</td>`
-        +'<td>'+concl
+        +`<td class="focus">${title}${srcTag}</td>`
+        +'<td>'+concl+varLine
         +(it.rq?`<div class="basis" style="margin-top:4px">${it.rq}</div>`:'')
-        +(lg?`<div style="margin-top:6px">${lg}</div>`:'')
+        +(lg?`<div style="margin-top:6px"><span class="pd-lglbl">근거 법령(법제처)</span>${lg}</div>`:'')
         +(whyTxt?`<div class="pd-why">▶ 해당 기준: ${whyTxt}</div>`:'')
         +(nt?`<details style="margin-top:6px"><summary style="cursor:pointer;color:#3156a3;font-weight:700;font-size:10.5px">세부 기준 펼치기</summary><ul class="notes" style="margin-top:6px">${nt}</ul></details>`:'')
         +'</td>'
