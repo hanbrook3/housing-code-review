@@ -6,7 +6,7 @@
 <meta name="author" content="최감용">
 <meta name="application-name" content="건축 사업 법규검토 콘솔">
 <!-- 개발자: 최감용 (Choi Gam-yong) · 본 도구 및 산정 로직의 출처 표기는 재배포·인용 시에도 유지되어야 합니다. Attribution to developer 최감용 must be preserved on redistribution. -->
-<title>건축 사업 법규검토 콘솔 v5.4</title>
+<title>건축 사업 법규검토 콘솔 v5.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1133,6 +1133,18 @@ select{
 }
 /* (4) 절제: 펄스 애니메이션 제거(AI틱한 장식 덜기), glow는 유지 */
 .hdr-tag .dot{animation:none}
+
+/* ===== v5.5 frontend-design: 판정 카드까지 제도 모티프 확장 (구조 표식만, 절제) ===== */
+/* STEP2 상세표 헤더 → 도면 스펙 스케줄 헤더 (모노·헤어라인) */
+.review-matrix thead th{
+  font-family:var(--mono);font-size:10px;letter-spacing:.3px;color:#46566b;
+  border-bottom:1.5px solid #b9c4d2;background:#eef2f6;
+}
+/* STEP3 카테고리 제목 앞 시안 치수 tick — 섹션 키커·제목 치수선과 동일 시그니처 */
+.ct::before{
+  content:'';display:inline-block;width:9px;height:0;border-top:2px solid #0891b2;
+  vertical-align:middle;margin-right:7px;
+}
 </style>
 </head>
 <body>
@@ -1155,7 +1167,7 @@ select{
 
 <header class="app-header">
   <div class="hdr-inner">
-    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.4 · 개발자 최감용</div>
+    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.5 · 개발자 최감용</div>
     <h1>건축 사업 법규검토 콘솔</h1>
     <div class="hdr-sub">신규 건축 사업 착수 시 적용되는 법적 제한사항을 사업 단계별로 파악하여 설계에 반영하기 위한 통합 검토 도구입니다. 공동주택·주상복합부터 오피스텔·근린생활·업무·숙박·판매·노유자·의료 등 14개 건축물 용도를 지원하며, 용도·사업방식별 인허가 절차와 검토 요건을 자동 점검합니다.</div>
     <div class="hdr-stats" id="hdrStats">
@@ -1474,6 +1486,7 @@ select{
     <li><b>전국 17개 시·도와 앱 선택 목록의 시·군·구·행정시 조례 DB가 수록</b>되어 있습니다. 다만 주차장 조례 비율 데이터는 일반화된 추정치이므로, 정확한 시·군별 적용 비율은 반드시 elis.go.kr에서 해당 시·군의 「주차장 설치 및 관리 조례」 별표를 직접 확인하시기 바랍니다.</li>
     <li>지구단위계획·도시계획·지자체 조례는 수시 변경되므로 반드시 최신 자료를 확인하십시오.</li>
     <li>판례 및 유권해석이 필요한 사항은 별도 전문가 자문을 받으시기 바랍니다.</li>
+    <li><b>v5.5 변경사항 (2026.6)</b>: frontend-design 제도 모티프를 판정 카드로 확장 — STEP2 인허가 상세표 헤더를 도면 스펙 스케줄 스타일(모노·헤어라인)로, STEP3 법규 체크리스트 카테고리 제목 앞에 치수 tick을 추가해 시그니처 통일. 구조 표식에만 적용(데이터 줄 미장식, 절제). 색·기능·판정 무변경.</li>
     <li><b>v5.4 변경사항 (2026.6)</b>: <b>frontend-design 적용</b> — 건축 도면의 제도(drafting) 주석을 시그니처로 정립: 히어로 통계를 도면 타이틀블록 데이터 스트립으로 재해석(템플릿형 '큰 숫자+그라데이션' 탈피), 제목 아래 치수선(끝 tick) 주석, 섹션 키커 앞 치수 tick. 장식적 펄스 애니메이션 제거(절제). 색·기능·판정 로직 무변경.</li>
     <li><b>v5.3 변경사항 (2026.6)</b>: <b>UI/UX 개선</b> — 키보드 포커스 링(접근성), 모션 감소 설정 존중(prefers-reduced-motion), 셀렉트 드롭다운 캐럿 통일, 카드 호버 인터랙션, 본문 바로가기 스킵 링크, 모바일 터치 타겟 확대·iOS 입력 줌 방지. 판정 로직·법규 수치는 변경 없음.</li>
     <li><b>v5.2.1 변경사항 (2026.6)</b>: 법규검토 스킬 기준 전체 재검증 — 교통영향평가 별표1(시행령 2026.3.24 개정본에서 60,000/90,000㎡ 동일 확인)·국가유산영향진단 시행령(3만㎡)·환경영향평가 별표3·별표4 현행 재확인. 재해영향평가 항목에 「재해영향평가등의 협의 실무지침」(행안부 고시 2025.5.1) 운영구분 확인 안내 추가.</li>
