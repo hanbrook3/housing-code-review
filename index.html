@@ -6,7 +6,7 @@
 <meta name="author" content="최감용">
 <meta name="application-name" content="건축 사업 법규검토 콘솔">
 <!-- 개발자: 최감용 (Choi Gam-yong) · 본 도구 및 산정 로직의 출처 표기는 재배포·인용 시에도 유지되어야 합니다. Attribution to developer 최감용 must be preserved on redistribution. -->
-<title>건축 사업 법규검토 콘솔 v5.3</title>
+<title>건축 사업 법규검토 콘솔 v5.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1099,6 +1099,40 @@ select{
   .fb,.radio-btn,.preset-btn,.toggle-all-btn,.done-chk,.tc-edit,.bb-btn,.act-btn,.step-jump,.sync-btn{min-height:40px}
   select,input[type=number],input[type=text]{min-height:42px;font-size:16px}
 }
+
+/* ===== v5.4 frontend-design 적용: 제도(drafting) 시그니처 ===== */
+/* 시그니처 = 건축 도면의 치수선·타이틀블록 주석. 과감함은 여기 하나에 집중, 나머지는 절제 */
+/* (1) 히어로 스탯 → 도면 타이틀블록 데이터 스트립 (큰숫자+그라데이션 템플릿 탈피) */
+@media(min-width:761px){
+  .app-header .hdr-stats{
+    gap:0;margin-top:16px;padding:0;border:1px solid rgba(125,211,252,.38);
+    border-radius:5px;background:rgba(8,20,36,.34);overflow:hidden;
+  }
+  .app-header .hdr-stat{
+    min-width:96px;padding:9px 15px 8px;border:0;border-left:1px solid rgba(125,211,252,.22);
+    border-radius:0;background:transparent;
+  }
+  .app-header .hdr-stat:first-child{border-left:0}
+  .app-header .hdr-stat .hs-v{font-family:var(--mono);font-size:19px;letter-spacing:-.5px}
+  .app-header .hdr-stat .hs-l{font-family:var(--mono);font-size:8.5px;letter-spacing:.6px;text-transform:uppercase}
+}
+/* (2) h1 아래 치수선(끝 tick 포함) — 도면 주석 시그니처 */
+.app-header h1{display:inline-block}
+.app-header h1::after{
+  content:'';display:block;margin-top:9px;height:7px;
+  background:
+    linear-gradient(var(--cyan),var(--cyan)) left bottom/100% 1.5px no-repeat,
+    linear-gradient(var(--cyan),var(--cyan)) left bottom/1.5px 7px no-repeat,
+    linear-gradient(var(--cyan),var(--cyan)) right bottom/1.5px 7px no-repeat;
+  opacity:.85;
+}
+/* (3) 섹션 키커 앞 치수 tick (구조가 의미를 인코딩) */
+.section-kicker::before{
+  content:'';width:12px;height:0;border-top:2px solid #0891b2;
+  margin-right:9px;align-self:center;flex:0 0 auto;
+}
+/* (4) 절제: 펄스 애니메이션 제거(AI틱한 장식 덜기), glow는 유지 */
+.hdr-tag .dot{animation:none}
 </style>
 </head>
 <body>
@@ -1121,7 +1155,7 @@ select{
 
 <header class="app-header">
   <div class="hdr-inner">
-    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.3 · 개발자 최감용</div>
+    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.4 · 개발자 최감용</div>
     <h1>건축 사업 법규검토 콘솔</h1>
     <div class="hdr-sub">신규 건축 사업 착수 시 적용되는 법적 제한사항을 사업 단계별로 파악하여 설계에 반영하기 위한 통합 검토 도구입니다. 공동주택·주상복합부터 오피스텔·근린생활·업무·숙박·판매·노유자·의료 등 14개 건축물 용도를 지원하며, 용도·사업방식별 인허가 절차와 검토 요건을 자동 점검합니다.</div>
     <div class="hdr-stats" id="hdrStats">
@@ -1440,6 +1474,7 @@ select{
     <li><b>전국 17개 시·도와 앱 선택 목록의 시·군·구·행정시 조례 DB가 수록</b>되어 있습니다. 다만 주차장 조례 비율 데이터는 일반화된 추정치이므로, 정확한 시·군별 적용 비율은 반드시 elis.go.kr에서 해당 시·군의 「주차장 설치 및 관리 조례」 별표를 직접 확인하시기 바랍니다.</li>
     <li>지구단위계획·도시계획·지자체 조례는 수시 변경되므로 반드시 최신 자료를 확인하십시오.</li>
     <li>판례 및 유권해석이 필요한 사항은 별도 전문가 자문을 받으시기 바랍니다.</li>
+    <li><b>v5.4 변경사항 (2026.6)</b>: <b>frontend-design 적용</b> — 건축 도면의 제도(drafting) 주석을 시그니처로 정립: 히어로 통계를 도면 타이틀블록 데이터 스트립으로 재해석(템플릿형 '큰 숫자+그라데이션' 탈피), 제목 아래 치수선(끝 tick) 주석, 섹션 키커 앞 치수 tick. 장식적 펄스 애니메이션 제거(절제). 색·기능·판정 로직 무변경.</li>
     <li><b>v5.3 변경사항 (2026.6)</b>: <b>UI/UX 개선</b> — 키보드 포커스 링(접근성), 모션 감소 설정 존중(prefers-reduced-motion), 셀렉트 드롭다운 캐럿 통일, 카드 호버 인터랙션, 본문 바로가기 스킵 링크, 모바일 터치 타겟 확대·iOS 입력 줌 방지. 판정 로직·법규 수치는 변경 없음.</li>
     <li><b>v5.2.1 변경사항 (2026.6)</b>: 법규검토 스킬 기준 전체 재검증 — 교통영향평가 별표1(시행령 2026.3.24 개정본에서 60,000/90,000㎡ 동일 확인)·국가유산영향진단 시행령(3만㎡)·환경영향평가 별표3·별표4 현행 재확인. 재해영향평가 항목에 「재해영향평가등의 협의 실무지침」(행안부 고시 2025.5.1) 운영구분 확인 안내 추가.</li>
     <li><b>v5.2 변경사항 (2026.6)</b>: <b>STEP2 인허가 상세 섹션 신설</b> + 영향평가·심의 판정을 법제처 원문으로 정교화(교통영향평가 60,000/90,000㎡, 환경·소규모 환경영향평가 별표3·별표4, 재해영향평가 5,000㎡, 매장유산 영향진단 3만㎡·국가유산영향진단법 이관, 지하안전평가 20m/10~20m, 교육환경평가, 건축위 통합심의, 경관·건축물 안전영향평가). <b>추가 입지·계획 정보 드롭다운 8종</b>(도시교통정비지역·굴착깊이·경관지구·교육환경보호구역·유존지역·재해위험지구·소규모환경 입지·지구단위계획)으로 위치·계획 조건 반영. <b>대상/검토/비대상 색상 결론 + 해당 기준 강조 + 기준 변수·출처(법제처 원문확인) 표기</b>를 STEP2·STEP3 전체에 적용.</li>
