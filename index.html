@@ -6,7 +6,7 @@
 <meta name="author" content="최감용">
 <meta name="application-name" content="건축 사업 법규검토 콘솔">
 <!-- 개발자: 최감용 (Choi Gam-yong) · 본 도구 및 산정 로직의 출처 표기는 재배포·인용 시에도 유지되어야 합니다. Attribution to developer 최감용 must be preserved on redistribution. -->
-<title>건축 사업 법규검토 콘솔 v5.5</title>
+<title>건축 사업 법규검토 콘솔 v5.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1145,6 +1145,30 @@ select{
   content:'';display:inline-block;width:9px;height:0;border-top:2px solid #0891b2;
   vertical-align:middle;margin-right:7px;
 }
+
+/* ===== v5.6 frontend-design 전면 일관화: 제도(drafting) 시그니처를 모든 구조 헤더·데이터에 ===== */
+/* 시안 치수 tick — 구조 헤더 공통(페이지 제목→섹션→카테고리→패널→그룹→카드) */
+h2[id]::before{
+  content:'';display:inline-block;width:12px;height:0;border-top:2px solid var(--cyan);
+  vertical-align:middle;align-self:center;flex:0 0 auto;
+}
+.result-panel h3::before,
+.field-grp-t::before,
+.dc-t::before{
+  content:'';display:inline-block;width:9px;height:0;border-top:2px solid #0891b2;
+  vertical-align:middle;margin-right:7px;
+}
+.dc-t::before{width:8px;margin-right:6px;opacity:.8}
+/* 계산기 판정 제목 tick — 상태색에 맞춤 */
+.judg-t::before{
+  content:'';display:inline-block;width:9px;height:0;border-top:2px solid currentColor;
+  vertical-align:middle;margin-right:7px;opacity:.65;
+}
+/* STEP4 검토결과 데이터 → 도면 타이틀블록/스펙 스타일 (큰숫자 템플릿 탈피) */
+.result-value{font-family:var(--mono);letter-spacing:-.5px}
+.result-label{font-family:var(--mono);letter-spacing:.4px}
+/* 타임라인 경로 라벨 — 도면 시트 표기(모노) */
+.tl-route{font-family:var(--mono);letter-spacing:.3px}
 </style>
 </head>
 <body>
@@ -1167,7 +1191,7 @@ select{
 
 <header class="app-header">
   <div class="hdr-inner">
-    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.5 · 개발자 최감용</div>
+    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.6 · 개발자 최감용</div>
     <h1>건축 사업 법규검토 콘솔</h1>
     <div class="hdr-sub">신규 건축 사업 착수 시 적용되는 법적 제한사항을 사업 단계별로 파악하여 설계에 반영하기 위한 통합 검토 도구입니다. 공동주택·주상복합부터 오피스텔·근린생활·업무·숙박·판매·노유자·의료 등 14개 건축물 용도를 지원하며, 용도·사업방식별 인허가 절차와 검토 요건을 자동 점검합니다.</div>
     <div class="hdr-stats" id="hdrStats">
@@ -1486,6 +1510,7 @@ select{
     <li><b>전국 17개 시·도와 앱 선택 목록의 시·군·구·행정시 조례 DB가 수록</b>되어 있습니다. 다만 주차장 조례 비율 데이터는 일반화된 추정치이므로, 정확한 시·군별 적용 비율은 반드시 elis.go.kr에서 해당 시·군의 「주차장 설치 및 관리 조례」 별표를 직접 확인하시기 바랍니다.</li>
     <li>지구단위계획·도시계획·지자체 조례는 수시 변경되므로 반드시 최신 자료를 확인하십시오.</li>
     <li>판례 및 유권해석이 필요한 사항은 별도 전문가 자문을 받으시기 바랍니다.</li>
+    <li><b>v5.6 변경사항 (2026.6)</b>: frontend-design 제도 시그니처를 전 구간 일관 적용 — STEP 메인 헤더·STEP4 검토결과 패널·계산기 그룹/판정·대시보드 카드 제목에 치수 tick, 검토결과 데이터·타임라인 경로를 도면 타이틀블록/모노 스펙 스타일로 통일. 경고·주의 박스는 색 충돌 방지로 제외(절제). 색·기능·판정 무변경.</li>
     <li><b>v5.5 변경사항 (2026.6)</b>: frontend-design 제도 모티프를 판정 카드로 확장 — STEP2 인허가 상세표 헤더를 도면 스펙 스케줄 스타일(모노·헤어라인)로, STEP3 법규 체크리스트 카테고리 제목 앞에 치수 tick을 추가해 시그니처 통일. 구조 표식에만 적용(데이터 줄 미장식, 절제). 색·기능·판정 무변경.</li>
     <li><b>v5.4 변경사항 (2026.6)</b>: <b>frontend-design 적용</b> — 건축 도면의 제도(drafting) 주석을 시그니처로 정립: 히어로 통계를 도면 타이틀블록 데이터 스트립으로 재해석(템플릿형 '큰 숫자+그라데이션' 탈피), 제목 아래 치수선(끝 tick) 주석, 섹션 키커 앞 치수 tick. 장식적 펄스 애니메이션 제거(절제). 색·기능·판정 로직 무변경.</li>
     <li><b>v5.3 변경사항 (2026.6)</b>: <b>UI/UX 개선</b> — 키보드 포커스 링(접근성), 모션 감소 설정 존중(prefers-reduced-motion), 셀렉트 드롭다운 캐럿 통일, 카드 호버 인터랙션, 본문 바로가기 스킵 링크, 모바일 터치 타겟 확대·iOS 입력 줌 방지. 판정 로직·법규 수치는 변경 없음.</li>
