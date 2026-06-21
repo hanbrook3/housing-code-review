@@ -6,7 +6,7 @@
 <meta name="author" content="최감용">
 <meta name="application-name" content="건축 사업 법규검토 콘솔">
 <!-- 개발자: 최감용 (Choi Gam-yong) · 본 도구 및 산정 로직의 출처 표기는 재배포·인용 시에도 유지되어야 합니다. Attribution to developer 최감용 must be preserved on redistribution. -->
-<title>건축 사업 법규검토 콘솔 v5.6</title>
+<title>건축 사업 법규검토 콘솔 v5.6.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1043,8 +1043,6 @@ td{font-size:11.2px}
 .pd-hit-badge{display:inline-block;font-size:9px;font-weight:800;color:#fff;background:#d97706;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle}
 .pd-why{margin-top:6px;padding:6px 9px;border-radius:6px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:10.5px;line-height:1.5;font-weight:700}
 .pd-why b{color:#b45309}
-.pd-nope{margin:0;padding:6px 9px;border-radius:6px;background:#f1f5f9;border:1px solid #cbd5e1;color:#475569;font-size:11px;line-height:1.5;font-weight:600}
-.pd-nope b{color:#334155}
 .pd-legend{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 9px;font-size:10px;color:#64748b}
 .pd-legend span{display:inline-flex;align-items:center;gap:5px}
 .pd-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;border:1px solid}
@@ -1191,7 +1189,7 @@ h2[id]::before{
 
 <header class="app-header">
   <div class="hdr-inner">
-    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.6 · 개발자 최감용</div>
+    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.6.1 · 개발자 최감용</div>
     <h1>건축 사업 법규검토 콘솔</h1>
     <div class="hdr-sub">신규 건축 사업 착수 시 적용되는 법적 제한사항을 사업 단계별로 파악하여 설계에 반영하기 위한 통합 검토 도구입니다. 공동주택·주상복합부터 오피스텔·근린생활·업무·숙박·판매·노유자·의료 등 14개 건축물 용도를 지원하며, 용도·사업방식별 인허가 절차와 검토 요건을 자동 점검합니다.</div>
     <div class="hdr-stats" id="hdrStats">
@@ -1510,6 +1508,7 @@ h2[id]::before{
     <li><b>전국 17개 시·도와 앱 선택 목록의 시·군·구·행정시 조례 DB가 수록</b>되어 있습니다. 다만 주차장 조례 비율 데이터는 일반화된 추정치이므로, 정확한 시·군별 적용 비율은 반드시 elis.go.kr에서 해당 시·군의 「주차장 설치 및 관리 조례」 별표를 직접 확인하시기 바랍니다.</li>
     <li>지구단위계획·도시계획·지자체 조례는 수시 변경되므로 반드시 최신 자료를 확인하십시오.</li>
     <li>판례 및 유권해석이 필요한 사항은 별도 전문가 자문을 받으시기 바랍니다.</li>
+    <li><b>v5.6.1 변경사항 (2026.6)</b>: 코드 품질 리팩터 — 중복된 판정 결론박스 생성 로직·상태 라벨맵을 공용 함수(pdConcl)로 통합(DRY), 미사용 CSS 제거. 리팩터 전후 렌더 출력 바이트 동일 검증(동작·판정·디자인 무변경).</li>
     <li><b>v5.6 변경사항 (2026.6)</b>: frontend-design 제도 시그니처를 전 구간 일관 적용 — STEP 메인 헤더·STEP4 검토결과 패널·계산기 그룹/판정·대시보드 카드 제목에 치수 tick, 검토결과 데이터·타임라인 경로를 도면 타이틀블록/모노 스펙 스타일로 통일. 경고·주의 박스는 색 충돌 방지로 제외(절제). 색·기능·판정 무변경.</li>
     <li><b>v5.5 변경사항 (2026.6)</b>: frontend-design 제도 모티프를 판정 카드로 확장 — STEP2 인허가 상세표 헤더를 도면 스펙 스케줄 스타일(모노·헤어라인)로, STEP3 법규 체크리스트 카테고리 제목 앞에 치수 tick을 추가해 시그니처 통일. 구조 표식에만 적용(데이터 줄 미장식, 절제). 색·기능·판정 무변경.</li>
     <li><b>v5.4 변경사항 (2026.6)</b>: <b>frontend-design 적용</b> — 건축 도면의 제도(drafting) 주석을 시그니처로 정립: 히어로 통계를 도면 타이틀블록 데이터 스트립으로 재해석(템플릿형 '큰 숫자+그라데이션' 탈피), 제목 아래 치수선(끝 tick) 주석, 섹션 키커 앞 치수 tick. 장식적 펄스 애니메이션 제거(절제). 색·기능·판정 로직 무변경.</li>
@@ -3879,8 +3878,7 @@ function render(){
       const isCollapsed=(itemCollapsed[itemKey]===true)||(allItemsCollapsed && itemCollapsed[itemKey]!==false);
       const isLegacy = item.t.includes('⚠ 구법');
       const rqC=RC[item.s]||'';
-      const CWg={A:'대상',V:'검토',N:'비대상',R:'권장'}, CIg={A:'✔',V:'◐',N:'✗',R:'☆'};
-      const conclH=`<div class="pd-concl pd-c-${item.s}"><span class="cw">${CIg[item.s]||'•'} ${CWg[item.s]||'확인'}</span>${item.rq?item.rq:''}</div>`;
+      const conclH=pdConcl(item.s, item.rq);
       const lgH=item.lg.map(l=>{
         const isCity=l.includes('조례')||l.includes('지침');
         const isUrl=/^https?:\/\//.test(l);
@@ -4001,6 +3999,11 @@ function renderDashboard(all, I){
 }
 
 /* ===== 심의·영향평가·사전검토 상세 (대상기준/대상여부) ===== */
+/* 공용: 대상/검토/비대상 색상 결론 박스 (renderPermitDetail·STEP3 체크리스트 공용 — DRY) */
+const PD_CONCL_W={A:'대상',V:'검토',N:'비대상',R:'권장'};
+const PD_CONCL_I={A:'✔',V:'◐',N:'✗',R:'☆'};
+function pdConcl(state,gist){return `<div class="pd-concl pd-c-${state}"><span class="cw">${PD_CONCL_I[state]||'•'} ${PD_CONCL_W[state]||'확인'}</span>${gist||''}</div>`;}
+
 function renderPermitDetail(all, I){
   const box=document.getElementById('permitDetail');
   if(!box) return;
@@ -4023,9 +4026,8 @@ function renderPermitDetail(all, I){
     items.forEach(it=>{
       const sl=SL[it.s]||['확인','na'];
       const title=String(it.t||'').replace(' ⚠ 구법','');
-      const CW={A:'대상',V:'검토',N:'비대상',R:'권장'}, CI={A:'✔',V:'◐',N:'✗',R:'☆'};
       const gistRaw=String(it.th||'').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
-      const concl=`<div class="pd-concl pd-c-${it.s}"><span class="cw">${CI[it.s]||'•'} ${CW[it.s]||'확인'}</span>${gistRaw?gistRaw:''}</div>`;
+      const concl=pdConcl(it.s, gistRaw);
       const vlabel=pickVar(title);
       const varLine=vlabel?`<div class="pd-var">기준 변수: <b>${vlabel}</b></div>`:'';
       const isWarn=SRCWARN.some(k=>title.indexOf(k)>=0);
