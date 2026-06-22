@@ -6,7 +6,7 @@
 <meta name="author" content="최감용">
 <meta name="application-name" content="건축 사업 법규검토 콘솔">
 <!-- 개발자: 최감용 (Choi Gam-yong) · 본 도구 및 산정 로직의 출처 표기는 재배포·인용 시에도 유지되어야 합니다. Attribution to developer 최감용 must be preserved on redistribution. -->
-<title>건축 사업 법규검토 콘솔 v5.6.1</title>
+<title>건축 사업 법규검토 콘솔 v5.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1189,7 +1189,7 @@ h2[id]::before{
 
 <header class="app-header">
   <div class="hdr-inner">
-    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.6.1 · 개발자 최감용</div>
+    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.7 · 개발자 최감용</div>
     <h1>건축 사업 법규검토 콘솔</h1>
     <div class="hdr-sub">신규 건축 사업 착수 시 적용되는 법적 제한사항을 사업 단계별로 파악하여 설계에 반영하기 위한 통합 검토 도구입니다. 공동주택·주상복합부터 오피스텔·근린생활·업무·숙박·판매·노유자·의료 등 14개 건축물 용도를 지원하며, 용도·사업방식별 인허가 절차와 검토 요건을 자동 점검합니다.</div>
     <div class="hdr-stats" id="hdrStats">
@@ -1210,6 +1210,7 @@ h2[id]::before{
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
     <button class="radio-btn on" id="dt-latest" data-dt="latest">최신 법령 적용</button>
     <button class="radio-btn" id="dt-legacy" data-dt="legacy">구법 적용 (접수 시점)</button>
+    <span id="lawAsOf" style="margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;color:#0f766e;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:4px 9px">법령 기준일 2026-06-16 · 이후 개정분 미반영 가능</span>
     <span id="legacyInputs" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;margin-left:5px">
       <select id="legacyYear" style="width:auto;padding:5px 8px">
         <option value="2020">2020년</option><option value="2021">2021년</option>
@@ -1505,9 +1506,10 @@ h2[id]::before{
   <ul>
     <li>본 검토서 및 검토결과는 주요 법령 기준에 따른 <b>참고용 자료</b>이며, 최종 법규 판단 및 정확한 산출값은 <b>법제처(law.go.kr)</b>, <b>자치법규정보시스템(elis.go.kr)</b> 및 해당 <b>지자체 담당과 사전 협의</b>를 통해 확인하시기 바랍니다.</li>
     <li>국토계획법 등 상위 법령은 시·군의 조례 제정 기준이며, <b>실제 사업이 적용받는 법규는 해당 시·군의 조례</b>입니다. 시 조례가 우선 적용됩니다.</li>
-    <li><b>전국 17개 시·도와 앱 선택 목록의 시·군·구·행정시 조례 DB가 수록</b>되어 있습니다. 다만 주차장 조례 비율 데이터는 일반화된 추정치이므로, 정확한 시·군별 적용 비율은 반드시 elis.go.kr에서 해당 시·군의 「주차장 설치 및 관리 조례」 별표를 직접 확인하시기 바랍니다.</li>
+    <li><b>전국 17개 시·도와 앱 선택 목록의 시·군·구·행정시 조례 DB가 수록</b>되어 있습니다. <b>주차장 부설주차 기준은 시·군별로 별표(자치법규정보시스템 elis.go.kr)를 직접 검증해 반영하는 중</b>입니다. <b>✔별표검증</b>으로 표시된 지역(예: 과천시 — 주차장 조례 별표2, 시행 2026.1.1)은 원문 별표값을, 그 외 <b>(추정·elis 별표 확인)</b>으로 표시된 지역은 일반화된 추정치를 임시 적용한 것이므로 해당 시·군 「주차장 조례」 별표를 반드시 직접 확인하시기 바랍니다. ※ 조례 부설주차 산정방식은 시·군마다 다를 수 있습니다(면적당 대수/세대당 대수 등).</li>
     <li>지구단위계획·도시계획·지자체 조례는 수시 변경되므로 반드시 최신 자료를 확인하십시오.</li>
     <li>판례 및 유권해석이 필요한 사항은 별도 전문가 자문을 받으시기 바랍니다.</li>
+    <li><b>v5.7 변경사항 (2026.6)</b>: <b>법령 기준일(2026-06-16) 명시</b> — 최신 법령 적용 시 업데이트 시점을 표시해 구법 오인 방지. <b>주차장 조례 별표 검증 반영 시작</b> — 과천시 주차장 조례 별표2(시행 2026.1.1, 전용 85㎡↓ 1/85·85㎡↑ 1/70, 세대당 최소 1대/전용 60㎡↓ 0.93대) 원문 검증값 적용. 미검증 지역은 '추정치 — elis 별표 확인'으로 명확히 구분 표기, 유의사항 정확화.</li>
     <li><b>v5.6.1 변경사항 (2026.6)</b>: 코드 품질 리팩터 — 중복된 판정 결론박스 생성 로직·상태 라벨맵을 공용 함수(pdConcl)로 통합(DRY), 미사용 CSS 제거. 리팩터 전후 렌더 출력 바이트 동일 검증(동작·판정·디자인 무변경).</li>
     <li><b>v5.6 변경사항 (2026.6)</b>: frontend-design 제도 시그니처를 전 구간 일관 적용 — STEP 메인 헤더·STEP4 검토결과 패널·계산기 그룹/판정·대시보드 카드 제목에 치수 tick, 검토결과 데이터·타임라인 경로를 도면 타이틀블록/모노 스펙 스타일로 통일. 경고·주의 박스는 색 충돌 방지로 제외(절제). 색·기능·판정 무변경.</li>
     <li><b>v5.5 변경사항 (2026.6)</b>: frontend-design 제도 모티프를 판정 카드로 확장 — STEP2 인허가 상세표 헤더를 도면 스펙 스케줄 스타일(모노·헤어라인)로, STEP3 법규 체크리스트 카테고리 제목 앞에 치수 tick을 추가해 시그니처 통일. 구조 표식에만 적용(데이터 줄 미장식, 절제). 색·기능·판정 무변경.</li>
@@ -1659,7 +1661,7 @@ const CITY_ORDINANCES={
 '경기도|동두천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,note:'동두천시 주차장 설치 및 관리 조례'},
 '경기도|오산시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'오산시 주차장 설치 및 관리 조례'},
 '경기도|구리시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'구리시 주차장 설치 및 관리 조례'},
-'경기도|과천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'과천시 주차장 설치 및 관리 조례'},
+'경기도|과천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pk:'전용면적 합계 기준 — 85㎡ 이하 1/85 · 85㎡ 초과 1/70 (대/㎡), 세대당 최소 1대(전용 60㎡ 이하 0.93대)',pksrc:'과천시 주차장 조례 별표2, 개정 2025.12.22·시행 2026.1.1',note:'과천시 주차장 조례'},
 '경기도|여주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,note:'여주시 주차장 설치 및 관리 조례'},
 '경기도|연천군':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'연천군 주차장 설치 및 관리 조례'},
 '경기도|가평군':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'가평군 주차장 설치 및 관리 조례'},
@@ -2766,7 +2768,7 @@ function buildItems(I){
   /* ============ 5. 주차장 ============ */
   a({c:4,t:`주차대수 확보 기준 (${cityRef} 조례)`,s:'A',
     th:`${cityRef} 주차장 설치 및 관리 조례 적용`,
-    rq:ord?`<b>${ord.note}</b> — 30㎡이하 ${ord.ratios[0]} / 30~60㎡ ${ord.ratios[1]} / 60~85㎡ ${ord.ratios[2]} / 85㎡ 초과 ${ord.ratios[3]} 대/세대 (조례 강화 기준)`:`${cityRef} 조례 직접 확인 (자치법규정보시스템) — 주택건설기준 제27조 기준 적용`,
+    rq:ord?(ord.pkv?`✔ <b>조례 별표 검증</b> — ${ord.pk} <span style="color:#047857;font-weight:600">[${ord.pksrc}]</span>`:`<b>${ord.note}</b> — 30㎡이하 ${ord.ratios[0]} / 30~60㎡ ${ord.ratios[1]} / 60~85㎡ ${ord.ratios[2]} / 85㎡ 초과 ${ord.ratios[3]} 대/세대 <span style="color:#b45309;font-weight:600">(⚠ 추정치 — 정확값은 elis.go.kr 「${cityRef} 주차장 조례」 별표 직접 확인)</span>`):`${cityRef} 조례 직접 확인 (자치법규정보시스템) — 주택건설기준 제27조 기준 적용`,
     lg:['주택건설기준 제27조',`${cityRef} 주차장 조례`,'주차장법 시행령 별표1'],
     nt:[
       '<b>주택건설기준 제27조 (법정 최소)</b>:',
@@ -3808,12 +3810,12 @@ function render(){
       cityInfo.style.background='#fffbeb';
       cityInfo.style.borderColor='#fde68a';
       cityInfo.style.color='#78350f';
-      cityInfo.innerHTML = `⚠ <b>${regionLabel(I)}</b> — ${ordRes.data.note}<br>주차 ${ordRes.data.ratios.join('/')}대 · 전기차 ${ordRes.data.ev}% · 조경 ${ordRes.data.landscape}% · 도시교통정비지역: ${ordRes.data.urban?'해당 (도시지역 일반)':'시·군별 확인'}${zoneInfo}${linkRow}`;
+      cityInfo.innerHTML = `⚠ <b>${regionLabel(I)}</b> — ${ordRes.data.note}<br>주차 ${ordRes.data.pkv?'✔별표검증('+ordRes.data.pksrc+')':ordRes.data.ratios.join('/')+'대(추정·elis 별표 확인)'} · 전기차 ${ordRes.data.ev}% · 조경 ${ordRes.data.landscape}% · 도시교통정비지역: ${ordRes.data.urban?'해당 (도시지역 일반)':'시·군별 확인'}${zoneInfo}${linkRow}`;
     } else {
       cityInfo.style.background='#f0fdf4';
       cityInfo.style.borderColor='#bbf7d0';
       cityInfo.style.color='#166534';
-      cityInfo.innerHTML = `● <b>${ordRes.key.replace('|',' ')}</b> 조례 자동 적용 — ${ordRes.data.note}<br>주차 ${ordRes.data.ratios.join('/')}대 · 전기차 ${ordRes.data.ev}% · 조경 ${ordRes.data.landscape}% · 도시교통정비지역: ${ordRes.data.urban?'해당':'해당없음'}${zoneInfo}${linkRow}`;
+      cityInfo.innerHTML = `● <b>${ordRes.key.replace('|',' ')}</b> 조례 자동 적용 — ${ordRes.data.note}<br>주차 ${ordRes.data.pkv?'✔별표검증('+ordRes.data.pksrc+')':ordRes.data.ratios.join('/')+'대(추정·elis 별표 확인)'} · 전기차 ${ordRes.data.ev}% · 조경 ${ordRes.data.landscape}% · 도시교통정비지역: ${ordRes.data.urban?'해당':'해당없음'}${zoneInfo}${linkRow}`;
     }
   } else {
     cityInfo.style.display='block';
