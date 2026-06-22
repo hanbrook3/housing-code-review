@@ -6,7 +6,7 @@
 <meta name="author" content="최감용">
 <meta name="application-name" content="건축 사업 법규검토 콘솔">
 <!-- 개발자: 최감용 (Choi Gam-yong) · 본 도구 및 산정 로직의 출처 표기는 재배포·인용 시에도 유지되어야 합니다. Attribution to developer 최감용 must be preserved on redistribution. -->
-<title>건축 사업 법규검토 콘솔 v5.7</title>
+<title>건축 사업 법규검토 콘솔 v5.29</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1189,7 +1189,7 @@ h2[id]::before{
 
 <header class="app-header">
   <div class="hdr-inner">
-    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.7 · 개발자 최감용</div>
+    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.29 · 개발자 최감용</div>
     <h1>건축 사업 법규검토 콘솔</h1>
     <div class="hdr-sub">신규 건축 사업 착수 시 적용되는 법적 제한사항을 사업 단계별로 파악하여 설계에 반영하기 위한 통합 검토 도구입니다. 공동주택·주상복합부터 오피스텔·근린생활·업무·숙박·판매·노유자·의료 등 14개 건축물 용도를 지원하며, 용도·사업방식별 인허가 절차와 검토 요건을 자동 점검합니다.</div>
     <div class="hdr-stats" id="hdrStats">
@@ -1355,6 +1355,7 @@ h2[id]::before{
   <div class="calc-tabs">
     <button class="ctab on" data-ctab="parktype">주차 유형별 배분</button>
     <button class="ctab" data-ctab="parkcalc">법정 주차대수 산출</button>
+    <button class="ctab" data-ctab="nonresid">비주거 부설주차</button>
     <button class="ctab" data-ctab="traffic">교통영향평가</button>
     <button class="ctab" data-ctab="welfare">주민공동시설</button>
     <button class="ctab" data-ctab="amenity">부대복리시설 의무</button>
@@ -1402,13 +1403,28 @@ h2[id]::before{
       </div>
     </div>
     <table>
-      <thead><tr><th style="width:25%">전용면적 구간</th><th style="width:22%;text-align:right">세대수</th><th style="width:23%;text-align:right">세대당 주차</th><th style="width:30%;text-align:right">구간 산정대수</th></tr></thead>
+      <thead><tr><th style="width:24%">전용면적 구간</th><th style="width:20%;text-align:right">세대수</th><th style="width:28%;text-align:right">전용면적 합계(㎡)</th><th style="width:28%;text-align:right">구간 산정</th></tr></thead>
       <tbody id="pk-rows"></tbody>
     </table>
     <div class="calc-result" id="pk-result"></div>
     <div class="info-box">
-      <b>주택건설기준 제27조 (법정 최소)</b>: 전용 60㎡ 이하 세대당 0.7대 이상 / 60㎡ 초과 세대당 1.0대 이상<br>
-      또는 「주택규모 × 주차장 설치기준」 표 적용 — 지자체 조례 강화 적용 우선
+      <b>주택건설기준 제27조①1 (시행 2026.5.6.)</b> — 전용면적 합계 ÷ 지역기준 + 세대당 최소 1대(전용 60㎡↓ 0.7대), 둘 중 큰 값:<br>
+      • 특별시(서울) 85㎡↓ <b>1/75</b>·85㎡↑ 1/65 / 광역시·수도권 시(부산·경기 등) <b>1/85</b>·1/70 / 그 밖 시·수도권 군 1/95·1/75 / 그 밖 군 1/110·1/85<br>
+      • 조례로 1/5(60㎡↓ 1/2) 범위 강화 가능 — <b>검증 조례(예: 과천 60㎡↓ 0.93대) 우선</b> / 주택 외 시설은 주차장법 시행령 별표1
+    </div>
+  </div>
+
+  <div class="calc-panel" id="cp-nonresid">
+    <div style="font-size:11px;color:#475569;line-height:1.6;margin-bottom:9px">
+      <b>근거</b>: 주차장법 시행령 별표1 (부설주차장 설치대상 시설물 종류·설치기준) — 지자체 조례 강화 우선
+    </div>
+    <div class="calc-grid">
+      <div><label>시설 용도</label><select id="nr-use"></select></div>
+      <div><label>시설면적 합계(㎡)</label><input type="number" id="nr-area" min="0" step="10"></div>
+    </div>
+    <div class="calc-result" id="nr-result"></div>
+    <div class="info-box">
+      <b>주차장법 시행령 별표1</b>: 위락 100㎡/대 · 문화집회·종교·판매·운수·의료·운동·업무·장례 150㎡/대 · 1·2종근생·숙박 200㎡/대 · 수련·공장·발전 350㎡/대 · 창고 400㎡/대 · 그 밖 300㎡/대 (소수 0.5↑ 올림, 조례로 강화·완화). 공동주택은 「법정 주차대수 산출」 탭(주택건설기준 제27조).
     </div>
   </div>
 
@@ -1496,7 +1512,7 @@ h2[id]::before{
   <button class="fb" data-ph="3">설계</button>
   <button class="fb" data-ph="4">시공</button>
   <button class="fb" data-ph="5">사용승인</button>
-  <button class="toggle-all-btn" id="toggleAll">▼ 세부사항 모두 접기 (요약 보기)</button>
+  <button class="toggle-all-btn active" id="toggleAll">▲ 세부사항 모두 펼치기 (상세 보기)</button>
 </div>
 <div id="body"></div>
 </section>
@@ -1506,9 +1522,18 @@ h2[id]::before{
   <ul>
     <li>본 검토서 및 검토결과는 주요 법령 기준에 따른 <b>참고용 자료</b>이며, 최종 법규 판단 및 정확한 산출값은 <b>법제처(law.go.kr)</b>, <b>자치법규정보시스템(elis.go.kr)</b> 및 해당 <b>지자체 담당과 사전 협의</b>를 통해 확인하시기 바랍니다.</li>
     <li>국토계획법 등 상위 법령은 시·군의 조례 제정 기준이며, <b>실제 사업이 적용받는 법규는 해당 시·군의 조례</b>입니다. 시 조례가 우선 적용됩니다.</li>
-    <li><b>전국 17개 시·도와 앱 선택 목록의 시·군·구·행정시 조례 DB가 수록</b>되어 있습니다. <b>주차장 부설주차 기준은 시·군별로 별표(자치법규정보시스템 elis.go.kr)를 직접 검증해 반영하는 중</b>입니다. <b>✔별표검증</b>으로 표시된 지역(예: 과천시 — 주차장 조례 별표2, 시행 2026.1.1)은 원문 별표값을, 그 외 <b>(추정·elis 별표 확인)</b>으로 표시된 지역은 일반화된 추정치를 임시 적용한 것이므로 해당 시·군 「주차장 조례」 별표를 반드시 직접 확인하시기 바랍니다. ※ 조례 부설주차 산정방식은 시·군마다 다를 수 있습니다(면적당 대수/세대당 대수 등).</li>
+    <li><b>주차대수(공동주택)는 「법정 주차대수 산출」 탭에서 주택건설기준 제27조①1(시행 2026.5.6.) 지역기준으로 계산</b>됩니다 — 전용면적 합계 ÷ 지역기준(서울 1/75·1/65, 부산·경기 등 1/85·1/70 …) 과 세대당 최소(1대/60㎡↓ 0.7대) 중 큰 값. 시·군 조례가 1/5(60㎡↓ 1/2) 범위에서 강화한 경우 그 값이 우선하며, <b>✔별표검증</b> 지역(예: 과천 60㎡↓ 0.93대)은 원문 별표를 반영했습니다. 그 외 지역은 법정 제27조를 적용하므로 해당 시·군 「주차장 조례」 별표(elis.go.kr)의 강화 여부를 확인하세요. <b>주택 외 시설</b>은 주차장법 시행령 별표1을 적용합니다.</li>
     <li>지구단위계획·도시계획·지자체 조례는 수시 변경되므로 반드시 최신 자료를 확인하십시오.</li>
     <li>판례 및 유권해석이 필요한 사항은 별도 전문가 자문을 받으시기 바랍니다.</li>
+    <li><b>v5.16 변경사항 (2026.6)</b>: 경기 주차 별표 배치7 — 의정부(공동주택 1/70·1/65 강화)·구리 부설주차 조례 반영. 경기 19개 시 검증 완료.</li>
+    <li><b>v5.15 변경사항 (2026.6)</b>: 경기 주차 별표 배치6 — 의왕·이천 부설주차 조례 반영(이천 아파트 세대당 1.4대 강화 등). 하남은 조례에 부설주차 별표 없이 법정 준용 확인. 경기 17개 시 검증 완료.</li>
+    <li><b>v5.14 변경사항 (2026.6)</b>: 경기 주차 별표 배치5 — 광명·시흥·군포 부설주차 조례 반영(시흥 공동주택 1/68·1/56·군포 위락 59·문화 90㎡당 등 강화). 경기 15개 시 검증 완료.</li>
+    <li><b>v5.13 변경사항 (2026.6)</b>: 경기 주차 별표 배치4 — 남양주·평택·김포 부설주차 조례 반영(비주거 위락 60~70·근생 120~135㎡당 등 강화, 공동주택은 제27조/세대당 1대). 경기 12개 시 검증 완료.</li>
+    <li><b>v5.12 변경사항 (2026.6)</b>: 경기 주차 별표 배치3 — 화성·안산·안양 부설주차 조례 반영(공동주택 1/85·1/70+세대당 1대, 비주거 위락 67~80·근생 134~135·공장/창고 250~400㎡당 등). 경기 9개 시 검증 완료.</li>
+    <li><b>v5.11 변경사항 (2026.6)</b>: 경기 주차 별표 배치2 — 부천(별표2: 공동주택 85㎡↓ 1/70·85㎡↑ 1/65 강화)·고양(별표7) 부설주차 조례 반영. 비주거 위락 67~70·근생 134㎡당 등 강화 적용.</li>
+    <li><b>v5.10 변경사항 (2026.6)</b>: 경기 주차 별표 검증 배치1 — 수원·성남·용인 부설주차 조례 별표 반영(공동주택 세대당 최소 1대 강화, 비주거 위락 67~70·문화 100·근생 132~135㎡당 등 강화). 검증 도시는 계산·표시에 조례값 우선 적용.</li>
+    <li><b>v5.9 변경사항 (2026.6)</b>: <b>비주거 부설주차 계산기 신설</b> — 주차장법 시행령 별표1(위락 100·문화집회/판매/업무 150·근생/숙박 200·공장 350·창고 400·기타 300㎡당 1대) 법정 적용 + 조례 강화 override(과천 별표2 검증: 위락 70·문화 100·근생 100㎡당). 용도·시설면적 입력 시 자동 산정. ※ 서울 자치구 주차장 조례는 부설주차 설치기준을 별표로 두지 않고 법정(제27조·주차장법 별표1)을 준용함을 확인 — 법정 기준이 기본 적용되며 조문 강화분은 개별 확인.</li>
+    <li><b>v5.8 변경사항 (2026.6)</b>: <b>주차 계산 엔진을 조례·법정 방식으로 개편</b> — 「법정 주차대수 산출」을 주택건설기준 제27조①1(시행 2026.5.6.) 면적식(전용면적합계÷지역기준)+세대당 최소 큰 값으로 계산. 지역 자동 분류(서울 1/75·1/65, 부산·경기 등 1/85·1/70, 그 밖 시 1/95·1/75, 그 밖 군 1/110·1/85). 검증 조례(과천 60㎡↓ 0.93대) 우선 적용, 미검증 지역은 법정 제27조 적용+조례 강화 확인 안내. 주택 외 시설은 주차장법 시행령 별표1.</li>
     <li><b>v5.7 변경사항 (2026.6)</b>: <b>법령 기준일(2026-06-16) 명시</b> — 최신 법령 적용 시 업데이트 시점을 표시해 구법 오인 방지. <b>주차장 조례 별표 검증 반영 시작</b> — 과천시 주차장 조례 별표2(시행 2026.1.1, 전용 85㎡↓ 1/85·85㎡↑ 1/70, 세대당 최소 1대/전용 60㎡↓ 0.93대) 원문 검증값 적용. 미검증 지역은 '추정치 — elis 별표 확인'으로 명확히 구분 표기, 유의사항 정확화.</li>
     <li><b>v5.6.1 변경사항 (2026.6)</b>: 코드 품질 리팩터 — 중복된 판정 결론박스 생성 로직·상태 라벨맵을 공용 함수(pdConcl)로 통합(DRY), 미사용 CSS 제거. 리팩터 전후 렌더 출력 바이트 동일 검증(동작·판정·디자인 무변경).</li>
     <li><b>v5.6 변경사항 (2026.6)</b>: frontend-design 제도 시그니처를 전 구간 일관 적용 — STEP 메인 헤더·STEP4 검토결과 패널·계산기 그룹/판정·대시보드 카드 제목에 치수 tick, 검토결과 데이터·타임라인 경로를 도면 타이틀블록/모노 스펙 스타일로 통일. 경고·주의 박스는 색 충돌 방지로 제외(절제). 색·기능·판정 무변경.</li>
@@ -1635,34 +1660,34 @@ const CITY_ORDINANCES={
 '서울특별시|중구':{ratios:[0.5,0.8,1.0,1.2],ev:5,landscape:15,urban:true,note:'서울시 조례 + 중구 건축 조례 (구도심 추가 검토)'},
 '서울특별시|중랑구':{ratios:[0.5,0.8,1.0,1.2],ev:5,landscape:15,urban:true,note:'서울시 조례 + 중랑구 건축 조례'},
 /* === 경기도 === */
-'경기도|김포시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'김포시 주차장 조례 / 김포시 건축조례 / 경기도 주택조례'},
-'경기도|성남시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'성남시 주차장 설치 및 관리 조례 / 성남시 건축 조례'},
-'경기도|수원시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'수원시 주차장 설치 및 관리 조례 / 수원시 건축 조례'},
-'경기도|용인시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'용인시 주차장 설치 및 관리 조례'},
-'경기도|화성시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'화성시 주차장 설치 및 관리 조례'},
-'경기도|고양시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'고양시 주차장 설치 및 관리 조례'},
-'경기도|부천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'부천시 주차장 설치 및 관리 조례'},
-'경기도|안양시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'안양시 주차장 설치 및 관리 조례'},
-'경기도|평택시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'평택시 주차장 설치 및 관리 조례'},
-'경기도|남양주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'남양주시 주차장 설치 및 관리 조례'},
-'경기도|광명시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'광명시 주차장 설치 및 관리 조례'},
-'경기도|시흥시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'시흥시 주차장 설치 및 관리 조례'},
-'경기도|파주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'파주시 주차장 설치 및 관리 조례'},
-'경기도|안산시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'안산시 주차장 설치 및 관리 조례'},
-'경기도|광주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'경기 광주시 주차장 설치 및 관리 조례'},
-'경기도|이천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,note:'이천시 주차장 설치 및 관리 조례'},
+'경기도|김포시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:0.7,minNormal:1.0},pk:'공동주택(사업계획승인 대상) 제27조 산정 — 비사업승인 소규모는 85㎡↓ 1/70·85㎡↑ 1/65',pksrc:'김포시 주차장 조례 별표3(개정 2023.8.3.)',pknr:{amuse:60,cult:100,nbr:134,train:350,ware:400,etc:200},pknrsrc:'김포시 주차장 조례 별표3(문화·종교 75㎡당, 수련·발전 250㎡당)',note:'김포시 주차장 조례 / 김포시 건축조례 / 경기도 주택조례'},
+'경기도|성남시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정 또는 세대당 1대 중 많은 대수',pksrc:'성남시 주차장 조례 별표3(일반지역)',pknr:{amuse:100,cult:100,nbr:135,train:350,ware:300,etc:200},pknrsrc:'성남시 주차장 조례 별표3(일반지역, 지구단위계획구역은 위락 70 등 추가 강화)',note:'성남시 주차장 조례 / 성남시 건축 조례'},
+'경기도|수원시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 전용 85㎡↓ 1/85·85㎡↑ 1/70, 세대당 최소 1대',pksrc:'수원시 주차장 조례 별표2',pknr:{amuse:70,cult:100,nbr:135,train:220,ware:210,etc:200},pknrsrc:'수원시 주차장 조례 별표2',note:'수원시 주차장 조례 / 수원시 건축 조례'},
+'경기도|용인시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정, 세대당 최소 1대',pksrc:'용인시 주차장 조례 별표7',pknr:{amuse:67,cult:100,nbr:132,train:350,ware:400,etc:200},pknrsrc:'용인시 주차장 조례 별표7',note:'용인시 주차장 설치 및 관리 조례'},
+'경기도|화성시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정, 세대당 최소 1대',pksrc:'화성시 주차장 조례 별표3(개정 2023.8.7.)',pknr:{amuse:80,cult:100,nbr:135,train:350,ware:400,etc:200},pknrsrc:'화성시 주차장 조례 별표3',note:'화성시 주차장 설치 및 관리 조례'},
+'경기도|고양시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정, 세대당 최소 1대',pksrc:'고양시 주차장 조례 별표7',pknr:{amuse:67,cult:100,nbr:134,train:250,ware:300,etc:200},pknrsrc:'고양시 주차장 조례 별표7 (문화·집회·종교 75㎡당, 공장 1만㎡↑ 350㎡당)',note:'고양시 주차장 설치 및 관리 조례'},
+'경기도|부천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[70,65],minSmall:1.0,minNormal:1.0},pk:'공동주택 전용 85㎡↓ 1/70·85㎡↑ 1/65(강화), 세대당 최소 1대',pksrc:'부천시 주차장 조례 별표2(개정 2026.5.18.)',pknr:{amuse:70,cult:100,nbr:134,train:233,ware:267,etc:200},pknrsrc:'부천시 주차장 조례 별표2',note:'부천시 주차장 설치 및 관리 조례'},
+'경기도|안양시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 85㎡↓ 1/85·85㎡↑ 1/70, 세대당 최소 1대',pksrc:'안양시 주차장 조례 별표3(개정 2025.5.16.)',pknr:{amuse:67,cult:100,nbr:134,train:250,ware:300,etc:200},pknrsrc:'안양시 주차장 조례 별표3(지식산업센터 150㎡당)',note:'안양시 주차장 설치 및 관리 조례'},
+'경기도|평택시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정 또는 세대당 1대 중 많은 대수',pksrc:'평택시 주차장 조례 별표3(개정 2024.7.5.)',pknr:{amuse:70,cult:100,nbr:135,train:250,ware:300,etc:200},pknrsrc:'평택시 주차장 조례 별표3(근생 기타지역 150㎡당, 주택조례 해당 공동주택 세대당 1.2대)',note:'평택시 주차장 설치 및 관리 조례'},
+'경기도|남양주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:0.7,minNormal:1.0},pk:'공동주택 주택건설기준 제27조 산정',pksrc:'남양주시 주차장 조례 별표7(개정 2025.5.8.)',pknr:{amuse:67,cult:100,nbr:120,train:360,ware:400,etc:200},pknrsrc:'남양주시 주차장 조례 별표7(수련·발전 200㎡당, 공장 1만㎡↑ 400㎡당)',note:'남양주시 주차장 설치 및 관리 조례'},
+'경기도|광명시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정, 세대당 최소 1대',pksrc:'광명시 주차장 조례 별표2(개정 2022.12.26.)',pknr:{amuse:67,cult:100,nbr:134,train:233,ware:267,etc:200},pknrsrc:'광명시 주차장 조례 별표2',note:'광명시 주차장 설치 및 관리 조례'},
+'경기도|시흥시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[68,56],minSmall:1.0,minNormal:1.0},pk:'공동주택 전용 85㎡↓ 1/68·85㎡↑ 1/56(강화), 세대당 최소 1대',pksrc:'시흥시 주차장 조례 별표2(개정 2024.11.7.)',pknr:{amuse:67,cult:100,nbr:134,train:234,ware:267,etc:200},pknrsrc:'시흥시 주차장 조례 별표2',note:'시흥시 주차장 설치 및 관리 조례'},
+'경기도|파주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[65,55],minSmall:1.0,minNormal:1.0},pk:'공동주택 전용 85㎡↓ 1/65·85㎡↑ 1/55, 세대당 최소 1대',pksrc:'파주시 주차장 조례 별표2(개정 2019.12.27.)',pknr:{amuse:50,cult:75,nbr:100,train:175,ware:200,etc:200},pknrsrc:'파주시 주차장 조례 별표2',note:'파주시 주차장 설치 및 관리 조례'},
+'경기도|안산시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 85㎡↓ 1/85·85㎡↑ 1/70, 세대당 최소 1대',pksrc:'안산시 주차장 조례 별표5(개정 2026.4.29.)',pknr:{amuse:70,cult:100,nbr:134,train:250,ware:300,etc:200},pknrsrc:'안산시 주차장 조례 별표5',note:'안산시 주차장 설치 및 관리 조례'},
+'경기도|광주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 주택건설기준 제27조 준용(85㎡↓ 1/85·85㎡↑ 1/70), 세대·호당 최소 1대',pksrc:'경기 광주시 주차장 조례 별표4(개정 2020.1.3.)',pknr:{amuse:70,cult:100,nbr:135,train:250,ware:300,etc:200},pknrsrc:'경기 광주시 주차장 조례 별표4(장례·예식 75)',note:'경기 광주시 주차장 설치 및 관리 조례'},
+'경기도|이천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,pkv:true,pkrule:{std:[85,70],minSmall:1.4,minNormal:1.4},pk:'아파트 세대당 1.4대 이상(전용 85㎡↓ 세대당 1대·85㎡↑ 1/70 기본)',pksrc:'이천시 주차장 조례 별표2(개정 2020.3.27.)',pknr:{amuse:67,cult:100,nbr:134,train:350,ware:267,etc:200},pknrsrc:'이천시 주차장 조례 별표2',note:'이천시 주차장 설치 및 관리 조례'},
 '경기도|하남시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'하남시 주차장 설치 및 관리 조례'},
-'경기도|의정부시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'의정부시 주차장 설치 및 관리 조례'},
-'경기도|군포시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'군포시 주차장 설치 및 관리 조례'},
-'경기도|의왕시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'의왕시 주차장 설치 및 관리 조례'},
-'경기도|안성시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,note:'안성시 주차장 설치 및 관리 조례'},
-'경기도|양주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,note:'양주시 주차장 설치 및 관리 조례'},
-'경기도|포천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,note:'포천시 주차장 설치 및 관리 조례'},
-'경기도|동두천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,note:'동두천시 주차장 설치 및 관리 조례'},
-'경기도|오산시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'오산시 주차장 설치 및 관리 조례'},
-'경기도|구리시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'구리시 주차장 설치 및 관리 조례'},
-'경기도|과천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pk:'전용면적 합계 기준 — 85㎡ 이하 1/85 · 85㎡ 초과 1/70 (대/㎡), 세대당 최소 1대(전용 60㎡ 이하 0.93대)',pksrc:'과천시 주차장 조례 별표2, 개정 2025.12.22·시행 2026.1.1',note:'과천시 주차장 조례'},
-'경기도|여주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,note:'여주시 주차장 설치 및 관리 조례'},
+'경기도|의정부시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[70,65],minSmall:1.0,minNormal:1.0},pk:'공동주택 전용 85㎡↓ 1/70·85㎡↑ 1/65(강화), 세대당 최소 1대',pksrc:'의정부시 주차장 조례 별표3(개정 2026.1.9.)',pknr:{amuse:70,cult:100,nbr:134,train:350,ware:350,etc:250},pknrsrc:'의정부시 주차장 조례 별표3',note:'의정부시 주차장 설치 및 관리 조례'},
+'경기도|군포시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 85㎡↓ 1/85·85㎡↑ 1/70, 세대당 최소 1대',pksrc:'군포시 주차장 조례 별표4',pknr:{amuse:59,cult:90,nbr:125,train:200,ware:200,etc:200},pknrsrc:'군포시 주차장 조례 별표4(위락 59·문화 90㎡당 강화)',note:'군포시 주차장 설치 및 관리 조례'},
+'경기도|의왕시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 85㎡↓ 1/85·85㎡↑ 1/70, 세대당 최소 1대',pksrc:'의왕시 주차장 조례 별표5(개정 2026.5.7.)',pknr:{amuse:70,cult:100,nbr:120,train:200,ware:200,etc:200},pknrsrc:'의왕시 주차장 조례 별표5',note:'의왕시 주차장 설치 및 관리 조례'},
+'경기도|안성시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,pkv:true,pkrule:{std:[85,70],minSmall:0.7,minNormal:1.0},pk:'공동주택 주택건설기준 제27조 준용(85㎡↓ 1/85·85㎡↑ 1/70, 60㎡↓ 0.7대)',pksrc:'안성시 주차장 조례 별표4(개정 2021.7.9.)',pknr:{amuse:100,cult:150,nbr:200,train:350,ware:400,etc:300},pknrsrc:'안성시 주차장 조례 별표4',note:'안성시 주차장 설치 및 관리 조례'},
+'경기도|양주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 주택건설기준 제27조 준용(85㎡↓ 1/85·85㎡↑ 1/70), 세대·호당 최소 1대',pksrc:'양주시 주차장 조례 별표2(개정 2025.3.31.)',pknr:{amuse:70,cult:100,nbr:135,train:351,ware:400,etc:200},pknrsrc:'양주시 주차장 조례 별표2(장례 80㎡)',note:'양주시 주차장 설치 및 관리 조례'},
+'경기도|포천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,pkv:true,pkrule:{std:[85,70],minSmall:1.3,minNormal:1.3},pk:'아파트 세대당 1.3대 이상(전용 85㎡↓ 세대당 1대·85㎡↑ 1/70 기본)',pksrc:'포천시 주차장 조례 별표3(개정 2024.4.3.)',pknr:{amuse:70,cult:100,nbr:150,train:300,ware:300,etc:200},pknrsrc:'포천시 주차장 조례 별표3(수련·공장·발전·창고 300㎡당)',note:'포천시 주차장 설치 및 관리 조례'},
+'경기도|동두천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,pkv:true,pkrule:{std:[70,65],minSmall:1.0,minNormal:1.0},pk:'공동주택 전용 85㎡↓ 1/70·85㎡↑ 1/65, 세대·호당 최소 1대',pksrc:'동두천시 주차장 조례 별표2(개정 2020.1.1.)',pknr:{amuse:100,cult:150,nbr:150,train:350,ware:400,etc:300},pknrsrc:'동두천시 주차장 조례 별표2(장례 80·고시원 100)',note:'동두천시 주차장 설치 및 관리 조례'},
+'경기도|오산시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 주택건설기준 제27조 준용(85㎡↓ 1/85·85㎡↑ 1/70), 세대·호당 최소 1대',pksrc:'오산시 주차장 조례 별표2(개정 2025.5.22.)',pknr:{amuse:70,cult:100,nbr:135,train:250,ware:300,etc:200},pknrsrc:'오산시 주차장 조례 별표2',note:'오산시 주차장 설치 및 관리 조례'},
+'경기도|구리시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:0.7,minNormal:1.0},pk:'공동주택 주택건설기준 제27조 산정',pksrc:'구리시 주차장 조례 별표6(개정 2025.9.18.)',pknr:{amuse:70,cult:100,nbr:134,train:200,ware:200,etc:200},pknrsrc:'구리시 주차장 조례 별표6(공장·창고·수련 등 그 밖 200㎡당)',note:'구리시 주차장 설치 및 관리 조례'},
+'경기도|과천시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:0.93,minNormal:1.0},pknr:{amuse:70,cult:100,nbr:100,train:350,ware:200,etc:200},pknrsrc:'과천시 주차장 조례 별표2',pk:'전용면적 합계 기준 — 85㎡ 이하 1/85 · 85㎡ 초과 1/70 (대/㎡), 세대당 최소 1대(전용 60㎡ 이하 0.93대)',pksrc:'과천시 주차장 조례 별표2, 개정 2025.12.22·시행 2026.1.1',note:'과천시 주차장 조례'},
+'경기도|여주시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:false,pkv:true,pkrule:{std:[85,70],minSmall:0.7,minNormal:1.0,mult:1.3},pk:'공동주택 주택건설기준 제27조 산정×1.3배 이상(세대당 1대 미만 시 1대 이상)',pksrc:'여주시 주차장 조례 별표9(개정 2021.6.17.)',pknr:{amuse:70,cult:100,nbr:134,train:350,ware:400,etc:200},pknrsrc:'여주시 주차장 조례 별표9(근생·숙박 134㎡당)',note:'여주시 주차장 설치 및 관리 조례'},
 '경기도|연천군':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'연천군 주차장 설치 및 관리 조례'},
 '경기도|가평군':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'가평군 주차장 설치 및 관리 조례'},
 '경기도|양평군':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'양평군 주차장 설치 및 관리 조례'},
@@ -1715,12 +1740,12 @@ const CITY_ORDINANCES={
 '광주광역시|북구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'광주시 조례 + 북구 건축 조례'},
 '광주광역시|광산구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'광주시 조례 + 광산구 건축 조례'},
 
-'대전광역시':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'대전광역시 주차장 설치 및 관리 조례'},
-'대전광역시|동구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'대전시 조례 + 동구 건축 조례'},
-'대전광역시|중구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'대전시 조례 + 중구 건축 조례'},
-'대전광역시|서구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'대전시 조례 + 서구 건축 조례'},
-'대전광역시|유성구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'대전시 조례 + 유성구 건축 조례'},
-'대전광역시|대덕구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'대전시 조례 + 대덕구 건축 조례'},
+'대전광역시':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정(85㎡↓ 1/85·85㎡↑ 1/70), 세대·호당 최소 1대',pksrc:'대전광역시 주차장 조례 별표6(개정 2023.10.6.)',pknr:{amuse:67,cult:100,nbr:134,train:200,ware:400,etc:200},pknrsrc:'대전광역시 주차장 조례 별표6',note:'대전광역시 주차장 설치 및 관리 조례'},
+'대전광역시|동구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정(85㎡↓ 1/85·85㎡↑ 1/70), 세대·호당 최소 1대',pksrc:'대전광역시 주차장 조례 별표6(개정 2023.10.6.)',pknr:{amuse:67,cult:100,nbr:134,train:200,ware:400,etc:200},pknrsrc:'대전광역시 주차장 조례 별표6',note:'대전시 조례 + 동구 건축 조례'},
+'대전광역시|중구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정(85㎡↓ 1/85·85㎡↑ 1/70), 세대·호당 최소 1대',pksrc:'대전광역시 주차장 조례 별표6(개정 2023.10.6.)',pknr:{amuse:67,cult:100,nbr:134,train:200,ware:400,etc:200},pknrsrc:'대전광역시 주차장 조례 별표6',note:'대전시 조례 + 중구 건축 조례'},
+'대전광역시|서구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정(85㎡↓ 1/85·85㎡↑ 1/70), 세대·호당 최소 1대',pksrc:'대전광역시 주차장 조례 별표6(개정 2023.10.6.)',pknr:{amuse:67,cult:100,nbr:134,train:200,ware:400,etc:200},pknrsrc:'대전광역시 주차장 조례 별표6',note:'대전시 조례 + 서구 건축 조례'},
+'대전광역시|유성구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정(85㎡↓ 1/85·85㎡↑ 1/70), 세대·호당 최소 1대',pksrc:'대전광역시 주차장 조례 별표6(개정 2023.10.6.)',pknr:{amuse:67,cult:100,nbr:134,train:200,ware:400,etc:200},pknrsrc:'대전광역시 주차장 조례 별표6',note:'대전시 조례 + 유성구 건축 조례'},
+'대전광역시|대덕구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,70],minSmall:1.0,minNormal:1.0},pk:'공동주택 제27조 산정(85㎡↓ 1/85·85㎡↑ 1/70), 세대·호당 최소 1대',pksrc:'대전광역시 주차장 조례 별표6(개정 2023.10.6.)',pknr:{amuse:67,cult:100,nbr:134,train:200,ware:400,etc:200},pknrsrc:'대전광역시 주차장 조례 별표6',note:'대전시 조례 + 대덕구 건축 조례'},
 
 '울산광역시':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'울산광역시 주차장 설치 및 관리 조례'},
 '울산광역시|중구':{ratios:[0.5,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'울산시 조례 + 중구 건축 조례'},
@@ -1752,7 +1777,7 @@ const CITY_ORDINANCES={
 '강원특별자치도|양양군':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'양양군 주차장 설치 및 관리 조례'},
 
 /* === 충청도 === */
-'충청북도|청주시':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:true,note:'청주시 주차장 설치 및 관리 조례'},
+'충청북도|청주시':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[85,60],minSmall:1.05,minNormal:1.5,minBand:[1.05,1.05,1.5,1.7]},pk:'공동주택 전용 60㎡↓ 세대당 1.05대·60~85㎡ 1.5대·85㎡↑ 1/60(세대당 1.7대 이상)',pksrc:'청주시 주차장 조례 별표7',pknr:{amuse:67,cult:100,nbr:150,train:350,ware:400,etc:300},pknrsrc:'청주시 주차장 조례 별표7(예식·장례·집회 80㎡당, 다중생활 100㎡당)',note:'청주시 주차장 설치 및 관리 조례'},
 '충청북도|충주시':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'충주시 주차장 설치 및 관리 조례'},
 '충청북도|제천시':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'제천시 주차장 설치 및 관리 조례'},
 '충청북도|음성군':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'음성군 주차장 설치 및 관리 조례'},
@@ -1764,7 +1789,7 @@ const CITY_ORDINANCES={
 '충청북도|영동군':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'영동군 주차장 설치 및 관리 조례'},
 '충청북도|단양군':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'단양군 주차장 설치 및 관리 조례'},
 
-'충청남도|천안시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'천안시 주차장 설치 및 관리 조례'},
+'충청남도|천안시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,pkv:true,pkrule:{std:[80,75],minSmall:1.0,minNormal:1.0},pk:'공동주택 전용 85㎡↓ 1/80·85㎡↑ 1/75, 세대당 최소 1대',pksrc:'천안시 주차장 조례 별표2(개정 2024.6.21.)',pknr:{amuse:70,cult:100,nbr:135,train:300,ware:300,etc:200},pknrsrc:'천안시 주차장 조례 별표2(공장·창고 300㎡당)',note:'천안시 주차장 설치 및 관리 조례'},
 '충청남도|아산시':{ratios:[0.7,1.0,1.0,1.0],ev:5,landscape:15,urban:true,note:'아산시 주차장 설치 및 관리 조례'},
 '충청남도|당진시':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'당진시 주차장 설치 및 관리 조례'},
 '충청남도|서산시':{ratios:[0.7,0.8,1.0,1.0],ev:5,landscape:15,urban:false,note:'서산시 주차장 설치 및 관리 조례'},
@@ -1902,7 +1927,7 @@ const RC={A:'rqA',V:'rqV',R:'rqR'};
 let openState={}, filter='all';
 let userTouched={pkRatios:false, ptPct:false, trafficUrban:false};
 let lastAppliedKey=null;
-let itemCollapsed={}, allItemsCollapsed=false;
+let itemCollapsed={}, allItemsCollapsed=true;   // 세부사항 기본 접힘(요약 보기) — 클릭 시 펼침
 let applyDate='latest'; // 'latest' 또는 'YYYY-MM' 형식
 
 /* 법령 주요 개정 시점 (구법 적용 시 분기 기준) */
@@ -2219,17 +2244,34 @@ function buildItems(I){
       ?['<b>투기과열지구·조정대상지역</b>: 전매제한·청약요건 추가','후분양: 사용검사 후 분양']
       :['<b>건축물분양법 대상</b>: 분양 바닥면적 3,000㎡ 이상 건축물의 사용승인 전 분양','<b>오피스텔</b>: 30실 이상 분양 시 적용','<b>분양신고</b>: 착공신고 후 + 신탁계약 또는 분양보증']});
 
+  if(pub) a({c:0,t:'공공주택 사업 절차 (공공주택특별법)',s:'A',
+    th:`${PT_L[pt]} — 공공주택사업자(LH·SH 등) 시행`,
+    rq:'공공주택특별법에 따른 <b>주택건설사업계획 승인</b>(국토교통부장관) — 건축허가·주택법 사업계획승인 등 의제. 입주자 모집·공급은 공공주택 공급규칙 별도 적용',
+    lg:['공공주택 특별법 제35조','공공주택 특별법 시행령','공공주택 특별법 제48조(공급)'],
+    nt:[
+      pt==='pr'?'<b>공공임대</b>: 임대의무기간·표준임대보증금/임대료 산정 기준 적용 (공공주택 특별법 시행령)':'<b>공공분양</b>: 분양가상한제·거주의무·전매제한 적용',
+      '<b>입주자 자격</b>: 소득·자산 기준 (공공주택 특별법 시행규칙·공급규칙)',
+      '<b>인허가 의제</b>: 사업계획승인 시 건축허가·주택법 사업계획승인·개발행위허가 등 일괄 의제 (제35조제4항)',
+      '⚠ 세부 절차·기준은 공공주택사업자(LH·SH) 내부 지침 병행 — 확인 필요'
+    ]});
+
   if(ren) a({c:0,t:'도시정비법 정비사업 절차',s:'A',
     th:'재건축·재개발 전면 적용',
     rq:'추진위→조합설립인가→사업시행계획인가→관리처분계획인가→이주·철거→착공→준공',
     lg:['도시및주거환경정비법 제16조·제35조·제50조·제74조'],
     nt:['<b>재건축 안전진단</b>: 준공 30년 + D·E등급','<b>조합설립</b>: 재건축 토지등소유자 3/4 + 동별 과반수','<b>재건축초과이익 환수</b> 여부 확인','<b>임대주택 의무비율</b>: 시·도 조례 (재개발)']});
 
+  if(as) a({c:0,t:'주택조합 조합원 모집 신고 (공개모집)',s:'A',
+    th:'지역·직장주택조합 — 설립인가 전 조합원 모집 시',
+    rq:'주택건설대지의 <b>50% 이상 토지 사용권원 확보</b> 후 시장·군수·구청장에게 신고 + <b>공개모집</b> (선착순 모집 불가, 결원 충원·재모집은 예외)',
+    lg:['주택법 제11조의3','주택법 시행규칙 제7조의3'],
+    nt:['<b>모집신고 요건</b>: 대지 50% 이상 사용권원 확보 (설립인가 시 80% + 소유권 15%로 상향)','<b>가입 계약서</b>: 사업개요·조합원 자격·분담금 납부예정금액/시기/방법·탈퇴 환급 절차 명시 (제11조의3제8항)','<b>청약 철회</b>: 가입비 등 예치 + 가입 후 30일 이내 청약 철회 가능 (제11조의6)','<b>발기인</b>: 자격기준 충족 + 모집신고일에 조합 가입 간주 (제11조의3제6·7항)']});
+
   if(as) a({c:0,t:'주택조합 설립인가',s:'A',
     th:'지역·직장주택조합 필수',
-    rq:'주택조합 설립인가 신청 (시장·군수·구청장)',
-    lg:['주택법 제11조·제11조의2','주택법 시행규칙 제7조'],
-    nt:['<b>조합원 자격</b>: 무주택 세대주 또는 85㎡ 이하 1주택','<b>토지 사용권</b>: 80% 이상 / 소유권 15% 이상','조합설립인가 후 3년 내 사업계획승인 미신청 시 해산총회']});
+    rq:'주택조합 설립인가 신청 (시장·군수·구청장) — 창립총회 후',
+    lg:['주택법 제11조','주택법 시행령 제20조','주택법 시행규칙 제7조'],
+    nt:['<b>조합원 자격</b>: 무주택 세대주 또는 85㎡ 이하 1주택 (지역조합은 6개월 이상 거주 등)','<b>토지 사용권</b>: 80% 이상 사용권원 + 소유권 15% 이상','<b>조합원 수 유지</b>: 설립인가~사용검사까지 예정세대수 50% 이상 + 조합원 20명 이상 (시행령 제20조⑦)','<b>총회 직접출석</b>: 일반 10% 이상·창립/주요의결 20% 이상 (시행령 제20조④)','조합설립인가 후 2년 내 사업계획승인 미신청 시 총회 의결로 해산 여부 결정']});
 
   /* ============ 2. 대지·건축 일반 ============ */
   a({c:1,t:'대지의 조경',s:s>=200?'A':'N',
@@ -2278,15 +2320,18 @@ function buildItems(I){
     lg:['건축법 제61조제1항','건축법 시행령 제86조제1항',`${cityRef} 건축조례`],
     nt:['<b>적용 지역</b>: 전용주거지역·일반주거지역 (준주거 제외)','<b>높이 10m 이하</b>: 인접대지경계선 1.5m 이상 (조례로 구체 거리)','<b>높이 10m 초과</b>: 해당 건축물 각 부분 높이의 1/2 이상 (조례)','현행 시행령 제86조제1항 기준은 10m']});
 
-  a({c:1,t:'채광방향 일조 (공동주택 동간 거리)',s:(isHousing&&(residZone||z==='zone6'))?'A':'N',
-    th:isHousing?'공동주택 채광창 적용 — 주거·준주거지역':`${USE_L[use]} — 공동주택 전용 기준 미적용`,
-    rq:(isHousing&&(residZone||z==='zone6'))?'채광창 있는 벽면 → 인접대지경계선까지 수평거리 2배 이하 (근린상업·준주거 4배 이하) / 인동간격 0.5배 이상 (도시형 0.25배)':(isHousing?'주거·준주거지역 외 — 미적용':'공동주택 외 용도 — 미적용'),
+  a({c:1,t:'채광방향 일조 (공동주택 동간 거리)',s:isHousing?'A':'N',
+    th:isHousing?`공동주택 채광 기준 — 전 용도지역 적용 (영 제86조③, 현재 ${ZONE_L[z]||z}: 인접대지 ${['zone6','zone8'].includes(z)?'4':'2'}배)`:`${USE_L[use]} — 공동주택 전용 기준 미적용`,
+    rq:isHousing?'채광창 있는 벽면 → 인접대지경계선까지 수평거리 2배 이하 (근린상업·준주거 4배 이하) / 인동간격 0.5배 이상 (도시형 0.25배) — 공동주택은 용도지역 무관 적용(영 제86조③)':'공동주택 외 용도 — 미적용',
     lg:['건축법 제61조제2항','건축법 시행령 제86조제3항',`${cityRef} 건축조례`],
     nt:['<b>채광창 벽면</b>: 직각방향 인접대지경계선까지 수평거리의 2배(준주거·근린상업 4배) 이하','<b>인동간격 (조례)</b>: 높이의 0.5배(도시형 생활주택 0.25배) 이상에서 건축조례로 결정','<b>부대·복리시설 마주봄</b>: 1.0배 이상 / 주된 개구부 마주봄: 10m 이상','측벽-측벽 4m, 채광창없는벽-측벽 8m 이상']});
 
-  a({c:1,t:'공개공지 확보',s:(['zone3','zone4','zone5','zone6','zone7','zone8','zone9','zone10'].includes(z)&&fa>=5000)?((use==='apt'||use==='row')?'V':'A'):'N',
-    th:`일반주거·준주거·상업·준공업 + 연면적 5,000㎡ 이상 (현재 ${ZONE_L[z]||z} / ${fa.toLocaleString()}㎡)`,
-    rq:(['zone3','zone4','zone5','zone6','zone7','zone8','zone9','zone10'].includes(z)&&fa>=5000)?((use==='apt'||use==='row')?'순수 공동주택은 통상 비대상 — 비주거 용도분(문화·판매·업무·숙박 등)이 있으면 대상 확인':'공개공지 확보 의무 — 대지면적의 5~10% 범위 (조례)'):'미해당',
+  const ospZone=['zone3','zone4','zone5','zone6','zone7','zone8','zone9','zone10'].includes(z);
+  const ospUseSet=['culture','sales','biz','lodge'];  // 건축법 시행령 제27조의2①1: 문화집회·종교·판매·운수·업무·숙박(앱 분류 매핑)
+  const ospStat = !ospZone?'N':(use==='mixed'?'V':(use==='nbr'?'V':(ospUseSet.includes(use)?(fa>=5000?'A':'N'):'N')));
+  a({c:1,t:'공개공지 확보',s:ospStat,
+    th:`일반주거·준주거·상업·준공업 + 대상용도 5,000㎡ 이상 (현재 ${ZONE_L[z]||z} / ${USE_L[use]} / ${fa.toLocaleString()}㎡)`,
+    rq:!ospZone?`${ZONE_L[z]||z} — 공개공지 대상 지역 아님(전용주거 등)`:(use==='mixed'?'주상복합 — 비주거 용도분(문화·판매·업무·숙박) 바닥면적 5,000㎡ 이상 시 대상':(use==='nbr'?'근린생활시설 — 건축조례(제2호) 다중이용시설 지정 여부 확인':(ospUseSet.includes(use)?(fa>=5000?'공개공지 확보 의무 — 대지면적의 5~10% 범위(조례)':`${USE_L[use]} — 대상 용도이나 바닥면적 5,000㎡ 미만`):`${USE_L[use]} — 공개공지 대상 용도 아님(시행령 제27조의2①1 미열거)`))),
     lg:['건축법 제43조','건축법 시행령 제27조의2',`${cityRef} 건축조례`],
     nt:['<b>대상 지역</b>: 일반주거·준주거·상업·준공업지역 (건축법 제43조제1항)','<b>대상 용도</b>: 문화·집회·종교·판매·운수·업무·숙박 등 바닥면적 5,000㎡ 이상 (시행령 제27조의2제1항)','<b>면적</b>: 대지면적의 5~10% 범위에서 조례','<b>순수 공동주택(아파트)은 통상 비대상</b> — 주상복합은 비주거 용도분 적용']});
 
@@ -2308,9 +2353,9 @@ function buildItems(I){
     lg:['건축법 시행령 제40조'],
     nt:['<b>판정 면적</b>: 전체 연면적이 아닌 11층 이상 층의 바닥면적 합계','<b>헬리포트</b>: 옥상 평탄부 직경 10m 이상 + H 표지','<b>인명구조 공간</b>: 22m×22m 이상','<b>옥상 출입문</b>: 비상문 자동개폐장치']});
 
-  a({c:1,t:'환기설비',s:u>=30?'A':'N',
-    th:`30세대 이상 공동주택 (현재 ${u}세대)`,
-    rq:u>=30?'시간당 0.5회 이상 환기능력 (기계환기 또는 자연환기 병행)':'자연환기 기준',
+  a({c:1,t:'환기설비',s:isHousing?(u>=30?'A':'N'):'V',
+    th:isHousing?`30세대 이상 공동주택 (현재 ${u}세대)`:`${USE_L[use]} — 다중이용시설 등(건축법 시행령 제87조②·설비규칙 별표) 용도·규모 확인`,
+    rq:isHousing?(u>=30?'시간당 0.5회 이상 환기능력 (기계환기 또는 자연환기 병행)':'자연환기 기준'):'다중이용시설 해당 시 기계환기설비 — 용도별 환기 기준 확인',
     lg:['건축법 시행령 제87조','건축물의 설비기준 등에 관한 규칙 제11조'],
     nt:['<b>30세대 이상</b>: 0.5회/h 이상 환기능력 (필수)','<b>미세먼지 차단</b>: 필터등급 (MERV 또는 KS B 6879)','<b>실내공기질</b>: 실내공기질 관리법 권고기준']});
 
@@ -2732,19 +2777,27 @@ function buildItems(I){
   const afterCpted100 = isAfterDate(LAW_DATES.cptedMandatory100);
   const afterCpted500 = isAfterDate(LAW_DATES.cptedMandatory500);
   const cptedThreshold = afterCpted100 ? 100 : (afterCpted500 ? 500 : 99999);
-  const cptedStatus = u >= cptedThreshold ? 'A' : (afterCpted500 && u >= 100 ? 'R' : 'N');
+  const cptedAlways=['offi','culture','edu','welfare']; // 건축법 시행령 제63조의7: 용도상 당연 대상
+  const cptedCond=['nbr','lodge'];                       // 1종근생 일용품 소매점·2종근생/숙박 중 다중생활시설만 대상
+  let cptedStatus;
+  if(isHousing){ cptedStatus = u >= cptedThreshold ? 'A' : (afterCpted500 && u >= 100 ? 'R' : 'N'); }
+  else if(cptedAlways.includes(use)){ cptedStatus='A'; }
+  else if(cptedCond.includes(use)){ cptedStatus='V'; }
+  else { cptedStatus='N'; }
+  const cptedTh = cptedStatus==='N' ? `${USE_L[use]} — 범죄예방 건축기준 비대상 용도 (시행령 제63조의7 미열거)` : (cptedStatus==='V' ? `${USE_L[use]} — 세부용도(1종근생 일용품 소매점·다중생활시설)만 대상` : `${USE_L[use]} — 범죄예방 건축기준 대상 용도 (건축법 시행령 제63조의7)`);
+  const cptedRq = cptedStatus==='N' ? '범죄예방 건축기준 대상 용도 아님 — 시행령 제63조의7 각 호 미해당' : (cptedStatus==='V' ? '해당 세부용도(1종근생 일용품 소매점, 2종근생·숙박 중 다중생활시설)일 때만 대상 — 확인 필요' : '범죄예방 건축기준(국토부 고시) 적용 — 자연감시·접근통제·영역성 확보·활용성 증대·유지관리 5원칙');
   a({c:3,t:`범죄예방 건축기준 (CPTED)${afterCpted100?'':(afterCpted500?' ⚠ 500세대 이상 의무':' ⚠ 구법')}`,s:cptedStatus,
-    th:afterCpted100
+    th:isHousing?(afterCpted100
       ?`100세대 이상 의무 (2019.7.31. 이후 — 현재 ${u}세대)`
       :(afterCpted500
         ?`500세대 이상 의무, 100세대 미만 권장 (2015.4.1. ~ 2019.7.30. — 현재 ${u}세대)`
-        :`<b>2015.4.1. 이전</b> — 범죄예방 건축기준 의무 미적용 (현재 ${u}세대)`),
-    rq:afterCpted100
+        :`<b>2015.4.1. 이전</b> — 범죄예방 건축기준 의무 미적용 (현재 ${u}세대)`)):cptedTh,
+    rq:isHousing?(afterCpted100
       ?(u>=100?'범죄예방 건축기준 <b>의무 적용</b> — 자연감시·접근통제·영역성 확보·활용성 증대·유지관리 5원칙 (2019.7.31. 이후)':'권장 적용 (100세대 미만)')
       :(afterCpted500
         ?(u>=500?'500세대 이상 의무 적용 (2015.4.1.~2019.7.30. 기간 — 고시 제2015-276호)':'500세대 미만 — 권장 (의무 아님)')
-        :`<b>구법 적용</b> (${applyDate} 기준) — 범죄예방 건축기준 고시 시행 전 (2015.4.1. 이전 사업계획승인 신청 → 의무 없음)`),
-    lg:['건축법 제53조의2','범죄예방 건축기준 (국토교통부 고시, 2015.4.1. 제정·2019.7.31. 개정)'],
+        :`<b>구법 적용</b> (${applyDate} 기준) — 범죄예방 건축기준 고시 시행 전 (2015.4.1. 이전 사업계획승인 신청 → 의무 없음)`)):cptedRq,
+    lg:['건축법 제53조의2','건축법 시행령 제63조의7(대상 건축물)','범죄예방 건축기준 (국토교통부 고시, 2015.4.1. 제정·2019.7.31. 개정)'],
     nt:[
       afterCpted100?'<b>2019.7.31. 고시 개정</b>: 의무 대상이 500세대 이상 → 100세대 이상으로 확대'
         :(afterCpted500?'<b>2015.4.1.~2019.7.30.</b>: 500세대 이상 의무, 100세대 미만 권장':'<b>2015.4.1. 이전</b>: 범죄예방 건축기준 고시 미시행 — 의무 없음'),
@@ -2766,19 +2819,35 @@ function buildItems(I){
     ]});
 
   /* ============ 5. 주차장 ============ */
-  a({c:4,t:`주차대수 확보 기준 (${cityRef} 조례)`,s:'A',
-    th:`${cityRef} 주차장 설치 및 관리 조례 적용`,
-    rq:ord?(ord.pkv?`✔ <b>조례 별표 검증</b> — ${ord.pk} <span style="color:#047857;font-weight:600">[${ord.pksrc}]</span>`:`<b>${ord.note}</b> — 30㎡이하 ${ord.ratios[0]} / 30~60㎡ ${ord.ratios[1]} / 60~85㎡ ${ord.ratios[2]} / 85㎡ 초과 ${ord.ratios[3]} 대/세대 <span style="color:#b45309;font-weight:600">(⚠ 추정치 — 정확값은 elis.go.kr 「${cityRef} 주차장 조례」 별표 직접 확인)</span>`):`${cityRef} 조례 직접 확인 (자치법규정보시스템) — 주택건설기준 제27조 기준 적용`,
-    lg:['주택건설기준 제27조',`${cityRef} 주차장 조례`,'주차장법 시행령 별표1'],
-    nt:[
+  const pkUseHousing = isHousing || isOffi;   // 공동주택·준주택(오피스텔) → 주택건설기준 제27조/조례 공동주택 항목
+  const nrLegend = '위락 100 · 문화집회·종교·판매·운수·의료·운동·업무·방송국·장례 150 · 1·2종근생·숙박 200 · 수련·공장·발전 350 · 창고 400 · 그 밖 300㎡당 1대';
+  const pknrTxt = (ord&&ord.pknr)?`위락 ${ord.pknr.amuse} · 문화 ${ord.pknr.cult} · 근생 ${ord.pknr.nbr} · 수련공장 ${ord.pknr.train} · 창고 ${ord.pknr.ware} · 그밖 ${ord.pknr.etc}㎡당 1대`:'';
+  a({c:4,t:`주차대수 확보 기준 — ${USE_L[use]} (${cityRef} 조례)`,s:'A',
+    th: pkUseHousing
+      ? `${isOffi?'오피스텔(준주택) — 조례 공동주택 항목 포함, ':''}주택건설기준 제27조 + ${cityRef} 주차장 조례 적용`
+      : `${USE_L[use]} — 주차장법 시행령 별표1(용도별 설치기준) + ${cityRef} 주차장 조례 적용`,
+    rq: pkUseHousing
+      ? (ord?(ord.pkv?`✔ <b>조례 별표 검증</b> — ${ord.pk} <span style="color:#047857;font-weight:600">[${ord.pksrc}]</span>${isOffi?' · 오피스텔 전용면적은 공동주택 산정방법 준용':''}`:`<b>주택건설기준 제27조 지역기준(법정) 적용</b> — 「법정 주차대수 산출」 탭에서 면적식+세대당최소로 산정 <span style="color:#b45309;font-weight:600">(시·군 조례 강화분은 elis.go.kr 「${cityRef} 주차장 조례」 별표 확인)</span>`):`${cityRef} 조례 직접 확인 (자치법규정보시스템) — 주택건설기준 제27조 기준 적용`)
+      : ((ord&&ord.pknr)?`✔ <b>조례 별표 검증(비주거)</b> — ${pknrTxt} <span style="color:#047857;font-weight:600">[${ord.pknrsrc||ord.pksrc||cityRef+' 주차장 조례'}]</span> · 「비주거 부설주차」 탭에서 용도·시설면적 입력 시 산정`:`<b>주차장법 시행령 별표1(법정) 적용</b> — ${nrLegend} · 「비주거 부설주차」 탭에서 산정 <span style="color:#b45309;font-weight:600">(조례 강화분은 elis.go.kr 「${cityRef} 주차장 조례」 별표 확인)</span>`),
+    lg: pkUseHousing
+      ? ['주택건설기준 제27조',`${cityRef} 주차장 조례`,'주차장법 시행령 별표1']
+      : ['주차장법 시행령 별표1(용도별 설치기준)',`${cityRef} 주차장 조례 별표`],
+    nt: pkUseHousing?[
       '<b>주택건설기준 제27조 (법정 최소)</b>:',
       '&nbsp;&nbsp;• 전용 85㎡ 이하: 1/75~1/110㎡ (지역별)',
       '&nbsp;&nbsp;• 전용 85㎡ 초과: 1/65~1/85㎡ (지역별)',
       '&nbsp;&nbsp;• 또는 세대당 1대 (60㎡ 이하 0.7대) 이상',
-      '<b>지자체 조례로 1/5(60㎡ 이하 1/2) 범위 강화 가능</b>',
+      isOffi?'<b>오피스텔(준주택)</b>: 대부분 지자체 조례에서 공동주택 항목에 포함 — 전용면적은 공동주택 산정방법 준용 (별표 확인)':'<b>지자체 조례로 1/5(60㎡ 이하 1/2) 범위 강화 가능</b>',
       ord?`<b>현재 적용</b>: ${ord.note}`:`⚠ 조례 데이터 미수록 — elis.go.kr 직접 확인`,
       '⚠ 「법정 주차대수 산출」 탭에서 시뮬레이션 가능',
-    ]});
+    ]:[
+      `<b>주차장법 시행령 별표1 (법정 용도별 원단위)</b>:`,
+      '&nbsp;&nbsp;• 위락 100 / 문화·집회·종교·판매·운수·의료·운동·업무·방송국·장례 150㎡당 1대',
+      '&nbsp;&nbsp;• 1·2종근생·숙박 200 / 수련·공장·발전 350 / 창고 400 / 그 밖 300㎡당 1대',
+      pknrTxt?`<b>현재 조례(${cityRef}) 강화분</b>: ${pknrTxt}`:`⚠ ${cityRef} 비주거 조례 별표 미수록 — 법정 적용 (elis.go.kr 확인)`,
+      ord?`<b>현재 적용</b>: ${ord.note}`:'',
+      '⚠ 「비주거 부설주차」 탭에서 용도·시설면적 입력 시 자동 산정',
+    ].filter(Boolean)});
 
   a({c:4,t:'노인복지주택 주차 기준 (제27조제4항)',s:'V',
     th:'「노인복지법」 노인복지주택 — 적용 시 별도 기준',
@@ -2833,7 +2902,7 @@ function buildItems(I){
 
   const afterEvCharge = isAfterDate(LAW_DATES.evCharge);
   a({c:4,t:`전기차 충전구역 (의무)${afterEvCharge?'':' ⚠ 구법'}`,s:afterEvCharge?'A':'V',
-    th:afterEvCharge?`신축 공동주택 100세대 이상 의무 (2022.1.28. 이후)`:`<b>2022.1.28. 이전</b> — 의무비율 강화 이전 기준 적용`,
+    th:afterEvCharge?(isHousing?`신축 공동주택 100세대 이상 의무 (2022.1.28. 이후)`:`${USE_L[use]} — 총 주차대수 기준 환경친화차 충전구역 (친환경차법 시행령 제18조의6)`):`<b>2022.1.28. 이전</b> — 의무비율 강화 이전 기준 적용`,
     rq:afterEvCharge
       ?`총 주차대수의 <b>${ord?ord.ev:5}% 이상</b> 환경친화적 자동차 충전구역 설치 (${cityRef} 조례 강화 가능)`
       :`<b>구법 적용</b> (${applyDate} 기준) — 2022.1.28. 이전은 의무비율이 다를 수 있음. 당시 조례 기준 확인 필요`,
@@ -2874,14 +2943,14 @@ function buildItems(I){
 
 
   /* ============ 6. 소방시설 ============ */
-  a({c:5,t:'스프링클러 설치',s:'A',
-    th:'아파트 전 층·전 세대',
-    rq:'모든 층 스프링클러 (세대 내 거실·주방·욕실·발코니 + 공용부)',
+  a({c:5,t:'스프링클러 설치',s:isHousing?'A':'V',
+    th:isHousing?'아파트 전 층·전 세대':`${USE_L[use]} — 특정소방대상물 용도·규모별(소방시설법 시행령 별표4) 확인`,
+    rq:isHousing?'모든 층 스프링클러 (세대 내 거실·주방·욕실·발코니 + 공용부)':'스프링클러 대상·범위는 소방시설법 시행령 별표4 용도·층수·면적 기준 확인',
     lg:['소방시설법 제12조','동법 시행령 별표4','화재안전기준 NFSC 103'],
     nt:['<b>적용</b>: 공동주택 중 아파트 — 전 층 전 세대','<b>세대 내 모든 실</b>: 거실·주방·욕실·발코니','<b>설비 방식</b>: 습식/준비작동식/건식/부압식','동파·가스누출 대책 고려']});
 
   a({c:5,t:'방화구획 (건축법 시행령 제46조)',s:'A',
-    th:'공동주택 전 층',
+    th:isHousing?'공동주택 전 층':`${USE_L[use]} — 연면적 1,000㎡ 초과 시 의무`,
     rq:'층별 방화구획 (3층 이상·지하층) / 면적구획 — 10층 이하 1,000㎡(스프링클러 시 3,000㎡), 11층 이상 200~500㎡',
     lg:['건축법 시행령 제46조','건축물의 피난·방화구조 등의 기준에 관한 규칙 제14조'],
     nt:['<b>층구획</b>: 3층 이상의 층 + 지하층','<b>10층 이하</b>: 1,000㎡(스프링클러 3,000㎡)마다','<b>11층 이상</b>: 실내마감 불연재 500㎡(1,500㎡) / 그 외 200㎡(600㎡)','<b>예외</b>: 주요구조부 내화 + 주차장은 완화 (제46조제2항제6호)','<b>방화문</b>: 갑종 방화문 (60분 차열·차연)']});
@@ -2905,7 +2974,7 @@ function buildItems(I){
     nt:['<b>초고층</b>: 50층 이상 또는 200m 이상','<b>준초고층</b>: 30층~49층 또는 120m~200m 미만','<b>면적</b>: 재실인원 × 0.5㎡/인',f>=50?'<b>초고층 특별법</b>: 종합방재실, 재난관리계획 수립':null].filter(Boolean)});
 
   a({c:5,t:'옥내소화전·자동화재탐지·비상방송 등',s:'A',
-    th:'아파트 일반 적용',
+    th:isHousing?'아파트 일반 적용':`${USE_L[use]} — 특정소방대상물 용도·규모별(소방시설법 시행령 별표4)`,
     rq:'화재안전기준 NFSC 의거 — 옥내소화전·자동화재탐지·비상방송·유도등·비상조명 등',
     lg:['소방시설법 시행령 별표4','화재안전기준 NFSC 102~507'],
     nt:['<b>옥내소화전 (NFSC 102)</b>: 5층 이상 또는 일정 규모','<b>자동화재탐지 (NFSC 203)</b>: 아파트 전 세대','<b>비상방송 (NFSC 202)</b>: 11층 이상','<b>유도등·표지 (NFSC 303)</b>: 모든 층','<b>비상조명 (NFSC 304)</b>: 지하층·무창층']});
@@ -3013,7 +3082,7 @@ function buildItems(I){
     ]});
 
   a({c:5,t:'피난시설 / 직통계단 / 옥외피난계단',s:'A',
-    th:'공동주택 전 단지',
+    th:isHousing?'공동주택 전 단지':`${USE_L[use]} — 직통계단·피난계단 일반 기준(건축법 시행령 제34~36조)`,
     rq:'직통계단 30m 이내 (내화 50m, 16층 이상 40m) + 피난계단·특별피난계단 + 옥외피난계단 (5층 이상 문화·집회·종교·판매·운수 등)',
     lg:['건축법 시행령 제34조·제35조·제36조','건축물의 피난·방화구조 등의 기준에 관한 규칙'],
     nt:[
@@ -3025,6 +3094,18 @@ function buildItems(I){
     ]});
 
   /* ============ 7. 에너지·친환경 ============ */
+  a({c:1,t:'실내공기질 측정·공고 (신축 공동주택)',s:isHousing?(u>=100?'A':'N'):'N',
+    th:isHousing?`신축 공동주택 100세대 이상 (현재 ${u}세대)`:`${USE_L[use]} — 공동주택 측정·공고 대상 아님(다중이용시설은 유지기준 별도)`,
+    rq:isHousing?(u>=100?'시공자가 입주예정자 입회하에 실내공기질 측정 → 시·군·구청장 제출(입주 7일 전까지) + 입주 7일 전부터 60일간 공고':'100세대 미만 — 측정·공고 의무 미적용'):'신축 공동주택(100세대↑) 대상 — 비주거 다중이용시설은 실내공기질 유지기준 별도(시행령 제2조①)',
+    lg:['실내공기질 관리법 제9조','실내공기질 관리법 시행령 제2조제3항','실내공기질 관리법 시행규칙 제7조'],
+    nt:['<b>대상</b>: 신축 공동주택 100세대 이상 (시행령 제2조③)','<b>측정항목</b>: 폼알데하이드·벤젠·톨루엔·에틸벤젠·자일렌·스티렌·라돈 (시행규칙 제7조③)','<b>절차</b>: 입주예정자 입회 측정 → 입주 7일 전까지 시·군·구 제출 → 입주 7일 전부터 60일간 게시판·홈페이지 공고','<b>측정자</b>: 시공자 자가측정 또는 측정대행업자']});
+
+  a({c:6,t:'빗물이용시설 (물의 재이용 촉진법)',s:isHousing?'V':'N',
+    th:isHousing?`공동주택 건축면적 1만㎡ 이상 (건축면적 기준 — 도면 확인)`:`${USE_L[use]} — 용도·규모별 대상 확인(대규모점포 전부 등)`,
+    rq:isHousing?'아파트·연립·다세대·기숙사로서 <b>건축면적 1만㎡ 이상</b>이면 빗물이용시설 설치 의무 — 건축면적 확정 후 대상 여부 확인':'대규모점포는 전부 대상 / 그 밖 용도는 시행령 제10조 규모 확인',
+    lg:['물의 재이용 촉진 및 지원에 관한 법률 제8조','동법 시행령 제10조제1항'],
+    nt:['<b>공동주택 대상</b>: 건축면적 1만㎡ 이상 (시행령 제10조①제2호)','<b>다른 용도</b>: 공공청사·체육관 지붕 1천㎡↑ / 학교 건축면적 5천㎡↑ / 대규모점포 전부 / 골프장 부지 10만㎡↑','<b>중수도</b>: 별도(제11조) — 일정 시설 또는 조례','⚠ 지자체 물순환·물재이용 조례로 대상·기준 강화 가능']});
+
   a({c:6,t:'에너지절약계획서 (녹색건축법 제14조)',s:fa>=500?'A':'N',
     th:`연면적 500㎡ 이상 (현재 ${fa.toLocaleString()}㎡)`,
     rq:fa>=500?'에너지절약계획서 첨부 + EPI 총점 65점 이상':'미해당',
@@ -3534,8 +3615,8 @@ function buildItems(I){
       '<b>점검 결과 보고</b>: 시·군·구청',
     ]});
 
-  a({c:11,t:'환기설비 기술기준',s:u>=30?'A':'N',
-    th:'30세대 이상 공동주택',
+  a({c:11,t:'환기설비 기술기준',s:isHousing?(u>=30?'A':'N'):'V',
+    th:isHousing?'30세대 이상 공동주택':`${USE_L[use]} — 다중이용시설 등 해당 시 적용`,
     rq:'기계환기 또는 자연환기 — 시간당 0.5회 이상 / KS B 6879 (헤파필터·미세먼지) 권장',
     lg:['건축법 시행령 제87조','건축물의 설비기준 등에 관한 규칙 제11조','기계설비 기술기준 KDS 31'],
     nt:[
@@ -3689,7 +3770,7 @@ function buildItems(I){
   // 비주거 용도: 주택건설기준(c:2) + 부대복리시설 중 주민공동시설(c:3) 제거
   let result = A;
   // 공동주택(주택건설기준·주택법) 전용 항목 — 비주거에서 제거 (용도 게이팅)
-  const residOnlyC3=/주민공동시설|경로당|어린이놀이터|어린이집|작은도서관|주민운동시설|다함께돌봄|관리사무소|의무관리/;
+  const residOnlyC3=/주민공동시설|경로당|어린이놀이터|어린이집|작은도서관|주민운동시설|다함께돌봄|관리사무소|의무관리|제50조/;
   const residOnlyC5=/특정소방대상물 분류 \(공동주택\)|노유자시설 방염/;
   const residOnlyC6=/친환경주택|건강친화형|장수명|공동주택 성능등급/;
   if(isNonResid){
@@ -3732,9 +3813,7 @@ function applyRegionDefaults(I){
   const ord = ordRes ? ordRes.data : null;
 
   // 1. 법정 주차대수 비율 자동 적용 (preset 버튼 상태는 renderParkCalc에서 일괄 갱신)
-  if(!userTouched.pkRatios && ord){
-    pkRanges.forEach((rg,i)=>{rg.ratio = ord.ratios[i];});
-  }
+  // 주차대수는 renderParkCalc가 지역(주택건설기준 제27조)·검증 조례 기준으로 산정
 
   // 2. 전기차 충전 비율 자동
   if(!userTouched.ptPct && ord){
@@ -3810,12 +3889,12 @@ function render(){
       cityInfo.style.background='#fffbeb';
       cityInfo.style.borderColor='#fde68a';
       cityInfo.style.color='#78350f';
-      cityInfo.innerHTML = `⚠ <b>${regionLabel(I)}</b> — ${ordRes.data.note}<br>주차 ${ordRes.data.pkv?'✔별표검증('+ordRes.data.pksrc+')':ordRes.data.ratios.join('/')+'대(추정·elis 별표 확인)'} · 전기차 ${ordRes.data.ev}% · 조경 ${ordRes.data.landscape}% · 도시교통정비지역: ${ordRes.data.urban?'해당 (도시지역 일반)':'시·군별 확인'}${zoneInfo}${linkRow}`;
+      cityInfo.innerHTML = `⚠ <b>${regionLabel(I)}</b> — ${ordRes.data.note}<br>주차 ${ordRes.data.pkv?'✔별표검증('+ordRes.data.pksrc+')':'법정 제27조 적용(조례 강화 elis 확인)'} · 전기차 ${ordRes.data.ev}% · 조경 ${ordRes.data.landscape}% · 도시교통정비지역: ${ordRes.data.urban?'해당 (도시지역 일반)':'시·군별 확인'}${zoneInfo}${linkRow}`;
     } else {
       cityInfo.style.background='#f0fdf4';
       cityInfo.style.borderColor='#bbf7d0';
       cityInfo.style.color='#166534';
-      cityInfo.innerHTML = `● <b>${ordRes.key.replace('|',' ')}</b> 조례 자동 적용 — ${ordRes.data.note}<br>주차 ${ordRes.data.pkv?'✔별표검증('+ordRes.data.pksrc+')':ordRes.data.ratios.join('/')+'대(추정·elis 별표 확인)'} · 전기차 ${ordRes.data.ev}% · 조경 ${ordRes.data.landscape}% · 도시교통정비지역: ${ordRes.data.urban?'해당':'해당없음'}${zoneInfo}${linkRow}`;
+      cityInfo.innerHTML = `● <b>${ordRes.key.replace('|',' ')}</b> 조례 자동 적용 — ${ordRes.data.note}<br>주차 ${ordRes.data.pkv?'✔별표검증('+ordRes.data.pksrc+')':'법정 제27조 적용(조례 강화 elis 확인)'} · 전기차 ${ordRes.data.ev}% · 조경 ${ordRes.data.landscape}% · 도시교통정비지역: ${ordRes.data.urban?'해당':'해당없음'}${zoneInfo}${linkRow}`;
     }
   } else {
     cityInfo.style.display='block';
@@ -3951,6 +4030,7 @@ function render(){
 
   try{renderParkType();}catch(e){console.error('parktype',e);}
   try{renderParkCalc();}catch(e){console.error('parkcalc',e);}
+  try{renderNonResid();}catch(e){console.error('nonresid',e);}
   try{renderTraffic();}catch(e){console.error('traffic',e);}
   try{renderWelfare();}catch(e){console.error('welfare',e);}
   try{renderAmenity();}catch(e){console.error('amenity',e);}
@@ -4063,25 +4143,29 @@ function renderReviewResults(all, I){
   const el=document.getElementById('reviewResults');
   if(!el) return;
   const isHousing=HOUSING_USES.includes(I.use);
+  const isOffi=I.use==='offi';
   const ordRes=getCityOrd(I.r,I.c);
   const ord=ordRes?ordRes.data:null;
   const zLimits=ZONE_LIMITS[I.z]||[0,0];
   const zoneLabel=ZONE_L[I.z]||I.z;
   const landscapePct=ord?ord.landscape:15;
   const urban=(ord&&ord.urban)||URBAN_DEFAULT_REGIONS.includes(I.r);
-  // 교통영향평가(아파트): 도시교통정비촉진법 시행령 별표1 제2호 가목1 — 도시교통정비지역 연면적 60,000㎡ 이상 / 교통권역 90,000㎡ 이상. 세대수 기준 아님.
-  const trafficThreshold=urban?60000:90000;
-  const trafficReq=I.fa>=trafficThreshold;
-  const trafficReview=!trafficReq&&I.fa>=trafficThreshold*0.8;
+  // 교통영향평가: 용도별 기준은 buildItems(c:7)에서 용도 인지로 산정 — 단일 출처 재사용 (도시교통정비촉진법 시행령 별표1 제2호)
+  const trafItem=all.find(i=>i.c===7 && /교통영향평가/.test(i.t));
+  const trafStat=trafItem?trafItem.s:'N';
+  const trafGist=trafItem?String(trafItem.th).replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim():'';
+  const trafficReq=trafStat==='A';
+  const trafficReview=trafStat==='V';
   const nf=(n,d=0)=>Number.isFinite(n)?n.toLocaleString('ko-KR',{maximumFractionDigits:d}):'-';
   const area=(n,d=1)=>`${nf(n,d)}㎡`;
   const accessRoad=(n)=>n<300?6:n<500?8:n<1000?12:n<2000?15:20;
   const accessRoadSum=(n)=>n<300?10:n<500?12:n<1000?16:n<2000?20:25;
   const commLegal=I.u>=100?(I.u<1000?I.u*2.5:500+I.u*2):0;
   const daycareLawActive=isAfterDate(LAW_DATES.daycare);
-  const trafficText=trafficReq?'교통영향평가 대상 우선 검토':(trafficReview?'간이 검토 가능성 확인':'일반 확인');
+  const trafficText=trafficReq?'교통영향평가 대상':(trafficReview?'조건부 대상 — 지역(도시교통정비/교통권역)·합산식 확인':'대상 아님 (규모·용도 미달)');
   const openSpaceZone=['zone3','zone4','zone5','zone6','zone7','zone8','zone9','zone10'].includes(I.z);
   const openSpaceReq=openSpaceZone&&I.use==='mixed'&&I.fa>=5000;
+  const openSpaceUses=['culture','sales','biz','lodge']; // 건축법 시행령 제27조의2①1 대상 용도(문화집회·종교·판매·운수·업무·숙박) — 근생 등은 조례(제2호) 확인
   const chip=(kind,text)=>`<span class="result-chip ${kind}">${text}</span>`;
   const basis=(text)=>`<div class="basis">${text}</div>`;
   const target=(ok,yes='적용대상',no='적용대상 아님')=>chip(ok?'req':'na',ok?yes:no);
@@ -4110,7 +4194,7 @@ function renderReviewResults(all, I){
     {
       item:'공개공지',
       standard:'일반주거·준주거·상업·준공업지역에서 문화·판매·업무·숙박 등 비주거 용도 바닥면적 5,000㎡ 이상이면 대상(건축법 제43조, 시행령 제27조의2). 순수 공동주택은 통상 비대상',
-      current:openSpaceZone?(I.use==='mixed'?`${detail()}${basis('주상복합 비주거 5,000㎡ 이상 여부 확인')}`:`${chip('na','적용대상 아님')}${basis('순수 주거용도 — 통상 비대상')}`):`${chip('na','적용대상 아님')}${basis(`${zoneLabel} — 대상 지역 아님`)}`,
+      current:(!openSpaceZone)?`${chip('na','적용대상 아님')}${basis(`${zoneLabel} — 대상 지역 아님`)}`:(I.use==='mixed')?`${detail()}${basis('주상복합 — 비주거 용도분 바닥면적 5,000㎡ 이상 여부 확인')}`:(I.use==='nbr')?`${detail()}${basis('근린생활시설 — 건축조례(제2호) 다중이용시설 지정 여부 확인')}`:(openSpaceUses.includes(I.use)?(I.fa>=5000?`${chip('req','적용대상')}${basis(`${USE_L[I.use]} ${I.fa.toLocaleString()}㎡ — 대지면적 5~10% 공개공지 확보`)}`:`${chip('na','적용대상 아님')}${basis(`${USE_L[I.use]} — 해당 용도 바닥면적 5,000㎡ 미만`)}`):`${chip('na','적용대상 아님')}${basis(`${USE_L[I.use]} — 공개공지 대상 용도 아님(시행령 제27조의2①1 미열거)`)}`),
       check:'건축법 제43조, 시행령 제27조의2, 지자체 건축조례, 지구단위계획 결정도면상 공개공지·공공보행통로 확인'
     },
     {
@@ -4135,7 +4219,7 @@ function renderReviewResults(all, I){
     },
     {
       item:'확인 기준',
-      standard:'아파트: 도시교통정비지역 연면적 60,000㎡ 이상 / 교통권역 90,000㎡ 이상(도시교통정비 촉진법 시행령 별표1). 세대수 기준 아님',
+      standard:(trafGist||`${USE_L[I.use]} — 도시교통정비 촉진법 시행령 별표1 제2호 기준`)+' · 세대수가 아닌 건축 연면적 기준',
       current:detail(),
       check:'세대수가 아닌 건축 연면적이 법정 기준. 용도, 진출입 도로, 주차계획 확정 후 최종 대상성 판단'
     },
@@ -4236,15 +4320,15 @@ function renderReviewResults(all, I){
     },
     {
       item:'채광 높이제한(인접대지)',
-      standard:'채광창 벽면에서 직각방향 인접대지경계선까지 수평거리의 2배 이하(근린상업·준주거지역은 4배). 기숙사 제외·다세대주택 예외(건축법 시행령 제86조③제1호)',
-      current:isHousing?`${target(true)}${basis(`${zoneLabel}: 수평거리의 ${lightMul}배 이하`)}`:detail(),
-      check:'채광창 벽면→인접대지경계선 수평거리 산정. 다세대주택은 수평거리 1m 이상+건축조례 거리 이상이면 제1호 미적용'
+      standard:isHousing?'공동주택: 채광창 벽면에서 직각방향 인접대지경계선까지 수평거리의 2배 이하(근린상업·준주거지역은 4배). 기숙사 제외·다세대주택 예외(건축법 시행령 제86조③제1호)':`${USE_L[I.use]} — 공동주택 전용 기준(영 제86조③) 미적용`,
+      current:isHousing?`${target(true)}${basis(`${zoneLabel}: 수평거리의 ${lightMul}배 이하`)}`:`${chip('na','적용대상 아님')}${basis('영 제86조③은 공동주택에만 적용 — 비주거 미적용')}`,
+      check:isHousing?'채광창 벽면→인접대지경계선 수평거리 산정. 다세대주택은 수평거리 1m 이상+건축조례 거리 이상이면 제1호 미적용':'영 제86조③(채광 높이제한)은 공동주택 전용 — 일반 채광/환기는 영 제51조 별도 적용'
     },
     {
       item:'인동거리(동간·같은 대지)',
-      standard:`같은 대지에서 두 동이 마주볼 때(건축법 시행령 제86조③제2호) — 채광창 벽면 직각방향: 높이의 0.5배(도시형 생활주택 0.25배) 이상 범위에서 건축조례로 결정 / 부대·복리시설 마주봄: 1배 / 채광창 없는 벽면-측벽: 8m / 측벽-측벽: 4m 이상`,
-      current:isHousing?`${chip('info','지역 기준 적용')}${basis(`적용 하한: 채광 높이 × ${daylightSep.ratio}배(도시형 ${daylightSep.urbanRatio}배) 이상 — ${ordName}`)}`:detail(),
-      check:`실제 적용거리는 건축조례(${ordName}) 해당 조문으로 확정. 도시형 생활주택 여부, 측벽·부대복리 마주봄 구분, 동지 9~15시 2시간 연속 일조 확보 시 완화(영 제86조③제2호 단서) 확인`
+      standard:isHousing?`같은 대지에서 두 동이 마주볼 때(건축법 시행령 제86조③제2호) — 채광창 벽면 직각방향: 높이의 0.5배(도시형 생활주택 0.25배) 이상 범위에서 건축조례로 결정 / 부대·복리시설 마주봄: 1배 / 채광창 없는 벽면-측벽: 8m / 측벽-측벽: 4m 이상`:`${USE_L[I.use]} — 공동주택 전용 인동거리 기준(영 제86조③제2호) 미적용`,
+      current:isHousing?`${chip('info','지역 기준 적용')}${basis(`적용 하한: 채광 높이 × ${daylightSep.ratio}배(도시형 ${daylightSep.urbanRatio}배) 이상 — ${ordName}`)}`:`${chip('na','적용대상 아님')}${basis('영 제86조③제2호(인동거리)는 공동주택에만 적용 — 비주거 미적용')}`,
+      check:isHousing?`실제 적용거리는 건축조례(${ordName}) 해당 조문으로 확정. 도시형 생활주택 여부, 측벽·부대복리 마주봄 구분, 동지 9~15시 2시간 연속 일조 확보 시 완화(영 제86조③제2호 단서) 확인`:'인동거리(영 제86조③제2호)는 공동주택 전용 기준'
     },
     {
       item:'채광·환기창',
@@ -4254,15 +4338,15 @@ function renderReviewResults(all, I){
     },
     {
       item:'승강기',
-      standard:'공동주택: 6층 이상이면 6인승 이상 승용승강기(연면적 무관, 주택건설기준 제15조①) / 비주거: 6층 이상+연면적 2,000㎡ 이상(건축법 제64조①)',
+      standard:isHousing?'공동주택: 6층 이상이면 6인승 이상 승용승강기 (연면적 무관, 주택건설기준 제15조①)':`${USE_L[I.use]}: 6층 이상 + 연면적 2,000㎡ 이상이면 승용승강기 설치 (건축법 제64조①)`,
       current:isHousing?`${target(I.f>=6)}${basis(`${I.f}층 · 공동주택은 연면적 무관`)}`:`${target(I.f>=6&&I.fa>=2000)}${basis(`${I.f}층 · 연면적 ${I.fa.toLocaleString()}㎡`)}`,
-      check:'22층 이상 2대, 복도형 화물용 100세대마다 1대, 승강기 대수는 국토부령 기준 확인'
+      check:isHousing?'22층 이상 2대, 복도형 화물용 100세대마다 1대, 승강기 대수는 주택건설기준 제15조 확인':'승강기 대수는 건축물의 설비기준 규칙 별표1의2(용도별 산정식) 확인'
     },
     {
       item:'비상용 승강기',
-      standard:'공동주택: 10층 이상이면 승용승강기를 비상용 구조로(주택건설기준 제15조②) + 화물용 승강기(§15③) / 비주거: 높이 31m 초과(건축법 제64조②). 1,500㎡ 이하 1대, 초과 시 3,000㎡마다 추가',
+      standard:isHousing?'공동주택: 10층 이상이면 승용승강기를 비상용 구조로 (주택건설기준 제15조②) + 화물용 승강기 (§15③)':`${USE_L[I.use]}: 높이 31m 초과 시 비상용 승강기 (건축법 제64조②). 1,500㎡ 이하 1대, 초과 시 3,000㎡마다 추가`,
       current:isHousing?`${target(I.f>=10)}${basis(`${I.f}층 · 공동주택 10층 이상`)}`:`${target(I.f>=11)}${basis(`${I.f}층 · 기준은 높이 31m 초과(층고로 확정)`)}`,
-      check:'공동주택 10층 이상은 적재 0.9톤 이상 화물용 승강기 별도(§15③). 승강장 6㎡ 이상, 내화구조 승강로, 피난층 출구 30m 이내 확인'
+      check:isHousing?'공동주택 10층 이상은 적재 0.9톤 이상 화물용 승강기 별도(§15③). 승강장 6㎡ 이상, 내화구조 승강로, 피난층 출구 30m 이내 확인':'높이 31m 초과 시 비상용 승강기. 승강장 6㎡ 이상·내화구조 승강로·피난층 출구 30m 이내 확인'
     },
     {
       item:'헬리포트·인명구조공간',
@@ -4278,9 +4362,9 @@ function renderReviewResults(all, I){
     },
     {
       item:'주차장',
-      standard:'공동주택 세대당 주차대수: 전용면적 합÷85㎡(지역별 계수)와 세대당 1대(60㎡ 이하 0.7대) 중 큰 값, 끝수 1대 올림 (주택건설기준 제27조제1항). 조례로 1/5(60㎡ 이하는 1/2) 범위 강화 가능',
-      current:`${detail()}${basis('전용면적 구간·지역구분 확정 후 산정 — 근거조문만 표시')}`,
-      check:'근거: 주택건설기준 제27조 + 지자체 주차장 설치·관리 조례. 도시형 생활주택 별도(§27①2), 장애인·친환경차 전용주차 가산 확인'
+      standard:isHousing?'공동주택: 전용면적 합÷지역계수와 세대당 1대(60㎡ 이하 0.7대) 중 큰 값, 끝수 1대 올림 (주택건설기준 제27조제1항). 조례로 1/5(60㎡ 이하 1/2) 범위 강화 가능':(isOffi?'오피스텔(준주택): 대부분 조례 공동주택 항목 준용 (전용면적은 공동주택 산정방법)':`${USE_L[I.use]}: 주차장법 시행령 별표1 용도별 설치기준 + 지자체 주차장 조례`),
+      current:`${detail()}${basis(isHousing?'전용면적 구간·지역구분 확정 후 산정 — 근거조문만 표시':(isOffi?'조례 공동주택 항목 적용 — 「법정 주차대수 산출」 탭':'「비주거 부설주차」 탭에서 용도·시설면적 산정'))}`,
+      check:isHousing?'근거: 주택건설기준 제27조 + 지자체 주차장 조례. 도시형 생활주택 별도(영 제27조①2), 장애인·친환경차 전용주차 가산 확인':'근거: 주차장법 시행령 별표1(용도별) + 지자체 주차장 조례 비주거 별표. 장애인·친환경차 전용주차 가산 확인'
     }
   ];
   const safetyRows=[
@@ -4292,7 +4376,7 @@ function renderReviewResults(all, I){
     },
     {
       item:'특별피난계단',
-      standard:'공동주택 16층 이상 의무, 일반 건축물은 11층 이상 또는 지하 3층 이하 기준 확인',
+      standard:isHousing?'공동주택: 16층 이상인 층으로부터 피난층까지 특별피난계단 (건축법 시행령 제35조②)':`${USE_L[I.use]}: 11층 이상(공동주택 외) 또는 지하 3층 이하 층으로부터 특별피난계단 (건축법 시행령 제35조②)`,
       current:isHousing?target(I.f>=16):target(I.f>=11),
       check:'부속실, 제연설비, 방화문, 비상용 승강기와의 연결 관계 확인'
     },
@@ -4513,6 +4597,7 @@ function renderTimeline(I){
   const {pt,use,f,fa,u,s,z}=I;
   const isHousing=HOUSING_USES.includes(use);
   const ren=['rc','rd'].includes(pt);
+  const as=['ra','wa'].includes(pt);
   const housingLawScale=isHousing && u>=30;     // 공동주택 30세대 이상 사업계획승인 (주택법 제15조·영 제27조①2)
   const mixedExempt=use==='mixed' && ['zone6','zone7','zone8','zone9'].includes(z) && u<300; // 준주거·상업 300세대 미만 주상복합은 건축허가 가능(주택 연면적 90% 미만 시, 영 제27조④1·확인필요)
   const isHousingLaw=housingLawScale && pt!=='gen' && !mixedExempt;   // 주택법 사업계획승인 대상
@@ -4558,6 +4643,18 @@ function renderTimeline(I){
       {t:'이주 · 철거 · 착공신고',law:'도정법 제81조',dur:'공사',side:consReviews,note:'기존 건축물 멸실 → 착공'},
       {t:'준공인가 · 사용검사',law:'도정법 제83조',dur:'',side:[],note:'준공인가 → 입주',mile:true},
       {t:'이전고시 · 청산',law:'도정법 제86조',dur:'',side:[],note:'소유권 이전 고시 → 조합 청산·해산'},
+    ];
+  } else if(as && isHousingLaw){
+    routeLabel='지역·직장주택조합 (주택법)';
+    descText='주택조합은 조합원 모집신고·설립인가를 거쳐 주택법 사업계획승인으로 진행합니다. 조합원 자격·토지 확보 요건과 일정 지연 리스크가 핵심입니다.';
+    steps=[
+      {t:'조합원 모집 신고 · 공개모집',law:'주택법 제11조의3',dur:'사전',side:[{t:'토지 50% 사용권원',k:'req'}],note:'대지 50% 이상 사용권원 확보 후 신고 → 공개모집 (가입계약서·청약철회 30일)'},
+      {t:'창립총회 · 주택조합 설립인가',law:'주택법 제11조',dur:'',side:[{t:'토지 80%+소유 15%',k:'req'}],note:'조합원 20명 이상·예정세대 50% 이상 / 토지 사용권 80%+소유권 15% (시행령 제20조)',mile:true},
+      {t:'주택건설 사업계획승인',law:'주택법 제15조',dur:'~60일',side:planReviews,note:'사업계획 + 각종 영향평가·심의 병행 → 승인 (설립인가 후 통상 2년 내 신청)',mile:true},
+      {t:'착공신고',law:'주택법 제16조',dur:'',side:consReviews,note:'착공 전 굴토·지하안전 등 확인 → 착공신고'},
+      {t:'입주자 모집 (일반분양분)',law:'주택법 제54조',dur:'공사',side:[{t:'분양보증(HUG)',k:'ver'}],note:'조합원 공급분 외 일반분양분 모집공고 승인'},
+      {t:'사용검사',law:'주택법 제49조',dur:'',side:[{t:'기계설비 사용전검사',k:(fa>=10000||u>=500)?'req':'ver'},{t:'소방 완공검사',k:'req'}],note:'공사 완료 → 사용검사 → 입주',mile:true},
+      {t:'입주 · 소유권 이전 · 조합 청산',law:'',dur:'준공후',side:[],note:'사용검사필증 → 입주 → 조합 청산·해산'},
     ];
   } else if(isHousingLaw){
     routeLabel='공동주택 (주택법)';
@@ -4685,103 +4782,133 @@ function renderParkType(){
 
 /* ============ 계산기 2: 법정 주차대수 산출 ============ */
 let pkRanges=[
-  {lbl:'30㎡ 이하',units:0,ratio:0.5},
-  {lbl:'30㎡ ~ 60㎡',units:0,ratio:0.7},
-  {lbl:'60㎡ ~ 85㎡',units:0,ratio:1.0},
-  {lbl:'85㎡ 초과',units:0,ratio:1.0},
+  {lbl:'30㎡ 이하', units:0, area:0, small:true,  over85:false, rep:24},
+  {lbl:'30㎡ ~ 60㎡', units:0, area:0, small:true,  over85:false, rep:48},
+  {lbl:'60㎡ ~ 85㎡', units:0, area:0, small:false, over85:false, rep:74},
+  {lbl:'85㎡ 초과', units:0, area:0, small:false, over85:true,  rep:108},
 ];
-let pkPreset='std';
-const PK_PRESETS={
-  std:{name:'주택건설기준 제27조 (법정 최소)',ratios:[0.7,0.7,1.0,1.0]},
-  local:{name:'지자체 조례',ratios:null}, // 동적 - 현재 선택된 지자체 비율 사용
-  custom:{name:'사용자 정의',ratios:null},
-};
+let pkPreset='local'; // local=조례/법정 자동, std=법정 강제
+
+/* 주택건설기준 제27조①1 지역 분류 + 면적당 기준(1/N) */
+const PARK_REGION={'서울특별시':'a','부산광역시':'b','대구광역시':'b','인천광역시':'b','광주광역시':'b','대전광역시':'b','울산광역시':'b','세종특별자치시':'b','경기도':'b','강원특별자치도':'c','충청북도':'c','충청남도':'c','전북특별자치도':'c','전라남도':'c','경상북도':'c','경상남도':'c','제주특별자치도':'c'};
+const PARK_STD={a:[75,65],b:[85,70],c:[95,75],d:[110,85]};
+const PARK_RGN_LABEL={a:'특별시(서울)',b:'광역시·특별자치시·수도권 내 시',c:'그 밖의 시·수도권 군',d:'그 밖의 지역(군)'};
+
+/* 적용 규칙: 검증 조례(공동주택 강화) 우선, 없으면 법정 제27조 지역기준 */
+function parkRule(I){
+  const region = PARK_REGION[I.r]||'c';
+  const rule = {region, std:PARK_STD[region].slice(), minSmall:0.7, minNormal:1.0, mult:1, minBand:null, verified:false,
+    label:`주택건설기준 제27조 — ${PARK_RGN_LABEL[region]} (85㎡↓ 1/${PARK_STD[region][0]}·85㎡↑ 1/${PARK_STD[region][1]}, 세대당 최소 1대/60㎡↓ 0.7대)`};
+  const ord=getCityOrd(I.r,I.c);
+  if(ord && ord.data && ord.data.pkv && ord.data.pkrule){
+    const r=ord.data.pkrule;
+    rule.std = r.std?r.std.slice():rule.std;
+    rule.minSmall = (r.minSmall!=null)?r.minSmall:rule.minSmall;
+    rule.minNormal = (r.minNormal!=null)?r.minNormal:rule.minNormal;
+    rule.mult = (r.mult!=null)?r.mult:1;
+    rule.minBand = r.minBand?r.minBand.slice():null;
+    rule.verified=true;
+    rule.label=`✔ ${ord.data.note} 별표 검증 — 85㎡↓ 1/${rule.std[0]}·85㎡↑ 1/${rule.std[1]}, 세대당 최소 ${rule.minNormal}대(60㎡↓ ${rule.minSmall}대)${rule.mult>1?` ×${rule.mult}배 가중`:''} [${ord.data.pksrc||''}]`;
+  }
+  return rule;
+}
 
 function applyPkPreset(key){
-  pkPreset=key;
-  if(key === 'local'){
-    // 현재 선택된 지자체의 비율을 동적으로 적용
-    const I = getInputs();
-    const ord = getCityOrd(I.r, I.c);
-    if(ord && ord.data && ord.data.ratios){
-      pkRanges.forEach((r,i)=>{r.ratio = ord.data.ratios[i];});
-    }
-  } else if(PK_PRESETS[key].ratios){
-    pkRanges.forEach((r,i)=>{r.ratio=PK_PRESETS[key].ratios[i];});
-  }
-  // 사용자가 명시적으로 preset 선택한 것이므로 자동 적용 OFF (지역 변경 시 다시 ON됨)
-  userTouched.pkRatios=true;
-  document.querySelectorAll('.preset-btn[data-preset]').forEach(b=>{
-    b.classList.toggle('on',b.dataset.preset===key);
-  });
+  pkPreset=key; userTouched.pkRatios=true;
+  document.querySelectorAll('.preset-btn[data-preset]').forEach(b=>b.classList.toggle('on',b.dataset.preset===key));
   renderParkCalc();
 }
 
 function renderParkCalc(){
   const I=getInputs();
-  const ordResNow = getCityOrd(I.r, I.c);
-  // preset 버튼 상태 동기화 — 자동 적용 중이면 모두 비활성화, 아니면 현재 pkPreset만 활성화
-  const isAuto = !userTouched.pkRatios && ordResNow;
-  document.querySelectorAll('.preset-btn[data-preset]').forEach(b=>{
-    if(isAuto){
-      b.classList.remove('on');
-    } else {
-      b.classList.toggle('on', b.dataset.preset === pkPreset);
-    }
-  });
+  const auto=parkRule(I);
+  const useStd=(pkPreset==='std');
+  const std = useStd ? PARK_STD[PARK_REGION[I.r]||'c'] : auto.std;
+  const minSmall = useStd ? 0.7 : auto.minSmall;
+  const minNormal = useStd ? 1.0 : auto.minNormal;
+  const mult = useStd ? 1 : (auto.mult||1);
+  const minBand = useStd ? null : auto.minBand;
+  const label = useStd ? `주택건설기준 제27조 — ${PARK_RGN_LABEL[PARK_REGION[I.r]||'c']} (법정 최소)` : auto.label;
+  const verified = useStd ? false : auto.verified;
 
-  const totalSet=pkRanges.reduce((sum,r)=>sum+r.units,0);
-  if(totalSet===0){
-    pkRanges[1].units=Math.floor(I.u*0.5);
-    pkRanges[2].units=Math.floor(I.u*0.3);
-    pkRanges[3].units=Math.max(0,I.u-pkRanges[1].units-pkRanges[2].units);
-  }
+  // 세대수 기본 배분(미설정 시 60~85㎡에 일괄)
+  if(pkRanges.reduce((s,r)=>s+r.units,0)===0){ pkRanges.forEach(r=>{r.units=0;r.area=0;}); pkRanges[2].units=I.u; }
+  // 전용면적 미입력 시 구간 대표면적으로 추정
+  pkRanges.forEach(r=>{ if(!r.area && r.units) r.area = Math.round(r.units*r.rep); });
+
+  let areaPark=0,minPark=0,totalUnits=0,totalArea=0;
+  pkRanges.forEach((r,idx)=>{
+    const base=r.over85?std[1]:std[0];
+    areaPark += (r.area||0)/base;
+    const mb=(minBand&&minBand[idx]!=null)?minBand[idx]:(r.small?minSmall:minNormal);
+    minPark += (r.units||0)*mb;
+    totalUnits += (r.units||0); totalArea += (r.area||0);
+  });
+  let result=Math.max(areaPark,minPark);
+  if(mult>1){ result=Math.max(result*mult, totalUnits); }
+  const rounded=Math.ceil(result-1e-9);
+  window.__pkResult=rounded;
+
   document.getElementById('pk-rows').innerHTML=pkRanges.map((r,i)=>{
-    const cnt=r.units*r.ratio;
-    return `<tr>
-      <td>${r.lbl}</td>
+    const base=r.over85?std[1]:std[0];
+    return `<tr><td>${r.lbl}</td>
       <td style="text-align:right"><input type="number" class="tbl-input" data-pk-u="${i}" value="${r.units}" min="0"></td>
-      <td style="text-align:right"><input type="number" class="tbl-input" data-pk-r="${i}" value="${r.ratio}" step="0.1" min="0"></td>
-      <td style="text-align:right">${cnt.toFixed(1)}대</td>
-    </tr>`;
+      <td style="text-align:right"><input type="number" class="tbl-input" data-pk-area="${i}" value="${r.area||0}" min="0" step="10"></td>
+      <td style="text-align:right">${((r.area||0)/base).toFixed(1)}대</td></tr>`;
   }).join('')+
-  `<tr class="tbl-sum"><td><b>합계</b></td><td style="text-align:right">${pkRanges.reduce((s,r)=>s+r.units,0).toLocaleString()}세대</td><td style="text-align:right">-</td><td style="text-align:right">${pkRanges.reduce((s,r)=>s+r.units*r.ratio,0).toFixed(1)}대</td></tr>`;
+  `<tr class="tbl-sum"><td><b>합계</b></td><td style="text-align:right">${totalUnits.toLocaleString()}세대</td><td style="text-align:right">${totalArea.toLocaleString()}㎡</td><td style="text-align:right">${areaPark.toFixed(1)}대</td></tr>`;
 
-  const total=pkRanges.reduce((s,r)=>s+r.units*r.ratio,0);
-  const rounded=Math.ceil(total);
-  const totalUnits=pkRanges.reduce((s,r)=>s+r.units,0);
-  const autoLabel = isAuto ? ordResNow.data.note : PK_PRESETS[pkPreset].name;
   document.getElementById('pk-result').innerHTML=`
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
-      <div><div class="sc-lbl">산출 주차대수</div><div style="font-size:18px;font-weight:600;color:#dc2626">${total.toFixed(1)}대</div></div>
-      <div><div class="sc-lbl">법정 주차대수 (올림)</div><div style="font-size:22px;font-weight:700;color:#dc2626">${rounded}대</div></div>
-      <div><div class="sc-lbl">합산 세대수</div><div style="font-size:18px;font-weight:600;color:#1e293b">${totalUnits.toLocaleString()}세대</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">
+      <div><div class="sc-lbl">면적식 산정</div><div style="font-size:16px;font-weight:600;color:#1e293b">${areaPark.toFixed(1)}대</div></div>
+      <div><div class="sc-lbl">세대당 최소</div><div style="font-size:16px;font-weight:600;color:#1e293b">${minPark.toFixed(1)}대</div></div>
+      <div><div class="sc-lbl">법정 주차대수 (큰 값·올림)${mult>1?` ×${mult}배 가중`:''}</div><div style="font-size:22px;font-weight:700;color:#dc2626">${rounded}대</div></div>
     </div>
-    <div style="font-size:11px;color:#64748b;margin-top:7px;padding-top:7px;border-top:1px solid #f1f5f9;line-height:1.6">
-      ${totalUnits!==I.u?`<span style="color:#dc2626">⚠ 합산 세대수(${totalUnits})와 메인 입력 세대수(${I.u}) 불일치</span> · `:''}
-      적용 기준: <b>${autoLabel}</b>${isAuto ? ' <span style="color:#16a34a;font-size:10px">● 지역 조례 자동적용</span>' : ''}
-    </div>
-  `;
+    <div style="font-size:11px;color:#64748b;margin-top:7px;padding-top:7px;border-top:1px solid #f1f5f9;line-height:1.65">
+      ${totalUnits!==I.u?`<span style="color:#dc2626">⚠ 합산 세대수(${totalUnits})와 메인 세대수(${I.u}) 불일치</span><br>`:''}
+      적용: <b>${label}</b> ${verified?'<span style="color:#16a34a">● 조례 별표 검증</span>':'<span style="color:#b45309">● 법정 기준(조례 강화분 elis 확인)</span>'}<br>
+      산식: 면적식 Σ(구간 전용면적합계÷지역기준) · 세대당최소 Σ(세대수×최소대수) · <b>법정=둘 중 큰 값(올림)</b>. 전용면적 미입력 시 구간 대표면적으로 추정(직접 입력 권장). 주택 외 시설은 주차장법 시행령 별표1.
+    </div>`;
 
-  document.querySelectorAll('[data-pk-u]').forEach(el=>{
-    el.addEventListener('input',function(){
-      pkRanges[parseInt(this.dataset.pkU)].units=Math.max(0,parseInt(this.value)||0);
-      renderParkCalc();
-    });
-  });
-  document.querySelectorAll('[data-pk-r]').forEach(el=>{
-    el.addEventListener('input',function(){
-      pkRanges[parseInt(this.dataset.pkR)].ratio=Math.max(0,parseFloat(this.value)||0);
-      pkPreset='custom';
-      userTouched.pkRatios=true;
-      document.querySelectorAll('.preset-btn[data-preset]').forEach(b=>{
-        b.classList.toggle('on',b.dataset.preset==='custom');
-      });
-      renderParkCalc();
-    });
-  });
+  document.querySelectorAll('[data-pk-u]').forEach(el=>el.addEventListener('input',function(){const i=+this.dataset.pkU;pkRanges[i].units=Math.max(0,parseInt(this.value)||0);pkRanges[i].area=0;renderParkCalc();}));
+  document.querySelectorAll('[data-pk-area]').forEach(el=>el.addEventListener('input',function(){const i=+this.dataset.pkArea;pkRanges[i].area=Math.max(0,parseFloat(this.value)||0);renderParkCalc();}));
 }
 
+/* ============ 계산기: 비주거 부설주차 (주차장법 시행령 별표1) ============ */
+const NR_USES=[
+ {k:'amuse',n:'위락시설',std:100},
+ {k:'cult',n:'문화·집회·종교·판매·운수·의료·운동·업무·방송국·장례식장',std:150},
+ {k:'nbr',n:'제1·2종 근린생활시설·숙박시설',std:200},
+ {k:'train',n:'수련시설·공장(아파트형 제외)·발전시설',std:350},
+ {k:'ware',n:'창고시설',std:400},
+ {k:'etc',n:'그 밖의 건축물',std:300},
+];
+let nrState={use:'cult',area:0};
+function renderNonResid(){
+  const sel=document.getElementById('nr-use'); if(!sel) return;
+  const I=getInputs(); const ord=getCityOrd(I.r,I.c);
+  const nr=(ord&&ord.data&&ord.data.pknr)?ord.data.pknr:null;
+  if(!sel.options.length) sel.innerHTML=NR_USES.map(u=>`<option value="${u.k}">${u.n}</option>`).join('');
+  sel.value=nrState.use;
+  const areaEl=document.getElementById('nr-area');
+  if(nrState.area===0) nrState.area=I.fa;
+  areaEl.value=nrState.area;
+  const u=NR_USES.find(x=>x.k===nrState.use)||NR_USES[1];
+  const verified=!!(nr&&nr[nrState.use]!=null);
+  const base=verified?nr[nrState.use]:u.std;
+  const cars=Math.round((nrState.area||0)/base);
+  document.getElementById('nr-result').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">
+      <div><div class="sc-lbl">적용 기준</div><div style="font-size:16px;font-weight:600;color:#1e293b">${base}㎡당 1대</div></div>
+      <div><div class="sc-lbl">시설면적</div><div style="font-size:16px;font-weight:600;color:#1e293b">${(nrState.area||0).toLocaleString()}㎡</div></div>
+      <div><div class="sc-lbl">법정 주차대수 (올림)</div><div style="font-size:22px;font-weight:700;color:#dc2626">${cars}대</div></div>
+    </div>
+    <div style="font-size:11px;color:#64748b;margin-top:7px;padding-top:7px;border-top:1px solid #f1f5f9;line-height:1.6">
+      ${verified?`✔ <b>${ord.data.note} 별표 검증</b> 적용 <span style="color:#16a34a">● 조례</span>`:'<b>주차장법 시행령 별표1(법정)</b> 적용 <span style="color:#b45309">● 조례 강화분 elis 확인</span>'} · 산식: 올림(시설면적 ÷ 기준면적). 복합용도는 용도별 합산.
+    </div>`;
+  sel.onchange=function(){nrState.use=this.value;renderNonResid();};
+  areaEl.oninput=function(){nrState.area=Math.max(0,parseFloat(this.value)||0);renderNonResid();};
+}
 
 /* ============ 계산기 3: 교통영향평가 ============ */
 let trafficState={urban:'y'};
@@ -5107,8 +5234,7 @@ document.querySelectorAll('[data-tf]').forEach(btn=>{
 
 document.getElementById('pt-total').addEventListener('input',renderParkType);
 document.getElementById('pt-use-calc').addEventListener('click',function(){
-  const total=pkRanges.reduce((s,r)=>s+r.units*r.ratio,0);
-  document.getElementById('pt-total').value=Math.ceil(total);
+  document.getElementById('pt-total').value=window.__pkResult||0;
   renderParkType();
 });
 
@@ -5127,10 +5253,8 @@ document.getElementById('toggleAll').addEventListener('click',function(){
 // 합산 세대수 → 메인 세대수 일치 버튼 (60~85㎡에 일괄 배분)
 document.getElementById('pk-sync-btn').addEventListener('click',function(){
   const I=getInputs();
-  pkRanges[0].units=0;
-  pkRanges[1].units=0;
-  pkRanges[2].units=I.u;
-  pkRanges[3].units=0;
+  pkRanges.forEach(r=>{r.units=0;r.area=0;});
+  pkRanges[2].units=I.u; pkRanges[2].area=0;
   renderParkCalc();
 });
 
