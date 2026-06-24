@@ -1,1557 +1,76 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="author" content="최감용">
-<meta name="application-name" content="건축 사업 법규검토 콘솔">
-<!-- 개발자: 최감용 (Choi Gam-yong) · 본 도구 및 산정 로직의 출처 표기는 재배포·인용 시에도 유지되어야 합니다. Attribution to developer 최감용 must be preserved on redistribution. -->
-<title>건축 사업 법규검토 콘솔 v5.29</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>건축 사업 법규검토 콘솔 v6.8 · 개발자 최감용</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
-:root{
-  --ink:#0b1b2e;       /* 딥 네이비 잉크 */
-  --ink-2:#0f2740;
-  --ink-3:#16395c;
-  --bp:#1e4976;        /* 블루프린트 블루 */
-  --cyan:#38bdf8;      /* 도면 라인 시안 */
-  --cyan-dim:#7dd3fc;
-  --paper:#eef1f6;     /* 배경 */
-  --paper-2:#e3e8f0;
-  --card:#ffffff;
-  --line:#d7dee8;
-  --line-2:#e8edf3;
-  --ink-text:#0b1b2e;
-  --muted:#5b6b80;
-  --muted-2:#8595a8;
-  --req:#dc2626;       /* 의무 */
-  --req-bg:#fef2f2; --req-bd:#fecaca; --req-tx:#b91c1c;
-  --ver:#d97706;       /* 확인필요 */
-  --ver-bg:#fffbeb; --ver-bd:#fde68a; --ver-tx:#b45309;
-  --rec:#059669;       /* 권장 */
-  --rec-bg:#ecfdf5; --rec-bd:#a7f3d0; --rec-tx:#047857;
-  --na:#94a3b8;
-  --shadow:0 1px 2px rgba(11,27,46,.05),0 2px 8px rgba(11,27,46,.04);
-  --shadow-lg:0 4px 16px rgba(11,27,46,.10);
-  --mono:"IBM Plex Mono","SFMono-Regular",ui-monospace,Menlo,monospace;
-  --sans:"IBM Plex Sans KR","Pretendard","Apple SD Gothic Neo","맑은 고딕",system-ui,sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%}
-html{max-width:100%;overflow-x:hidden}
-body{
-  font-family:var(--sans);font-size:12px;color:var(--ink-text);line-height:1.5;
-  background:var(--paper);
-  background-image:
-    linear-gradient(rgba(30,73,118,.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(30,73,118,.035) 1px,transparent 1px);
-  background-size:22px 22px;
-  padding:0 16px 60px;
-  max-width:1240px;margin:0 auto;
-  overflow-x:hidden;
-}
-h1{font-size:21px;font-weight:700;letter-spacing:0;color:#fff;line-height:1.2}
-h2{
-  font-size:13px;font-weight:700;color:var(--ink);margin:22px 0 10px;
-  display:flex;align-items:center;gap:8px;letter-spacing:0;text-transform:none;
-}
-h2 .h2num{
-  font-family:var(--mono);font-size:10px;font-weight:600;color:var(--cyan);
-  background:var(--ink);padding:3px 7px;border-radius:5px;letter-spacing:0;
-  flex-shrink:0;
-}
-h2::before{display:none}
-
-/* ===== 헤더 (블루프린트) ===== */
-.app-header{
-  margin:0 -16px 0;padding:22px 22px 20px;position:relative;overflow:hidden;
-  background:
-    radial-gradient(circle at 88% -10%,rgba(56,189,248,.22),transparent 45%),
-    linear-gradient(135deg,var(--ink) 0%,var(--ink-2) 55%,var(--ink-3) 130%);
-  border-bottom:2px solid var(--cyan);
-}
-.app-header::before{
-  content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
-  background-image:
-    linear-gradient(rgba(56,189,248,.08) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(56,189,248,.08) 1px,transparent 1px);
-  background-size:28px 28px;
-  mask-image:linear-gradient(90deg,transparent,#000 40%);
-}
-.app-header .hdr-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto}
-.hdr-tag{
-  font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0;
-  color:var(--cyan);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;
-}
-.hdr-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 2.4s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.hdr-sub{
-  font-size:11.5px;color:#9db4cf;margin-top:8px;max-width:680px;line-height:1.6;
-}
-.hdr-stats{
-  display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;padding-top:13px;
-  border-top:1px solid rgba(125,211,252,.18);
-}
-.hdr-stat{display:flex;flex-direction:column;gap:1px}
-.hdr-stat .hs-v{font-family:var(--mono);font-size:18px;font-weight:600;color:#fff;line-height:1}
-.hdr-stat .hs-l{font-size:9.5px;color:#7e96b3;letter-spacing:0;margin-top:3px}
-
-/* ===== 패널 / 입력 ===== */
-.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:12px;box-shadow:var(--shadow)}
-select,input[type=number],input[type=text]{
-  width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;
-  color:var(--ink-text);font-size:11.5px;font-family:inherit;transition:border-color .12s,box-shadow .12s;
-}
-select:focus,input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(56,189,248,.15)}
-input[type=number]{font-family:var(--mono);font-weight:500}
-button{font-family:inherit;cursor:pointer}
-label{display:block;font-size:9.5px;font-weight:600;color:var(--muted);margin-bottom:4px;letter-spacing:0;text-transform:uppercase}
-.grid7{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:11px}
-.meta{display:flex;flex-wrap:wrap;gap:7px 14px;padding-top:12px;border-top:1px solid var(--line-2);margin-top:13px;font-size:10.5px;color:var(--muted)}
-.meta span{display:inline-flex;align-items:center;gap:4px}
-.meta b{color:var(--ink);font-weight:600;font-family:var(--mono)}
-.city-info{margin-top:10px;padding:10px 13px;background:var(--rec-bg);border:1px solid var(--rec-bd);border-radius:9px;font-size:10.5px;color:var(--rec-tx);line-height:1.65}
-
-/* ===== 요약 통계 카드 ===== */
-.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px}
-.sc{
-  background:var(--card);border:1px solid var(--line);border-radius:11px;padding:12px 14px;
-  box-shadow:var(--shadow);position:relative;overflow:hidden;
-}
-.sc::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent,var(--ink))}
-.sc-lbl{font-size:9.5px;color:var(--muted);margin-bottom:4px;letter-spacing:0;text-transform:uppercase;font-weight:600}
-.sc-val{font-size:24px;font-weight:600;font-family:var(--mono);line-height:1}
-.sc-u{font-size:11px;font-weight:400;margin-left:2px;color:var(--muted)}
-
-/* ===== 핵심 대시보드 ===== */
-.dash{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:11px;margin-bottom:12px;
-}
-.dash-card{
-  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
-  box-shadow:var(--shadow);position:relative;
-}
-.dash-card .dc-h{
-  display:flex;align-items:center;gap:7px;margin-bottom:9px;padding-bottom:8px;
-  border-bottom:1px dashed var(--line);
-}
-.dash-card .dc-ico{
-  width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;
-  font-size:13px;flex-shrink:0;
-}
-.dash-card .dc-t{font-size:11px;font-weight:700;color:var(--ink);letter-spacing:0}
-.dash-card .dc-n{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);background:var(--paper);padding:2px 7px;border-radius:5px}
-.dash-list{list-style:none;display:flex;flex-direction:column;gap:5px}
-.dash-list li{font-size:10.5px;color:var(--ink-text);line-height:1.45;display:flex;align-items:flex-start;gap:6px}
-.dash-list li::before{content:'';width:5px;height:5px;border-radius:1px;background:var(--accent,var(--bp));margin-top:5px;flex-shrink:0;transform:rotate(45deg)}
-.dash-list li b{font-weight:600}
-.dash-empty{font-size:10px;color:var(--muted-2);font-style:italic}
-
-/* ===== 필터 ===== */
-.filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:11px}
-.flabel{font-size:9.5px;color:var(--muted);font-weight:600;letter-spacing:0;text-transform:uppercase;margin-right:2px}
-.fb{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:500;border:1px solid var(--line);background:#fff;color:var(--muted);transition:all .12s}
-.fb:hover{border-color:var(--bp);color:var(--bp)}
-.fb.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-
-/* ===== 카테고리 블록 ===== */
-.cb{border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-bottom:9px;background:var(--card);box-shadow:var(--shadow)}
-.ch{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;background:linear-gradient(180deg,#f8fafc,#f1f5f9);cursor:pointer;user-select:none;flex-wrap:wrap;gap:6px;border-bottom:1px solid transparent;transition:background .12s}
-.ch:hover{background:linear-gradient(180deg,#f1f5f9,#e9eef5)}
-.ct{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:0}
-.cnum{font-family:var(--mono);font-size:10px;font-weight:600;color:#fff;background:var(--bp);width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
-.cbadges{display:flex;gap:4px;flex-wrap:wrap}
-.ci{padding:13px 15px;border-top:1px solid var(--line-2);background:#fff;transition:background .1s}
-.ci:hover{background:#fcfdfe}
-.ci-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer;padding:0}
-.ci-header:hover .ititle{color:var(--bp)}
-.ci-toggle{margin-left:auto;font-size:10px;color:var(--muted-2);flex-shrink:0;transition:transform .15s}
-.ci.collapsed{padding:11px 15px}
-.ci.collapsed .ci-toggle{transform:rotate(180deg)}
-.ci-body{padding-top:10px;border-top:1px solid var(--line-2);margin-top:9px}
-.ci.collapsed .ci-body{display:none}
-.ci.done{background:linear-gradient(90deg,rgba(5,150,105,.05),transparent 60%)}
-.ci.done .ititle{text-decoration:line-through;text-decoration-color:var(--rec);text-decoration-thickness:1.5px;color:var(--muted)}
-
-.toggle-all-btn{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:500;border:1px solid var(--line);background:#fff;color:var(--muted);margin-left:auto;transition:all .12s}
-.toggle-all-btn:hover{border-color:var(--bp);color:var(--bp)}
-.toggle-all-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-.law-link{color:var(--bp);text-decoration:none;font-weight:600;font-size:10.5px;border-bottom:1px solid rgba(30,73,118,.3)}
-.law-link:hover{color:var(--ink);border-bottom-color:var(--ink)}
-.sync-btn{padding:6px 12px;border-radius:7px;font-size:11px;font-weight:600;background:var(--rec);color:#fff;border:1px solid var(--rec);transition:filter .12s}
-.sync-btn:hover{filter:brightness(.93)}
-.summary-box{background:var(--ver-bg);border:1.5px solid var(--ver-bd);border-radius:10px;padding:11px 13px;margin-top:9px}
-.summary-box-t{font-size:12px;font-weight:700;color:var(--ver-tx);margin-bottom:6px}
-.summary-box ul{font-size:11px;color:var(--ink-text);line-height:1.7;padding-left:15px;margin:0;list-style:disc}
-.summary-box li b{color:var(--ink)}
-
-.ih{display:flex;align-items:flex-start;gap:7px;margin-bottom:6px;flex-wrap:wrap}
-.ititle{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4;flex:1;min-width:150px}
-.thr{font-size:10.5px;color:var(--muted);margin-bottom:7px;padding:5px 9px;font-weight:500;background:var(--paper);border-radius:6px;border-left:2px solid var(--bp)}
-.thr::before{content:'기준 ';font-family:var(--mono);font-size:9px;color:var(--bp);font-weight:600}
-.rq{padding:8px 11px;border-radius:8px;font-size:11.5px;line-height:1.6;margin-bottom:8px;font-weight:500}
-.lrow{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:6px}
-.lbl{font-size:9.5px;color:var(--muted-2);font-weight:600;flex-shrink:0;letter-spacing:0;text-transform:uppercase}
-.ltag{display:inline-block;font-size:9.5px;padding:2px 7px;border-radius:5px;background:var(--paper);border:1px solid var(--line);color:var(--muted);margin:1px 0;font-family:var(--mono);font-weight:500}
-.ltag-city{background:var(--ver-bg);color:var(--ver-tx);border-color:var(--ver-bd)}
-.notes{padding-left:15px;list-style:none;margin-top:6px}
-.notes li{font-size:10.5px;color:var(--ink-text);line-height:1.65;margin-bottom:3px;position:relative}
-.notes li::before{content:'';position:absolute;left:-12px;top:7px;width:4px;height:4px;border-radius:50%;background:var(--line);}
-.notes li b{color:var(--ink);font-weight:600}
-
-/* 판정 배지 */
-.bA{background:var(--req-bg);color:var(--req-tx);border:1px solid var(--req-bd)}
-.bV{background:var(--ver-bg);color:var(--ver-tx);border:1px solid var(--ver-bd)}
-.bR{background:var(--rec-bg);color:var(--rec-tx);border:1px solid var(--rec-bd)}
-.bN{background:var(--paper);color:var(--na);border:1px solid var(--line)}
-.rqA{background:var(--req-bg);border:1px solid var(--req-bd);color:var(--req-tx)}
-.rqV{background:var(--ver-bg);border:1px solid var(--ver-bd);color:var(--ver-tx)}
-.rqR{background:var(--rec-bg);border:1px solid var(--rec-bd);color:var(--rec-tx)}
-.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;letter-spacing:0}
-
-/* 사업단계 배지 */
-.pb{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9px;font-weight:600;padding:2px 7px;border-radius:5px;white-space:nowrap;letter-spacing:0;border:1px solid}
-.pb1{background:#eef2ff;color:#4338ca;border-color:#c7d2fe}
-.pb2{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
-.pb3{background:#ecfeff;color:#0e7490;border-color:#a5f3fc}
-.pb4{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
-.pb5{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}
-
-/* 검토완료 체크 */
-.done-chk{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:var(--muted);cursor:pointer;user-select:none;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:#fff;transition:all .12s;flex-shrink:0}
-.done-chk:hover{border-color:var(--rec);color:var(--rec)}
-.done-chk.on{background:var(--rec-bg);border-color:var(--rec);color:var(--rec-tx)}
-.done-chk .box{width:13px;height:13px;border:1.5px solid currentColor;border-radius:4px;position:relative;flex-shrink:0}
-.done-chk.on .box::after{content:'';position:absolute;left:3.5px;top:.5px;width:4px;height:8px;border:solid var(--rec);border-width:0 2px 2px 0;transform:rotate(45deg)}
-
-.disc{margin-top:16px;padding:13px 15px;border-radius:12px;background:var(--ver-bg);border:1px solid var(--ver-bd);font-size:10.5px;color:var(--ver-tx);line-height:1.7}
-.disc-t{font-size:11.5px;font-weight:700;color:var(--ver-tx);margin-bottom:6px;display:flex;align-items:center;gap:5px}
-.disc ul{padding-left:15px;list-style:disc}
-.disc b{color:#78350f}
-
-.tag-app{background:var(--req-bg);color:var(--req-tx);border:1px solid var(--req-bd);font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:5px}
-.tag-ver{background:var(--ver-bg);color:var(--ver-tx);border:1px solid var(--ver-bd);font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:5px}
-.tag-rec{background:var(--rec-bg);color:var(--rec-tx);border:1px solid var(--rec-bd);font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:5px}
-
-/* ===== 계산기 ===== */
-.calc-wrap{background:linear-gradient(180deg,#0b1b2e,#0f2740);border:1px solid var(--ink-3);border-radius:14px;padding:7px 7px 14px;margin-bottom:13px;box-shadow:var(--shadow-lg)}
-.calc-inner{background:var(--card);border-radius:10px;padding:14px}
-.calc-tabs{display:flex;gap:5px;margin:0 0 0;padding:7px 7px 0;flex-wrap:wrap}
-.ctab{padding:7px 13px;border-radius:8px 8px 0 0;font-size:11.5px;font-weight:500;border:1px solid transparent;background:rgba(255,255,255,.06);color:#9db4cf;transition:all .12s}
-.ctab:hover{background:rgba(255,255,255,.12);color:#fff}
-.ctab.on{background:var(--card);color:var(--ink);font-weight:700}
-.calc-panel{display:none}
-.calc-panel.on{display:block}
-table{width:100%;border-collapse:collapse;margin:9px 0;background:#fff;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
-th{background:var(--paper);font-size:10px;font-weight:700;color:var(--muted);padding:8px 9px;text-align:left;border-bottom:1px solid var(--line);letter-spacing:0;text-transform:uppercase}
-td{padding:8px 9px;font-size:11px;border-bottom:1px solid var(--line-2);color:var(--ink-text)}
-td b{font-family:var(--mono)}
-tr:last-child td{border-bottom:none}
-.tbl-sum{background:var(--paper);font-weight:600}
-.tbl-input{width:58px;padding:4px 7px;font-size:11px;text-align:right;font-family:var(--mono)}
-.calc-result{background:#fff;border:2px solid var(--ink);border-radius:9px;padding:11px 13px;margin-top:10px}
-.preset-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
-.preset-btn{padding:5px 11px;border-radius:7px;font-size:10.5px;font-weight:500;border:1px solid var(--line);background:#fff;color:var(--muted);transition:all .12s}
-.preset-btn:hover{border-color:var(--bp);color:var(--bp)}
-.preset-btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.radio-group{display:flex;gap:6px;flex-wrap:wrap}
-.radio-btn{padding:6px 12px;border-radius:7px;font-size:11px;border:1px solid var(--line);background:#fff;color:var(--muted);font-weight:500;transition:all .12s}
-.radio-btn:hover{border-color:var(--bp);color:var(--bp)}
-.radio-btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.judg-A{background:var(--req-bg);border:2px solid var(--req);border-radius:9px;padding:11px 13px;margin-top:9px}
-.judg-V{background:var(--ver-bg);border:2px solid var(--ver);border-radius:9px;padding:11px 13px;margin-top:9px}
-.judg-N{background:var(--rec-bg);border:2px solid var(--rec);border-radius:9px;padding:11px 13px;margin-top:9px}
-.judg-A .judg-t{color:var(--req-tx)}
-.judg-V .judg-t{color:var(--ver-tx)}
-.judg-N .judg-t{color:var(--rec-tx)}
-.judg-t{font-size:13px;font-weight:700;margin-bottom:5px}
-.judg-r{font-size:10.5px;line-height:1.7;color:var(--ink-text)}
-.judg-r ul{padding-left:15px;list-style:disc;margin-top:4px}
-.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:9px 11px;font-size:10.5px;color:#1e40af;line-height:1.65;margin-top:8px}
-.warn-box{background:var(--ver-bg);border:1px solid var(--ver-bd);border-radius:8px;padding:9px 11px;font-size:10.5px;color:var(--ver-tx);line-height:1.65;margin-top:8px}
-.chk{display:inline-block;width:16px;height:16px;border:1.5px solid var(--line);border-radius:4px;background:#fff;cursor:pointer;position:relative;vertical-align:middle}
-.chk.on{background:var(--ink);border-color:var(--ink)}
-.chk.on::after{content:'';position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
-.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;margin-bottom:9px}
-.field-grp{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:8px}
-.field-grp-t{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:6px}
-
-/* 액션 바 */
-.actionbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
-.act-btn{padding:7px 14px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--ink);transition:all .12s;display:inline-flex;align-items:center;gap:6px}
-.act-btn:hover{border-color:var(--bp);color:var(--bp);box-shadow:var(--shadow)}
-.act-btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
-.act-btn.primary:hover{background:var(--ink-2);color:#fff}
-.progress-wrap{display:flex;align-items:center;gap:9px;margin-left:auto;font-size:10.5px;color:var(--muted)}
-.progress-bar{width:120px;height:7px;background:var(--paper-2);border-radius:99px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--rec),#34d399);border-radius:99px;transition:width .3s ease}
-
-@media(max-width:480px){
-  .grid7{grid-template-columns:1fr 1fr}.sg{grid-template-columns:1fr 1fr}
-  .calc-grid{grid-template-columns:1fr}.tbl-input{width:50px}
-  .hdr-stats{gap:13px}.progress-wrap{margin-left:0;width:100%}
-  body{padding:0 11px 50px}.app-header{margin:0 -11px}
-}
-
-/* ===== 사업 기본 정보 상단 고정 ===== */
-.biz-sticky{position:sticky;top:0;z-index:300;margin-bottom:12px}
-.biz-sticky #bizForm .panel{margin-bottom:0}
-.biz-bar{
-  display:none;align-items:center;gap:9px;
-  background:linear-gradient(135deg,var(--ink),var(--ink-2));
-  border:1px solid var(--ink-3);border-bottom:2px solid var(--cyan);
-  border-radius:11px;padding:8px 12px;cursor:pointer;
-  box-shadow:0 4px 14px rgba(11,27,46,.22);
-}
-.bb-ico{color:var(--cyan);font-size:13px;flex-shrink:0;line-height:1}
-.bb-chips{display:flex;gap:5px;overflow-x:auto;flex:1;scrollbar-width:none;-webkit-overflow-scrolling:touch;min-width:0}
-.bb-chips::-webkit-scrollbar{display:none}
-.bb-chip{
-  flex-shrink:0;font-size:10px;color:#cfe3f5;background:rgba(56,189,248,.12);
-  border:1px solid rgba(125,211,252,.28);padding:3px 8px;border-radius:6px;
-  white-space:nowrap;font-family:var(--mono);line-height:1.4;
-}
-.bb-chip b{color:#fff;font-weight:600}
-.bb-chip.legacy{background:rgba(220,38,38,.28);border-color:#f87171;color:#fecaca}
-.bb-btn{
-  flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--ink);
-  background:var(--cyan);border:none;border-radius:7px;padding:5px 12px;
-  cursor:pointer;transition:filter .12s;
-}
-.bb-btn:hover{filter:brightness(1.08)}
-/* 접힘 상태: 폼 숨김 + 바 표시 */
-.biz-sticky.collapsed #bizForm{display:none}
-.biz-sticky.collapsed .biz-bar{display:flex}
-/* 고정된 상태에서 펼침: 바 유지 + 폼은 드롭다운 오버레이 (본문 밀지 않음) */
-.biz-sticky.stuck:not(.collapsed) .biz-bar{display:flex}
-.biz-sticky.stuck:not(.collapsed) #bizForm{
-  position:absolute;left:0;right:0;top:calc(100% + 7px);z-index:310;
-}
-.biz-sticky.stuck:not(.collapsed) #bizForm .panel{
-  box-shadow:0 18px 44px rgba(11,27,46,.3);border-color:var(--bp);
-  max-height:min(70vh,560px);overflow-y:auto;
-}
-@media(max-width:480px){
-  .bb-btn{padding:5px 9px;font-size:10px}
-  .biz-bar{padding:7px 10px;border-radius:10px}
-}
-
-
-.tl-wrap{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow)}
-.tl-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:4px}
-.tl-route{font-family:var(--mono);font-size:10px;font-weight:600;color:#fff;background:var(--bp);padding:4px 10px;border-radius:6px;letter-spacing:0}
-.tl-desc{font-size:10.5px;color:var(--muted);margin-bottom:16px;line-height:1.6}
-.timeline{position:relative;margin-left:4px}
-.tl-step{position:relative;padding-left:34px;padding-bottom:18px}
-.tl-step:last-child{padding-bottom:0}
-.tl-step::before{content:'';position:absolute;left:11px;top:24px;bottom:-2px;width:2px;background:linear-gradient(180deg,var(--bp),var(--line))}
-.tl-step:last-child::before{display:none}
-.tl-node{position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 0 0 4px var(--card)}
-.tl-step.milestone .tl-node{background:var(--req)}
-.tl-step.done-stage .tl-node{background:var(--rec)}
-.tl-card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 13px}
-.tl-t{font-size:12.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.tl-law{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--bp);background:#fff;border:1px solid var(--line);padding:2px 6px;border-radius:4px}
-.tl-dur{font-size:9.5px;color:var(--muted);font-family:var(--mono);margin-left:auto}
-.tl-side{margin-top:7px;display:flex;flex-wrap:wrap;gap:4px}
-.tl-side-tag{font-size:9.5px;padding:2.5px 8px;border-radius:5px;background:#fff;border:1px solid var(--line);color:var(--muted)}
-.tl-side-tag.req{background:var(--req-bg);color:var(--req-tx);border-color:var(--req-bd);font-weight:600}
-.tl-side-tag.ver{background:var(--ver-bg);color:var(--ver-tx);border-color:var(--ver-bd)}
-.tl-note{font-size:10px;color:var(--muted);line-height:1.55;margin-top:6px}
-.tl-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:9.5px;color:var(--muted)}
-.tl-legend span{display:inline-flex;align-items:center;gap:5px}
-.tl-legend .lg-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
-
-
-/* ===== 디자인 리프레시: 실무형 콘솔 밀도/가독성 개선 ===== */
-*,*::before,*::after{letter-spacing:0}
-body,.hdr-sub,.info-box,.warn-box,.city-info,.disc,.ititle,.dash-list li,.tl-note,.rq,.notes li{
-  overflow-wrap:anywhere;
-}
-body > *,.panel,.tl-wrap,.calc-wrap,.actionbar,.filters,.cb,.sg,.dash,#body,.app-header .hdr-inner{
-  min-width:0;
-}
-body > :not(.app-header),.panel,.tl-wrap,.calc-wrap,.actionbar,.filters,.cb,.sg,.dash,#body,.app-header .hdr-inner{
-  max-width:100%;
-}
-.app-header{max-width:none}
-body{
-  max-width:1360px;
-  padding:198px 20px 56px;
-  background-color:#f4f6f8;
-  background-image:
-    linear-gradient(rgba(17,24,39,.045) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(17,24,39,.045) 1px,transparent 1px);
-  background-size:24px 24px;
-}
-h1{font-size:24px;line-height:1.15}
-h2{font-size:14px;margin:24px 0 10px}
-h2[id]{scroll-margin-top:212px}
-h2 .h2num{border-radius:4px;background:#111827;color:#67e8f9}
-.top-console{
-  position:fixed;
-  left:0;
-  right:0;
-  top:0;
-  z-index:1200;
-  background:#eef2f6;
-  border-bottom:1px solid #bcc7d4;
-  box-shadow:0 8px 24px rgba(15,23,42,.12);
-  backdrop-filter:blur(14px);
-}
-.tc-main,.step-nav{
-  max-width:1360px;
-  margin:0 auto;
-  padding-left:20px;
-  padding-right:20px;
-}
-.tc-main{
-  min-height:42px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  border-bottom:1px solid #d4dbe5;
-  background:#f6f8fb;
-}
-.tc-label{
-  flex-shrink:0;
-  font-size:11px;
-  font-weight:800;
-  color:#111827;
-  padding:4px 8px;
-  border-radius:5px;
-  background:#dbeafe;
-  border:1px solid #b7c9e8;
-}
-.tc-chips{
-  min-width:0;
-  flex:1;
-  display:flex;
-  gap:5px;
-  overflow-x:auto;
-  scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;
-}
-.tc-chips::-webkit-scrollbar,.step-nav::-webkit-scrollbar{display:none}
-.top-console .bb-chip{
-  color:#334155;
-  background:#eef4fb;
-  border:1px solid #c8d3e0;
-}
-.top-console .bb-chip b{color:#0f172a}
-.top-console .bb-chip.legacy{
-  background:#fef2f2;
-  border-color:#fecaca;
-  color:#b91c1c;
-}
-.tc-edit{
-  flex-shrink:0;
-  min-height:28px;
-  padding:5px 11px;
-  border:1px solid #111827;
-  border-radius:6px;
-  background:#111827;
-  color:#fff;
-  font-size:11px;
-  font-weight:800;
-}
-.tc-edit:hover{background:#1f2937}
-.tc-edit-form{
-  max-width:1360px;
-  margin:0 auto;
-  padding:8px 20px;
-  display:none;
-  grid-template-columns:1.05fr 1.05fr 1.2fr 1.25fr .82fr 1.08fr .72fr .9fr .9fr;
-  gap:7px;
-  border-bottom:1px solid #d2dae5;
-  background:#f1f4f8;
-}
-.tc-edit-form.open{display:grid}
-.tc-field{
-  min-width:0;
-}
-.tc-field span{
-  display:block;
-  margin-bottom:3px;
-  font-size:9.5px;
-  font-weight:800;
-  color:#64748b;
-}
-.tc-field select,.tc-field input{
-  min-height:30px;
-  padding:5px 7px;
-  border-radius:6px;
-  font-size:10.5px;
-  background:#fff;
-  border-color:#c3cedb;
-}
-.tc-field input{
-  font-family:var(--mono);
-  font-weight:700;
-}
-.step-nav{
-  min-height:70px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  overflow-x:auto;
-  white-space:nowrap;
-  padding-top:9px;
-  padding-bottom:9px;
-  background:#e7ecf3;
-}
-.step-jump{
-  flex:1 0 210px;
-  min-height:48px;
-  padding:8px 14px;
-  border:1px solid #c7d0dc;
-  border-radius:8px;
-  background:#f8fafc;
-  color:#1f2937;
-  font-size:12px;
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:9px;
-  box-shadow:0 1px 2px rgba(17,24,39,.05);
-  transition:background .15s,border-color .15s,color .15s,box-shadow .15s,flex-basis .15s;
-}
-.step-jump:hover{
-  border-color:#0891b2;
-  background:#ecfeff;
-  color:#0f766e;
-}
-.step-jump.on{
-  flex-basis:260px;
-  border-color:#3156a3;
-  background:#3156a3;
-  color:#fff;
-  box-shadow:0 6px 16px rgba(49,86,163,.24);
-}
-.sj-no{
-  flex-shrink:0;
-  padding:3px 8px;
-  border-radius:5px;
-  background:#f8fafc;
-  border:1px solid #d8dee8;
-  color:#111827;
-  font-size:10px;
-  line-height:1;
-  font-family:var(--mono);
-}
-.step-jump.on .sj-no{
-  background:#fff;
-  border-color:#fff;
-  color:#3156a3;
-}
-.sj-title{
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.app-header{
-  margin:0 -20px 20px;
-  padding:20px 28px 22px;
-  background:
-    linear-gradient(135deg,#111827 0%,#1f2937 58%,#155e75 120%);
-  border-bottom:3px solid #0891b2;
-}
-.app-header::before{
-  opacity:.35;
-  background-size:24px 24px;
-  mask-image:linear-gradient(90deg,rgba(0,0,0,.35),#000 46%,rgba(0,0,0,.75));
-}
-.hdr-tag{font-size:9.5px;color:#67e8f9;margin-bottom:7px}
-.hdr-sub{max-width:760px;color:#cbd5e1;font-size:11px;line-height:1.65}
-.hdr-stats{gap:8px;margin-top:14px;padding-top:12px;border-top-color:rgba(203,213,225,.22)}
-.hdr-stat{
-  min-width:86px;
-  padding:8px 10px;
-  border:1px solid rgba(203,213,225,.2);
-  border-radius:8px;
-  background:rgba(255,255,255,.065);
-}
-.hdr-stat .hs-v{font-size:18px}
-.hdr-stat .hs-l{font-size:9.5px;color:#cbd5e1}
-@media(min-width:1040px){
-  .app-header .hdr-inner{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
-    column-gap:28px;
-    align-items:end;
+  :root {
+    --bg: #0f1620;
+    --bg-2: #15202e;
+    --panel: #1b2738;
+    --panel-2: #21304400;
+    --surface: #ffffff;
+    --line: #e3e8ef;
+    --line-strong: #cbd5e1;
+    --ink: #0f1b2d;
+    --ink-2: #44566c;
+    --ink-3: #6b7c92;
+    --muted: #8294a8;
+    --accent: #1d4ed8;
+    --accent-2: #2563eb;
+    --accent-soft: #eef3ff;
+    --ok: #047857;
+    --ok-soft: #e7f5ef;
+    --warn: #b45309;
+    --warn-soft: #fdf2e2;
+    --bad: #b91c1c;
+    --bad-soft: #fdeced;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(15,27,45,.06), 0 8px 24px rgba(15,27,45,.06);
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+    --sans: "IBM Plex Sans KR", system-ui, sans-serif;
   }
-  .hdr-tag,.app-header h1,.hdr-sub{grid-column:1}
-  .hdr-stats{
-    grid-column:2;
-    grid-row:1 / span 3;
-    align-self:end;
-    justify-content:flex-end;
-    max-width:540px;
-    margin-top:0;
-    padding-top:0;
-    border-top:0;
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: var(--sans);
+    background: #eef1f5;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
   }
-}
+  #root { height: 100vh; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #c4cdd9; border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+  button { font-family: inherit; cursor: pointer; }
+  input, select { font-family: inherit; }
 
-.panel,.sc,.dash-card,.cb,.tl-wrap,.disc{
-  border-radius:8px;
-  box-shadow:0 1px 2px rgba(17,24,39,.05);
-}
-.panel,.tl-wrap{
-  border-color:#d8dee8;
-  background:rgba(255,255,255,.96);
-}
-.date-panel{
-  background:linear-gradient(180deg,#f8fafc 0%,#fff 100%)!important;
-  border-color:#d8dee8!important;
-}
-select,input[type=number],input[type=text]{
-  min-height:34px;
-  border-radius:6px;
-  border-color:#cfd7e3;
-  background:#fff;
-}
-select:hover,input[type=number]:hover,input[type=text]:hover{border-color:#9aa8ba}
-select:focus,input:focus{border-color:#0891b2;box-shadow:0 0 0 3px rgba(8,145,178,.14)}
-button{min-height:30px}
-label{font-size:10px;color:#475569;text-transform:none}
-.grid7{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
-.meta{
-  gap:8px;
-  padding-top:10px;
-  color:#475569;
-}
-.meta span{
-  padding:3px 8px;
-  border:1px solid #e2e8f0;
-  border-radius:5px;
-  background:#f8fafc;
-}
-.city-info,.info-box,.warn-box,.summary-box,.field-grp{
-  border-radius:7px;
-}
-.info-box{
-  background:#f8fafc;
-  border-color:#cbd5e1;
-  color:#1f3f5f;
-}
-#dateImpactBox.date-impact{
-  border-radius:7px!important;
-  background:#fffbeb!important;
-  border-color:#fcd34d!important;
-}
-
-.sg{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-.sc{
-  padding:13px 14px 12px 16px;
-  border-color:#d8dee8;
-}
-.sc::after{width:4px}
-.sc-lbl{font-size:10px;text-transform:none;color:#475569}
-.sc-val{font-size:26px}
-
-.dash{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
-.dash-card{
-  padding:0;
-  overflow:hidden;
-  border-color:#d8dee8;
-}
-.dash-card::before{
-  content:'';
-  display:block;
-  height:3px;
-  background:var(--accent,var(--bp));
-}
-.dash-card .dc-h{
-  margin:0;
-  padding:11px 12px;
-  border-bottom:1px solid #e7edf4;
-  background:#fbfdff;
-}
-.dash-card .dc-ico{width:26px;height:26px;border-radius:6px;font-size:13px}
-.dash-card .dc-t{font-size:12px}
-.dash-card .dc-n{border-radius:999px;background:#eef2f7;color:#334155}
-.dash-list{padding:10px 13px 12px;gap:7px}
-.dash-list li{font-size:11px;line-height:1.55}
-.dash-list li::before{width:4px;height:4px;border-radius:50%;transform:none}
-
-.radio-btn,.fb,.preset-btn,.toggle-all-btn,.act-btn,.sync-btn,.bb-btn{
-  border-radius:6px;
-}
-.radio-btn,.fb,.preset-btn,.toggle-all-btn{
-  border-color:#cfd7e3;
-  color:#334155;
-}
-.radio-btn.on,.fb.on,.preset-btn.on,.toggle-all-btn.active,.act-btn.primary{
-  background:#111827;
-  border-color:#111827;
-}
-.radio-btn:hover,.fb:hover,.preset-btn:hover,.toggle-all-btn:hover,.act-btn:hover{
-  border-color:#0891b2;
-  color:#0f766e;
-}
-.actionbar,.filters{
-  padding:10px 12px;
-  border:1px solid #d8dee8;
-  border-radius:8px;
-  background:rgba(255,255,255,.96);
-  box-shadow:0 1px 2px rgba(17,24,39,.04);
-}
-.filters{gap:7px}
-.flabel{text-transform:none;color:#475569}
-.progress-bar{width:150px;background:#e2e8f0}
-
-.calc-wrap{
-  padding:0;
-  border:0;
-  border-radius:0;
-  background:transparent;
-  box-shadow:none;
-}
-.calc-tabs{
-  margin:0;
-  padding:8px 8px 0;
-  border:1px solid #111827;
-  border-bottom:0;
-  border-radius:8px 8px 0 0;
-  background:#111827;
-}
-.ctab{
-  border-radius:6px 6px 0 0;
-  color:#cbd5e1;
-  background:transparent;
-}
-.ctab.on{background:#fff;color:#111827}
-.calc-inner{
-  border:1px solid #d8dee8;
-  border-top:0;
-  border-radius:0 0 8px 8px;
-  padding:16px;
-  box-shadow:0 1px 2px rgba(17,24,39,.05);
-}
-.calc-panel{overflow-x:auto}
-.calc-panel,.calc-inner{max-width:100%}
-.calc-panel table{min-width:700px}
-table{border-radius:7px;border-color:#d8dee8}
-th{
-  background:#f1f5f9;
-  color:#475569;
-  text-transform:none;
-}
-td{font-size:11.2px}
-.calc-result{
-  border:1px solid #111827;
-  border-left:4px solid #111827;
-  border-radius:7px;
-}
-
-.tl-wrap{padding:16px}
-.tl-card{
-  background:#fff;
-  border-color:#d8dee8;
-  border-radius:8px;
-  box-shadow:0 1px 2px rgba(17,24,39,.04);
-}
-.tl-node{
-  background:#111827;
-  box-shadow:0 0 0 4px #fff;
-}
-.tl-step::before{background:linear-gradient(180deg,#64748b,#d8dee8)}
-.tl-route{border-radius:5px;background:#0f766e}
-
-.cb{
-  border-color:#d8dee8;
-  overflow:hidden;
-}
-.ch{
-  padding:11px 13px;
-  background:#fff;
-  border-bottom:1px solid #e7edf4;
-}
-.ch:hover{background:#f8fafc}
-.cnum{border-radius:5px;background:#111827}
-.ct{font-size:13px}
-.ci{
-  position:relative;
-  padding:12px 14px 12px 18px;
-}
-.ci::before{
-  content:'';
-  position:absolute;
-  left:0;
-  top:0;
-  bottom:0;
-  width:3px;
-  background:#d8dee8;
-}
-.ci:has(.bA)::before{background:var(--req)}
-.ci:has(.bV)::before{background:var(--ver)}
-.ci:has(.bR)::before{background:var(--rec)}
-.ci-header{gap:7px}
-.ci.collapsed{padding:10px 14px 10px 18px}
-.ititle{font-size:12px;line-height:1.45}
-.thr{
-  background:#f8fafc;
-  border-radius:6px;
-  border-left-color:#64748b;
-}
-.rq{border-radius:7px}
-.badge,.pb,.tag-app,.tag-ver,.tag-rec,.ltag,.done-chk{border-radius:5px}
-.done-chk{min-height:28px}
-
-.biz-bar{border-radius:8px;background:linear-gradient(135deg,#111827,#164e63)}
-.biz-sticky{
-  position:relative;
-  top:auto;
-  z-index:1;
-}
-.biz-sticky.stuck:not(.collapsed) .biz-bar{display:none}
-.biz-sticky.stuck:not(.collapsed) #bizForm{
-  position:static;
-  left:auto;
-  right:auto;
-  top:auto;
-  z-index:auto;
-}
-.biz-sticky.stuck:not(.collapsed) #bizForm .panel{
-  max-height:none;
-  overflow:visible;
-  box-shadow:0 1px 2px rgba(17,24,39,.05);
-  border-color:#d8dee8;
-}
-.bb-chip{border-radius:5px}
-.bb-ico{color:#67e8f9}
-.disc{background:#fffbeb}
-.page-shell{max-width:1360px;margin:0 auto;display:flex;flex-direction:column}
-.page-panel{display:none}
-.page-panel.on{display:block}
-#page-basic{order:1}
-#page-permits{order:2}
-#page-checklist{order:3}
-#page-results{order:4}
-.disc{order:5}
-.section-kicker{
-  display:inline-flex;
-  align-items:center;
-  min-height:28px;
-  margin:18px 0 9px;
-  padding:5px 10px;
-  border:1px solid #cfd7e3;
-  border-radius:6px;
-  background:#f8fafc;
-  color:#334155;
-  font-size:12px;
-  font-weight:800;
-}
-.review-results{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.result-band{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:10px;
-}
-.result-card{
-  background:#fff;
-  border:1px solid #d8dee8;
-  border-radius:8px;
-  padding:13px 14px;
-  box-shadow:0 1px 2px rgba(17,24,39,.05);
-}
-.result-card.good{background:#f0fdf4;border-color:#bbf7d0}
-.result-card.warn{background:#fffbeb;border-color:#fde68a}
-.result-card.danger{background:#fef2f2;border-color:#fecaca}
-.result-card.info{background:#eff6ff;border-color:#bfdbfe}
-.result-label{
-  font-size:10px;
-  font-weight:800;
-  color:#64748b;
-  margin-bottom:5px;
-}
-.result-value{
-  font-size:20px;
-  font-weight:900;
-  color:#111827;
-  line-height:1.25;
-}
-.result-note{
-  margin-top:5px;
-  font-size:10.5px;
-  color:#475569;
-  line-height:1.45;
-}
-.result-grid{
-  display:grid;
-  grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);
-  gap:12px;
-}
-.result-panel{
-  background:#fff;
-  border:1px solid #d8dee8;
-  border-radius:8px;
-  padding:14px;
-  box-shadow:0 1px 2px rgba(17,24,39,.05);
-}
-.result-panel h3{
-  margin:0 0 10px;
-  font-size:13px;
-  color:#111827;
-}
-.result-panel.wide{grid-column:1/-1}
-.result-summary-note{
-  margin:-2px 0 10px;
-  padding:9px 11px;
-  border:1px solid #dbe4ef;
-  border-radius:7px;
-  background:#f8fafc;
-  color:#475569;
-  font-size:11px;
-  line-height:1.55;
-}
-.result-list{
-  list-style:none;
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-  margin:0;
-  padding:0;
-}
-.result-list li{
-  position:relative;
-  padding-left:13px;
-  font-size:11.5px;
-  line-height:1.55;
-  color:#1f2937;
-}
-.result-list li::before{
-  content:'';
-  position:absolute;
-  left:0;
-  top:8px;
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:#3156a3;
-}
-.result-table{
-  width:100%;
-  border-collapse:collapse;
-  margin:0;
-  min-width:0;
-}
-.result-table th,.result-table td{
-  padding:8px 9px;
-  border-bottom:1px solid #e5eaf1;
-  font-size:11px;
-}
-.result-table th{background:#f8fafc;color:#475569}
-.result-table tr:last-child td{border-bottom:0}
-.review-matrix th,.review-matrix td{vertical-align:top;line-height:1.55}
-.review-matrix th:first-child{width:112px;color:#111827}
-.review-matrix .basis{color:#64748b;font-size:10.5px;margin-top:3px}
-.review-matrix .focus{font-weight:700;color:#0f2740}
-.result-chip{
-  display:inline-flex;
-  align-items:center;
-  min-height:20px;
-  padding:2px 7px;
-  border-radius:999px;
-  border:1px solid #cbd5e1;
-  background:#fff;
-  color:#334155;
-  font-size:10px;
-  font-weight:800;
-  white-space:nowrap;
-  margin:0 4px 2px 0;
-}
-.result-chip.warn{background:#fffbeb;border-color:#fde68a;color:#92400e}
-.result-chip.req{background:#fef2f2;border-color:#fecaca;color:#991b1b}
-.result-chip.info{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
-.result-chip.good{background:#f0fdf4;border-color:#bbf7d0;color:#047857}
-.result-chip.na{background:#f1f5f9;border-color:#cbd5e1;color:#64748b}
-.legacy-calcs{display:none!important}
-
-@media(max-width:760px){
-  body{padding:216px 12px 48px}
-  h2[id]{scroll-margin-top:234px}
-  .app-header{margin:0 -12px 16px;padding:18px 16px}
-  h1{font-size:21px}
-  .hdr-sub{max-width:100%;font-size:10.5px;line-height:1.65}
-  .tc-main,.step-nav{padding-left:12px;padding-right:12px}
-  .tc-main{min-height:72px;align-items:flex-start;flex-wrap:wrap;padding-top:7px;padding-bottom:7px}
-  .tc-label{order:1}
-  .tc-edit{order:2;margin-left:auto}
-  .tc-chips{order:3;flex-basis:100%}
-  .tc-edit-form{
-    display:none;
-    gap:7px;
-    overflow-x:auto;
-    padding:8px 12px;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-  }
-  .tc-edit-form.open{display:flex}
-  .tc-edit-form::-webkit-scrollbar{display:none}
-  .tc-field{flex:0 0 132px}
-  .step-nav{min-height:42px}
-  .result-grid{grid-template-columns:1fr}
-  .hdr-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .hdr-stat{min-width:0}
-  .grid7{grid-template-columns:1fr}
-  .sg{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .dash{grid-template-columns:1fr}
-  .actionbar,.filters{align-items:stretch}
-  .act-btn,.fb,.toggle-all-btn{justify-content:center}
-  .progress-wrap{width:100%;margin-left:0}
-  .progress-bar{flex:1;min-width:110px}
-  .calc-tabs{overflow-x:auto;flex-wrap:nowrap}
-  .ctab{white-space:nowrap}
-}
-@media(max-width:480px){
-  .sg{grid-template-columns:1fr}
-  .ci-header{align-items:flex-start}
-  .ci-toggle{margin-left:0}
-  .tl-t{align-items:flex-start}
-  .tl-dur{margin-left:0}
-}
-
-@media print{
-  body{background:#fff!important;padding:0;font-size:10px}
-  body{background-image:none!important}
-  .top-console{display:none!important}
-  .app-header{background:var(--ink)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;margin:0 0 12px;border-radius:0}
-  .calc-wrap,.actionbar,.filters,.app-header .hdr-stats{display:none!important}
-  .ci.collapsed .ci-body{display:block!important}
-  .ci.collapsed .ci-toggle,.ci-toggle,.done-chk,.ch>div:last-child{display:none!important}
-  .cb,.panel,.dash-card,.sc{box-shadow:none;break-inside:avoid}
-  .ci{break-inside:avoid}
-  .tl-wrap{box-shadow:none}
-  .tl-step{break-inside:avoid}
-  .tl-step::before{background:var(--line)!important}
-  .biz-sticky{position:static}
-  .biz-bar{display:none!important}
-  .biz-sticky #bizForm{display:block!important;position:static!important}
-  body{max-width:none;margin:0}
-  h2{break-after:avoid}
-  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-}
-.pd-hit{background:#fef9c3;border:1px solid #fde68a;border-radius:4px;padding:1px 4px;color:#92400e;font-weight:700}
-.pd-hit-badge{display:inline-block;font-size:9px;font-weight:800;color:#fff;background:#d97706;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle}
-.pd-why{margin-top:6px;padding:6px 9px;border-radius:6px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:10.5px;line-height:1.5;font-weight:700}
-.pd-why b{color:#b45309}
-.pd-legend{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 9px;font-size:10px;color:#64748b}
-.pd-legend span{display:inline-flex;align-items:center;gap:5px}
-.pd-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;border:1px solid}
-.pd-legend .lg-y{background:#fef9c3;border-color:#fde68a}
-.pd-legend .lg-g{background:#f1f5f9;border-color:#cbd5e1}
-.pd-legend .lg-a{background:#fef2f2;border-color:#fecaca}
-.pd-legend .lg-v{background:#fffbeb;border-color:#fde68a}
-.pd-concl{font-size:11.5px;font-weight:800;margin:0 0 5px;padding:5px 9px;border-radius:6px;line-height:1.45}
-.pd-c-A{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
-.pd-c-V{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
-.pd-c-N{background:#f1f5f9;color:#475569;border:1px solid #cbd5e1}
-.pd-c-R{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
-.pd-concl .cw{font-weight:900;padding:1px 7px;border-radius:5px;margin-right:5px}
-.pd-c-A .cw{background:#b91c1c;color:#fff}
-.pd-c-V .cw{background:#b45309;color:#fff}
-.pd-c-N .cw{background:#64748b;color:#fff}
-.pd-c-R .cw{background:#047857;color:#fff}
-.pd-var{margin-top:5px;font-size:10px;color:#475569;font-weight:600}
-.pd-var b{color:#0f2740}
-.pd-src{display:inline-block;font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;white-space:nowrap}
-.pd-src.ok{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
-.pd-src.warn{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
-.pd-lglbl{font-size:9px;font-weight:800;color:#64748b;margin-right:4px}
-#permitExtra .grid7{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
-
-/* ===== UI/UX 개선 v5.3 (접근성·폴리시, 기능 무변경) ===== */
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
-}
-/* 키보드 포커스 링 (마우스엔 안 보이고 키보드 탭에만) */
-a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,
-.step-jump:focus-visible,.fb:focus-visible,.radio-btn:focus-visible,.preset-btn:focus-visible,
-.act-btn:focus-visible,.done-chk:focus-visible,.ch:focus-visible,.ci-header:focus-visible,
-.toggle-all-btn:focus-visible,.tc-edit:focus-visible,.bb-btn:focus-visible,.sync-btn:focus-visible{
-  outline:3px solid #0891b2;outline-offset:2px;border-radius:6px;
-}
-/* 셀렉트 커스텀 캐럿 (네이티브 화살표 → 일관된 아이콘) */
-select{
-  -webkit-appearance:none;-moz-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 9px center;padding-right:26px;
-}
-/* 카드 hover 살짝 들림 (인터랙션 피드백) */
-.dash-card,.result-card,.sc{transition:box-shadow .15s ease,transform .15s ease}
-.dash-card:hover,.result-card:hover{box-shadow:0 6px 18px rgba(17,24,39,.12);transform:translateY(-1px)}
-/* 본문 바로가기(스킵) 링크 — 키보드 접근성 */
-.skip-link{position:absolute;left:-9999px;top:0;z-index:2000;background:#111827;color:#fff;padding:9px 16px;border-radius:0 0 8px 0;font-weight:800;font-size:12px}
-.skip-link:focus{left:0}
-/* 터치 타겟 최소 크기 + iOS 입력 줌 방지 */
-@media (max-width:760px){
-  .fb,.radio-btn,.preset-btn,.toggle-all-btn,.done-chk,.tc-edit,.bb-btn,.act-btn,.step-jump,.sync-btn{min-height:40px}
-  select,input[type=number],input[type=text]{min-height:42px;font-size:16px}
-}
-
-/* ===== v5.4 frontend-design 적용: 제도(drafting) 시그니처 ===== */
-/* 시그니처 = 건축 도면의 치수선·타이틀블록 주석. 과감함은 여기 하나에 집중, 나머지는 절제 */
-/* (1) 히어로 스탯 → 도면 타이틀블록 데이터 스트립 (큰숫자+그라데이션 템플릿 탈피) */
-@media(min-width:761px){
-  .app-header .hdr-stats{
-    gap:0;margin-top:16px;padding:0;border:1px solid rgba(125,211,252,.38);
-    border-radius:5px;background:rgba(8,20,36,.34);overflow:hidden;
-  }
-  .app-header .hdr-stat{
-    min-width:96px;padding:9px 15px 8px;border:0;border-left:1px solid rgba(125,211,252,.22);
-    border-radius:0;background:transparent;
-  }
-  .app-header .hdr-stat:first-child{border-left:0}
-  .app-header .hdr-stat .hs-v{font-family:var(--mono);font-size:19px;letter-spacing:-.5px}
-  .app-header .hdr-stat .hs-l{font-family:var(--mono);font-size:8.5px;letter-spacing:.6px;text-transform:uppercase}
-}
-/* (2) h1 아래 치수선(끝 tick 포함) — 도면 주석 시그니처 */
-.app-header h1{display:inline-block}
-.app-header h1::after{
-  content:'';display:block;margin-top:9px;height:7px;
-  background:
-    linear-gradient(var(--cyan),var(--cyan)) left bottom/100% 1.5px no-repeat,
-    linear-gradient(var(--cyan),var(--cyan)) left bottom/1.5px 7px no-repeat,
-    linear-gradient(var(--cyan),var(--cyan)) right bottom/1.5px 7px no-repeat;
-  opacity:.85;
-}
-/* (3) 섹션 키커 앞 치수 tick (구조가 의미를 인코딩) */
-.section-kicker::before{
-  content:'';width:12px;height:0;border-top:2px solid #0891b2;
-  margin-right:9px;align-self:center;flex:0 0 auto;
-}
-/* (4) 절제: 펄스 애니메이션 제거(AI틱한 장식 덜기), glow는 유지 */
-.hdr-tag .dot{animation:none}
-
-/* ===== v5.5 frontend-design: 판정 카드까지 제도 모티프 확장 (구조 표식만, 절제) ===== */
-/* STEP2 상세표 헤더 → 도면 스펙 스케줄 헤더 (모노·헤어라인) */
-.review-matrix thead th{
-  font-family:var(--mono);font-size:10px;letter-spacing:.3px;color:#46566b;
-  border-bottom:1.5px solid #b9c4d2;background:#eef2f6;
-}
-/* STEP3 카테고리 제목 앞 시안 치수 tick — 섹션 키커·제목 치수선과 동일 시그니처 */
-.ct::before{
-  content:'';display:inline-block;width:9px;height:0;border-top:2px solid #0891b2;
-  vertical-align:middle;margin-right:7px;
-}
-
-/* ===== v5.6 frontend-design 전면 일관화: 제도(drafting) 시그니처를 모든 구조 헤더·데이터에 ===== */
-/* 시안 치수 tick — 구조 헤더 공통(페이지 제목→섹션→카테고리→패널→그룹→카드) */
-h2[id]::before{
-  content:'';display:inline-block;width:12px;height:0;border-top:2px solid var(--cyan);
-  vertical-align:middle;align-self:center;flex:0 0 auto;
-}
-.result-panel h3::before,
-.field-grp-t::before,
-.dc-t::before{
-  content:'';display:inline-block;width:9px;height:0;border-top:2px solid #0891b2;
-  vertical-align:middle;margin-right:7px;
-}
-.dc-t::before{width:8px;margin-right:6px;opacity:.8}
-/* 계산기 판정 제목 tick — 상태색에 맞춤 */
-.judg-t::before{
-  content:'';display:inline-block;width:9px;height:0;border-top:2px solid currentColor;
-  vertical-align:middle;margin-right:7px;opacity:.65;
-}
-/* STEP4 검토결과 데이터 → 도면 타이틀블록/스펙 스타일 (큰숫자 템플릿 탈피) */
-.result-value{font-family:var(--mono);letter-spacing:-.5px}
-.result-label{font-family:var(--mono);letter-spacing:.4px}
-/* 타임라인 경로 라벨 — 도면 시트 표기(모노) */
-.tl-route{font-family:var(--mono);letter-spacing:.3px}
-</style>
-</head>
-<body>
-<a href="#maincontent" class="skip-link">본문 바로가기</a>
-
-<div class="top-console" id="topConsole">
-  <div class="tc-main">
-    <span class="tc-label">사업 기본 정보</span>
-    <div class="tc-chips" id="topBizSummary"></div>
-    <button class="tc-edit" id="topBizEdit" type="button" aria-expanded="false" aria-controls="topEditForm">✎ 기본정보 수정 ▾</button>
-  </div>
-  <div class="tc-edit-form" id="topEditForm" aria-label="상단 사업 기본 정보 빠른 수정"></div>
-  <nav class="step-nav" aria-label="단계 이동">
-    <button class="step-jump on" data-page-target="basic" type="button"><span class="sj-no">STEP 1</span><span class="sj-title">사업기본정보입력</span></button>
-    <button class="step-jump" data-page-target="permits" type="button"><span class="sj-no">STEP 2</span><span class="sj-title">인허가절차 체크사항</span></button>
-    <button class="step-jump" data-page-target="checklist" type="button"><span class="sj-no">STEP 3</span><span class="sj-title">법규체크리스트</span></button>
-    <button class="step-jump" data-page-target="results" type="button"><span class="sj-no">STEP 4</span><span class="sj-title">검토결과</span></button>
-  </nav>
-</div>
-
-<header class="app-header">
-  <div class="hdr-inner">
-    <div class="hdr-tag"><span class="dot"></span>ARCHITECTURE · REGULATORY REVIEW CONSOLE · v5.29 · 개발자 최감용</div>
-    <h1>건축 사업 법규검토 콘솔</h1>
-    <div class="hdr-sub">신규 건축 사업 착수 시 적용되는 법적 제한사항을 사업 단계별로 파악하여 설계에 반영하기 위한 통합 검토 도구입니다. 공동주택·주상복합부터 오피스텔·근린생활·업무·숙박·판매·노유자·의료 등 14개 건축물 용도를 지원하며, 용도·사업방식별 인허가 절차와 검토 요건을 자동 점검합니다.</div>
-    <div class="hdr-stats" id="hdrStats">
-      <div class="hdr-stat"><span class="hs-v" id="hsItems">116</span><span class="hs-l">검토 항목</span></div>
-      <div class="hdr-stat"><span class="hs-v">4</span><span class="hs-l">검토 화면</span></div>
-      <div class="hdr-stat"><span class="hs-v" id="hsOrds">246</span><span class="hs-l">전국 조례 DB</span></div>
-      <div class="hdr-stat"><span class="hs-v">14</span><span class="hs-l">법령 처분시점</span></div>
-      <div class="hdr-stat"><span class="hs-v" id="hsReq">—</span><span class="hs-l">현재 의무사항</span></div>
-    </div>
-  </div>
-</header>
-
-<main class="page-shell" id="maincontent">
-<section class="page-panel on" id="page-basic" data-page="basic">
-<h2 id="step1"><span class="h2num">STEP 1</span>사업기본정보입력</h2>
-<div class="section-kicker">법령 적용 시점</div>
-<div class="panel date-panel">
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
-    <button class="radio-btn on" id="dt-latest" data-dt="latest">최신 법령 적용</button>
-    <button class="radio-btn" id="dt-legacy" data-dt="legacy">구법 적용 (접수 시점)</button>
-    <span id="lawAsOf" style="margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;color:#0f766e;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:4px 9px">법령 기준일 2026-06-16 · 이후 개정분 미반영 가능</span>
-    <span id="legacyInputs" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;margin-left:5px">
-      <select id="legacyYear" style="width:auto;padding:5px 8px">
-        <option value="2020">2020년</option><option value="2021">2021년</option>
-        <option value="2022">2022년</option><option value="2023">2023년</option>
-        <option value="2024">2024년</option><option value="2025">2025년</option>
-        <option value="2026" selected>2026년</option>
-      </select>
-      <select id="legacyMonth" style="width:auto;padding:5px 8px">
-        <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
-        <option value="4">4월</option><option value="5" selected>5월</option><option value="6">6월</option>
-        <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
-        <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-      </select>
-      <span style="font-size:10.5px;color:#1e40af;font-weight:600">기준</span>
-    </span>
-  </div>
-  <div id="dateInfoBox" class="info-box" style="margin-top:0">
-    <b>처분시법주의 (處分時法主義):</b> 건축허가 · 사업계획승인은 신청 접수 시점의 법령을 적용합니다. 장기 진행 사업은 신청 시점 법령 유지. 단, 절차법·당사자에게 유리한 신법 등 예외 존재.
-  </div>
-  <div id="dateImpactBox" class="date-impact" style="display:none;margin-top:8px;padding:7px 10px;font-size:10.5px;color:#78350f;line-height:1.6"></div>
-</div>
-
-<div class="section-kicker">사업 기본 정보 입력</div>
-<div class="biz-sticky" id="bizSticky">
-  <div class="biz-bar" id="bizBar" title="탭하여 입력 폼 열기/닫기">
-    <span class="bb-ico">▦</span>
-    <div class="bb-chips" id="bizSummary"></div>
-    <button class="bb-btn" id="bizToggle" type="button">수정 ▾</button>
-  </div>
-  <div id="bizForm">
-  <div class="panel" style="margin-bottom:0">
-  <div class="grid7">
-    <div><label>광역시·도</label>
-    <select id="sR">
-      <option>서울특별시</option><option>경기도</option><option>인천광역시</option>
-      <option>부산광역시</option><option>대구광역시</option><option>대전광역시</option>
-      <option>광주광역시</option><option>울산광역시</option><option>세종특별자치시</option>
-      <option>강원특별자치도</option><option>충청북도</option><option>충청남도</option>
-      <option>전북특별자치도</option><option>전라남도</option><option>경상북도</option>
-      <option>경상남도</option><option>제주특별자치도</option>
-    </select></div>
-    <div><label>시·군·구</label>
-    <select id="sC"><option>(자동)</option></select></div>
-    <div><label>용도지역</label>
-    <select id="sZ">
-      <option value="zone1">제1종전용주거지역</option>
-      <option value="zone2">제2종전용주거지역</option>
-      <option value="zone3">제1종일반주거지역</option>
-      <option value="zone4" selected>제2종일반주거지역</option>
-      <option value="zone5">제3종일반주거지역</option>
-      <option value="zone6">준주거지역</option>
-      <option value="zone7">일반상업지역</option>
-      <option value="zone8">근린상업지역</option>
-      <option value="zone9">중심상업지역</option>
-      <option value="zone10">준공업지역</option>
-    </select></div>
-    <div><label>건축물 용도</label>
-    <select id="sB">
-      <option value="apt">공동주택 (아파트)</option>
-      <option value="mixed">주상복합 (주거+상업)</option>
-      <option value="row">연립·다세대주택</option>
-      <option value="offi">오피스텔 (준주택)</option>
-      <option value="nbr">근린생활시설 (1·2종)</option>
-      <option value="biz">업무시설</option>
-      <option value="lodge">숙박시설 (호텔/생활숙박)</option>
-      <option value="sales">판매시설</option>
-      <option value="edu">교육연구시설</option>
-      <option value="welfare">노유자시설</option>
-      <option value="medical">의료시설</option>
-      <option value="culture">문화·집회시설</option>
-      <option value="factory">공장·창고시설</option>
-      <option value="etc">기타 건축물</option>
-    </select></div>
-    <div><label>세대수 / 객실·실 수</label><input type="number" id="sU" value="280" min="1"></div>
-    <div><label>사업방식</label>
-    <select id="sP">
-      <option value="p">민간분양</option>
-      <option value="pr">공공임대 (LH/SH)</option>
-      <option value="ps">공공분양 (LH/SH)</option>
-      <option value="rc">재건축정비사업</option>
-      <option value="rd">재개발정비사업</option>
-      <option value="ra">지역주택조합</option>
-      <option value="wa">직장주택조합</option>
-      <option value="gen">일반 건축 (비주택)</option>
-    </select></div>
-    <div><label>최고 층수</label><input type="number" id="sF" value="7" min="1"></div>
-    <div><label>대지면적 (㎡)</label><input type="number" id="sS" value="30000" min="50" step="100"></div>
-    <div><label>연면적 (㎡)</label><input type="number" id="sA" value="62000" min="100" step="500"></div>
-  </div>
-  <div class="meta" id="meta"></div>
-  <div class="city-info" id="cityInfo" style="display:none"></div>
-  </div>
-  </div>
-</div>
-
-<div class="sg" id="sumG"></div>
-</section>
-
-<section class="page-panel" id="page-permits" data-page="permits">
-<h2 id="step2"><span class="h2num">STEP 2</span>인허가절차 체크사항</h2>
-<div class="section-kicker">핵심 인허가 체크사항</div>
-<div class="dash" id="dashGrid"></div>
-
-<div class="section-kicker">추가 입지·계획 정보 (선택 시 판정 정교화)</div>
-<div class="panel" id="permitExtra">
-  <div class="grid7">
-    <div><label>도시교통정비지역 구분</label><select id="xTraffic"><option value="">미선택(조례DB 기준)</option><option value="urban">도시교통정비지역</option><option value="region">교통권역</option><option value="none">해당 없음</option></select></div>
-    <div><label>지하 굴착깊이</label><select id="xExcav"><option value="">미선택</option><option value="u10">10m 미만</option><option value="d1020">10m~20m</option><option value="o20">20m 이상</option></select></div>
-    <div><label>경관지구·중점경관관리구역</label><select id="xScenic"><option value="">미선택</option><option value="yes">해당</option><option value="no">해당 없음</option></select></div>
-    <div><label>교육환경보호구역(학교 200m)</label><select id="xEdu"><option value="">미선택</option><option value="yes">해당</option><option value="no">해당 없음</option></select></div>
-    <div><label>매장유산 유존지역·고시구역</label><select id="xHeritage"><option value="">미선택</option><option value="yes">해당</option><option value="no">해당 없음</option></select></div>
-    <div><label>자연재해위험개선지구·해일위험지구</label><select id="xDisaster"><option value="">미선택</option><option value="yes">해당</option><option value="no">해당 없음</option></select></div>
-    <div><label>소규모 환경평가 입지(용도지역)</label><select id="xEnvLoc"><option value="">미선택</option><option value="urban">도시지역(주거·상업·공업)</option><option value="green">도시지역 녹지지역</option><option value="mng_b">보전관리지역</option><option value="mng_p">생산관리지역</option><option value="mng_c">계획관리지역</option><option value="farm">농림지역</option><option value="nature">자연환경보전지역</option><option value="gb">개발제한구역</option></select></div>
-    <div><label>지구단위계획에 따른 사업</label><select id="xDistrict"><option value="">미선택</option><option value="yes">해당(지구단위계획 시행)</option><option value="no">해당 없음</option></select></div>
-  </div>
-  <div style="margin-top:8px;font-size:10.5px;color:#64748b">※ 미선택 시 면적·용도 등 기본정보로만 판정하며, 위치·계획 정보가 필요한 항목은 '검토'로 표시됩니다. 선택하면 해당/비해당으로 확정 반영됩니다.</div>
-</div>
-<div class="section-kicker">심의 · 영향평가 · 사전검토 상세 (대상기준 / 대상여부)</div>
-<div id="permitDetail"></div>
-
-<div class="section-kicker">인허가 절차 타임라인</div>
-<div class="tl-wrap">
-  <div class="tl-head">
-    <span style="font-size:12px;font-weight:700;color:var(--ink)">사업 진행 순서</span>
-    <span class="tl-route" id="tlRoute">—</span>
-  </div>
-  <div class="tl-desc" id="tlDesc"></div>
-  <div class="timeline" id="tlBody"></div>
-  <div class="tl-legend">
-    <span><span class="lg-dot" style="background:var(--ink)"></span>일반 단계</span>
-    <span><span class="lg-dot" style="background:var(--req)"></span>핵심 마일스톤 (인허가)</span>
-    <span><span class="tl-side-tag req" style="padding:1px 6px">필수</span>병행 의무 절차</span>
-    <span><span class="tl-side-tag ver" style="padding:1px 6px">조건부</span>해당 시 진행</span>
-  </div>
-</div>
-</section>
-
-<section class="page-panel" id="page-results" data-page="results">
-<h2 id="step4"><span class="h2num">STEP 4</span>검토결과</h2>
-<div id="reviewResults" class="review-results"></div>
-<div class="calc-wrap legacy-calcs" aria-hidden="true">
-  <div class="calc-tabs">
-    <button class="ctab on" data-ctab="parktype">주차 유형별 배분</button>
-    <button class="ctab" data-ctab="parkcalc">법정 주차대수 산출</button>
-    <button class="ctab" data-ctab="nonresid">비주거 부설주차</button>
-    <button class="ctab" data-ctab="traffic">교통영향평가</button>
-    <button class="ctab" data-ctab="welfare">주민공동시설</button>
-    <button class="ctab" data-ctab="amenity">부대복리시설 의무</button>
-    <button class="ctab" data-ctab="zone">건폐율·용적률</button>
-  </div>
-  <div class="calc-inner">
-  <div id="calcUseWarn" class="warn-box" style="display:none;margin:0 0 11px">
-    ⚠ <b>현재 건축물 용도가 주택이 아닙니다.</b> 「법정 주차대수 산출」·「주민공동시설」·「부대복리시설 의무」 계산기는 <b>주택법·주택건설기준 전용</b>입니다. 비주거 건축물의 주차는 <b>주차장법 시행령 별표1</b>(용도별 설치기준) + 지자체 조례를 적용하세요.
-  </div>
-
-  <div class="calc-panel on" id="cp-parktype">
-    <div style="font-size:11px;color:#475569;line-height:1.6;margin-bottom:9px">
-      <b>총 주차대수를 입력하면 유형별 필요 대수를 자동 산출</b>합니다. 각 유형은 체크박스로 적용/해제, 비율은 직접 수정 가능.
-    </div>
-    <div class="calc-grid">
-      <div><label>총 주차대수 (대)</label><input type="number" id="pt-total" value="100" min="1"></div>
-      <div style="display:flex;align-items:flex-end"><button class="preset-btn" id="pt-use-calc">← 「법정 주차대수 산출」 결과 사용</button></div>
-    </div>
-    <table>
-      <thead><tr><th style="width:6%"></th><th style="width:30%">주차 유형</th><th style="width:14%;text-align:right">비율 (%)</th><th style="width:14%;text-align:right">산출 대수</th><th style="width:36%">근거 / 비고</th></tr></thead>
-      <tbody id="pt-rows"></tbody>
-    </table>
-    <div class="calc-result" id="pt-result"></div>
-    <div class="info-box">
-      <b>법정 의무 항목</b><br>
-      • <b>장애인 전용</b>: 부설주차장 총 면수의 2~4% (편의증진법 시행령 별표2)<br>
-      • <b>전기차 충전구역</b>: 신축 공동주택 총 주차대수의 <b>5% 이상</b> (친환경자동차법 시행령 제18조의7, 시·도 조례로 강화 가능)<br>
-      • <b>확장형 주차구획</b>: 주차대수 50대 이상 부설주차장 → 평행주차 제외 총 구획의 <b>30% 이상</b> (주차장법 시행규칙 제6조제1항제14호)
-    </div>
-  </div>
-
-  <div class="calc-panel" id="cp-parkcalc">
-    <div style="font-size:11px;color:#475569;line-height:1.6;margin-bottom:9px">
-      <b>근거</b>: 주택건설기준 등에 관한 규정 제27조 / 지자체 주차장 조례 (강화 적용 우선)
-    </div>
-    <div style="margin-bottom:9px">
-      <label>적용 기준</label>
-      <div class="preset-row">
-        <button class="preset-btn" data-preset="std">주택건설기준 제27조 (법정 최소)</button>
-        <button class="preset-btn" data-preset="local">지자체 조례 적용</button>
-        <button class="preset-btn" data-preset="custom">사용자 정의</button>
-      </div>
-      <div style="margin-top:7px">
-        <button class="sync-btn" id="pk-sync-btn">📋 메인 세대수로 일치 (60~85㎡에 일괄 배분)</button>
-      </div>
-    </div>
-    <table>
-      <thead><tr><th style="width:24%">전용면적 구간</th><th style="width:20%;text-align:right">세대수</th><th style="width:28%;text-align:right">전용면적 합계(㎡)</th><th style="width:28%;text-align:right">구간 산정</th></tr></thead>
-      <tbody id="pk-rows"></tbody>
-    </table>
-    <div class="calc-result" id="pk-result"></div>
-    <div class="info-box">
-      <b>주택건설기준 제27조①1 (시행 2026.5.6.)</b> — 전용면적 합계 ÷ 지역기준 + 세대당 최소 1대(전용 60㎡↓ 0.7대), 둘 중 큰 값:<br>
-      • 특별시(서울) 85㎡↓ <b>1/75</b>·85㎡↑ 1/65 / 광역시·수도권 시(부산·경기 등) <b>1/85</b>·1/70 / 그 밖 시·수도권 군 1/95·1/75 / 그 밖 군 1/110·1/85<br>
-      • 조례로 1/5(60㎡↓ 1/2) 범위 강화 가능 — <b>검증 조례(예: 과천 60㎡↓ 0.93대) 우선</b> / 주택 외 시설은 주차장법 시행령 별표1
-    </div>
-  </div>
-
-  <div class="calc-panel" id="cp-nonresid">
-    <div style="font-size:11px;color:#475569;line-height:1.6;margin-bottom:9px">
-      <b>근거</b>: 주차장법 시행령 별표1 (부설주차장 설치대상 시설물 종류·설치기준) — 지자체 조례 강화 우선
-    </div>
-    <div class="calc-grid">
-      <div><label>시설 용도</label><select id="nr-use"></select></div>
-      <div><label>시설면적 합계(㎡)</label><input type="number" id="nr-area" min="0" step="10"></div>
-    </div>
-    <div class="calc-result" id="nr-result"></div>
-    <div class="info-box">
-      <b>주차장법 시행령 별표1</b>: 위락 100㎡/대 · 문화집회·종교·판매·운수·의료·운동·업무·장례 150㎡/대 · 1·2종근생·숙박 200㎡/대 · 수련·공장·발전 350㎡/대 · 창고 400㎡/대 · 그 밖 300㎡/대 (소수 0.5↑ 올림, 조례로 강화·완화). 공동주택은 「법정 주차대수 산출」 탭(주택건설기준 제27조).
-    </div>
-  </div>
-
-  <div class="calc-panel" id="cp-traffic">
-    <div style="font-size:11px;color:#475569;line-height:1.6;margin-bottom:9px">
-      <b>근거</b>: 도시교통정비 촉진법 제15조·제17조 / 동법 시행령 별표1·별표2
-    </div>
-    <div class="calc-grid">
-      <div><label>위치 구분</label>
-        <div class="radio-group">
-          <button class="radio-btn on" data-tf="urban" data-val="y">도시교통정비지역</button>
-          <button class="radio-btn" data-tf="urban" data-val="n">그 외 지역</button>
-        </div>
-      </div>
-    </div>
-    <div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:6px;padding:7px 10px;margin-top:5px">
-      <div style="font-size:10.5px;color:#475569">자동 연동: 세대수 <b id="tf-units">100</b>세대 · 연면적 <b id="tf-area">10,000</b>㎡</div>
-    </div>
-    <div id="tf-result" style="margin-top:9px"></div>
-    <div class="info-box">
-      <b>일반 판정 기준</b> (시행령 별표2)<br>
-      • <b>교통영향평가</b>: 도시교통정비지역 100세대 이상 또는 연면적 100,000㎡ 이상<br>
-      • <b>간이교통영향평가</b>: 미달 시 50세대 이상 또는 50,000㎡ 이상 검토
-    </div>
-  </div>
-
-  <div class="calc-panel" id="cp-welfare">
-    <div style="font-size:11px;color:#475569;line-height:1.6;margin-bottom:9px">
-      <b>근거</b>: 주택건설기준 등에 관한 규정 제55조의2
-    </div>
-    <div id="wf-result"></div>
-    <div class="info-box">
-      <b>의무 설치 시설</b> · 100세대 이상: 경로당·어린이놀이터·주민운동시설·작은도서관·다함께돌봄센터 / 500세대 이상: 국공립어린이집 추가
-    </div>
-  </div>
-
-  <div class="calc-panel" id="cp-amenity">
-    <div style="font-size:11px;color:#475569;line-height:1.6;margin-bottom:9px">
-      <b>입력값 기준 자동 판정</b> · <b>근거</b>: 건축법·주택법·소방시설법 등
-    </div>
-    <table>
-      <thead><tr><th style="width:28%">시설/항목</th><th style="width:26%">의무 기준</th><th style="width:10%">판정</th><th style="width:36%">근거 법령</th></tr></thead>
-      <tbody id="am-rows"></tbody>
-    </table>
-  </div>
-
-  <div class="calc-panel" id="cp-zone">
-    <div style="font-size:11px;color:#475569;line-height:1.6;margin-bottom:9px">
-      <b>근거</b>: 국토계획법 제77조·제78조 / 시행령 제84조·제85조 / <b style="color:#dc2626">지자체 도시계획 조례 우선 적용</b>
-    </div>
-    <div id="zn-result"></div>
-    <div class="info-box">
-      <b>법정 상한 (국토계획법 시행령)</b> — 지자체 조례로 상한 범위 내 강화 적용 가능<br>
-      1종전용 50/100 · 2종전용 50/150 · 1종일반 60/200 · 2종일반 60/250 · 3종일반 50/300 · 준주거 70/500 · 일반상업 80/1300 · 중심상업 90/1500 · 근린상업 70/900 · 준공업 70/400 (건폐율%/용적률%)
-    </div>
-    <div class="warn-box">
-      ⚠ 본 산출은 단순 추정. 정확한 건축면적·지상 연면적은 별도 산정 필요.
-    </div>
-  </div>
-  </div>
-</div>
-</section>
-
-<section class="page-panel" id="page-checklist" data-page="checklist">
-<h2 id="step3"><span class="h2num">STEP 3</span>법규체크리스트</h2>
-<div class="actionbar">
-  <button class="act-btn primary" id="btnPrint">⎙ 검토서 인쇄 / PDF 저장</button>
-  <button class="act-btn" id="btnResetDone">↺ 체크 초기화</button>
-  <div class="progress-wrap">
-    <span>설계 반영 검토</span>
-    <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
-    <span id="progText" style="font-family:var(--mono);font-weight:600;color:var(--ink)">0 / 0</span>
-  </div>
-</div>
-<div class="filters">
-  <span class="flabel">판정</span>
-  <button class="fb on" data-f="all">전체</button>
-  <button class="fb" data-f="app">해당·권장만</button>
-  <button class="fb" data-f="ver">확인필요만</button>
-  <button class="fb" data-f="todo">미검토만</button>
-  <span class="flabel" style="margin-left:8px">사업단계</span>
-  <button class="fb on" data-ph="all">전체</button>
-  <button class="fb" data-ph="1">사전조사</button>
-  <button class="fb" data-ph="2">인허가</button>
-  <button class="fb" data-ph="3">설계</button>
-  <button class="fb" data-ph="4">시공</button>
-  <button class="fb" data-ph="5">사용승인</button>
-  <button class="toggle-all-btn active" id="toggleAll">▲ 세부사항 모두 펼치기 (상세 보기)</button>
-</div>
-<div id="body"></div>
-</section>
-
-<div class="disc">
-  <div class="disc-t">⚠ 유의사항</div>
-  <ul>
-    <li>본 검토서 및 검토결과는 주요 법령 기준에 따른 <b>참고용 자료</b>이며, 최종 법규 판단 및 정확한 산출값은 <b>법제처(law.go.kr)</b>, <b>자치법규정보시스템(elis.go.kr)</b> 및 해당 <b>지자체 담당과 사전 협의</b>를 통해 확인하시기 바랍니다.</li>
-    <li>국토계획법 등 상위 법령은 시·군의 조례 제정 기준이며, <b>실제 사업이 적용받는 법규는 해당 시·군의 조례</b>입니다. 시 조례가 우선 적용됩니다.</li>
-    <li><b>주차대수(공동주택)는 「법정 주차대수 산출」 탭에서 주택건설기준 제27조①1(시행 2026.5.6.) 지역기준으로 계산</b>됩니다 — 전용면적 합계 ÷ 지역기준(서울 1/75·1/65, 부산·경기 등 1/85·1/70 …) 과 세대당 최소(1대/60㎡↓ 0.7대) 중 큰 값. 시·군 조례가 1/5(60㎡↓ 1/2) 범위에서 강화한 경우 그 값이 우선하며, <b>✔별표검증</b> 지역(예: 과천 60㎡↓ 0.93대)은 원문 별표를 반영했습니다. 그 외 지역은 법정 제27조를 적용하므로 해당 시·군 「주차장 조례」 별표(elis.go.kr)의 강화 여부를 확인하세요. <b>주택 외 시설</b>은 주차장법 시행령 별표1을 적용합니다.</li>
-    <li>지구단위계획·도시계획·지자체 조례는 수시 변경되므로 반드시 최신 자료를 확인하십시오.</li>
-    <li>판례 및 유권해석이 필요한 사항은 별도 전문가 자문을 받으시기 바랍니다.</li>
-    <li><b>v5.16 변경사항 (2026.6)</b>: 경기 주차 별표 배치7 — 의정부(공동주택 1/70·1/65 강화)·구리 부설주차 조례 반영. 경기 19개 시 검증 완료.</li>
-    <li><b>v5.15 변경사항 (2026.6)</b>: 경기 주차 별표 배치6 — 의왕·이천 부설주차 조례 반영(이천 아파트 세대당 1.4대 강화 등). 하남은 조례에 부설주차 별표 없이 법정 준용 확인. 경기 17개 시 검증 완료.</li>
-    <li><b>v5.14 변경사항 (2026.6)</b>: 경기 주차 별표 배치5 — 광명·시흥·군포 부설주차 조례 반영(시흥 공동주택 1/68·1/56·군포 위락 59·문화 90㎡당 등 강화). 경기 15개 시 검증 완료.</li>
-    <li><b>v5.13 변경사항 (2026.6)</b>: 경기 주차 별표 배치4 — 남양주·평택·김포 부설주차 조례 반영(비주거 위락 60~70·근생 120~135㎡당 등 강화, 공동주택은 제27조/세대당 1대). 경기 12개 시 검증 완료.</li>
-    <li><b>v5.12 변경사항 (2026.6)</b>: 경기 주차 별표 배치3 — 화성·안산·안양 부설주차 조례 반영(공동주택 1/85·1/70+세대당 1대, 비주거 위락 67~80·근생 134~135·공장/창고 250~400㎡당 등). 경기 9개 시 검증 완료.</li>
-    <li><b>v5.11 변경사항 (2026.6)</b>: 경기 주차 별표 배치2 — 부천(별표2: 공동주택 85㎡↓ 1/70·85㎡↑ 1/65 강화)·고양(별표7) 부설주차 조례 반영. 비주거 위락 67~70·근생 134㎡당 등 강화 적용.</li>
-    <li><b>v5.10 변경사항 (2026.6)</b>: 경기 주차 별표 검증 배치1 — 수원·성남·용인 부설주차 조례 별표 반영(공동주택 세대당 최소 1대 강화, 비주거 위락 67~70·문화 100·근생 132~135㎡당 등 강화). 검증 도시는 계산·표시에 조례값 우선 적용.</li>
-    <li><b>v5.9 변경사항 (2026.6)</b>: <b>비주거 부설주차 계산기 신설</b> — 주차장법 시행령 별표1(위락 100·문화집회/판매/업무 150·근생/숙박 200·공장 350·창고 400·기타 300㎡당 1대) 법정 적용 + 조례 강화 override(과천 별표2 검증: 위락 70·문화 100·근생 100㎡당). 용도·시설면적 입력 시 자동 산정. ※ 서울 자치구 주차장 조례는 부설주차 설치기준을 별표로 두지 않고 법정(제27조·주차장법 별표1)을 준용함을 확인 — 법정 기준이 기본 적용되며 조문 강화분은 개별 확인.</li>
-    <li><b>v5.8 변경사항 (2026.6)</b>: <b>주차 계산 엔진을 조례·법정 방식으로 개편</b> — 「법정 주차대수 산출」을 주택건설기준 제27조①1(시행 2026.5.6.) 면적식(전용면적합계÷지역기준)+세대당 최소 큰 값으로 계산. 지역 자동 분류(서울 1/75·1/65, 부산·경기 등 1/85·1/70, 그 밖 시 1/95·1/75, 그 밖 군 1/110·1/85). 검증 조례(과천 60㎡↓ 0.93대) 우선 적용, 미검증 지역은 법정 제27조 적용+조례 강화 확인 안내. 주택 외 시설은 주차장법 시행령 별표1.</li>
-    <li><b>v5.7 변경사항 (2026.6)</b>: <b>법령 기준일(2026-06-16) 명시</b> — 최신 법령 적용 시 업데이트 시점을 표시해 구법 오인 방지. <b>주차장 조례 별표 검증 반영 시작</b> — 과천시 주차장 조례 별표2(시행 2026.1.1, 전용 85㎡↓ 1/85·85㎡↑ 1/70, 세대당 최소 1대/전용 60㎡↓ 0.93대) 원문 검증값 적용. 미검증 지역은 '추정치 — elis 별표 확인'으로 명확히 구분 표기, 유의사항 정확화.</li>
-    <li><b>v5.6.1 변경사항 (2026.6)</b>: 코드 품질 리팩터 — 중복된 판정 결론박스 생성 로직·상태 라벨맵을 공용 함수(pdConcl)로 통합(DRY), 미사용 CSS 제거. 리팩터 전후 렌더 출력 바이트 동일 검증(동작·판정·디자인 무변경).</li>
-    <li><b>v5.6 변경사항 (2026.6)</b>: frontend-design 제도 시그니처를 전 구간 일관 적용 — STEP 메인 헤더·STEP4 검토결과 패널·계산기 그룹/판정·대시보드 카드 제목에 치수 tick, 검토결과 데이터·타임라인 경로를 도면 타이틀블록/모노 스펙 스타일로 통일. 경고·주의 박스는 색 충돌 방지로 제외(절제). 색·기능·판정 무변경.</li>
-    <li><b>v5.5 변경사항 (2026.6)</b>: frontend-design 제도 모티프를 판정 카드로 확장 — STEP2 인허가 상세표 헤더를 도면 스펙 스케줄 스타일(모노·헤어라인)로, STEP3 법규 체크리스트 카테고리 제목 앞에 치수 tick을 추가해 시그니처 통일. 구조 표식에만 적용(데이터 줄 미장식, 절제). 색·기능·판정 무변경.</li>
-    <li><b>v5.4 변경사항 (2026.6)</b>: <b>frontend-design 적용</b> — 건축 도면의 제도(drafting) 주석을 시그니처로 정립: 히어로 통계를 도면 타이틀블록 데이터 스트립으로 재해석(템플릿형 '큰 숫자+그라데이션' 탈피), 제목 아래 치수선(끝 tick) 주석, 섹션 키커 앞 치수 tick. 장식적 펄스 애니메이션 제거(절제). 색·기능·판정 로직 무변경.</li>
-    <li><b>v5.3 변경사항 (2026.6)</b>: <b>UI/UX 개선</b> — 키보드 포커스 링(접근성), 모션 감소 설정 존중(prefers-reduced-motion), 셀렉트 드롭다운 캐럿 통일, 카드 호버 인터랙션, 본문 바로가기 스킵 링크, 모바일 터치 타겟 확대·iOS 입력 줌 방지. 판정 로직·법규 수치는 변경 없음.</li>
-    <li><b>v5.2.1 변경사항 (2026.6)</b>: 법규검토 스킬 기준 전체 재검증 — 교통영향평가 별표1(시행령 2026.3.24 개정본에서 60,000/90,000㎡ 동일 확인)·국가유산영향진단 시행령(3만㎡)·환경영향평가 별표3·별표4 현행 재확인. 재해영향평가 항목에 「재해영향평가등의 협의 실무지침」(행안부 고시 2025.5.1) 운영구분 확인 안내 추가.</li>
-    <li><b>v5.2 변경사항 (2026.6)</b>: <b>STEP2 인허가 상세 섹션 신설</b> + 영향평가·심의 판정을 법제처 원문으로 정교화(교통영향평가 60,000/90,000㎡, 환경·소규모 환경영향평가 별표3·별표4, 재해영향평가 5,000㎡, 매장유산 영향진단 3만㎡·국가유산영향진단법 이관, 지하안전평가 20m/10~20m, 교육환경평가, 건축위 통합심의, 경관·건축물 안전영향평가). <b>추가 입지·계획 정보 드롭다운 8종</b>(도시교통정비지역·굴착깊이·경관지구·교육환경보호구역·유존지역·재해위험지구·소규모환경 입지·지구단위계획)으로 위치·계획 조건 반영. <b>대상/검토/비대상 색상 결론 + 해당 기준 강조 + 기준 변수·출처(법제처 원문확인) 표기</b>를 STEP2·STEP3 전체에 적용.</li>
-    <li><b>v5.1 변경사항 (2026.5)</b>: <b>건축물 용도 14종 확장</b> (공동주택·주상복합·연립다세대·오피스텔·근린생활·업무·숙박·판매·교육연구·노유자·의료·문화집회·공장·기타) — 비주거 선택 시 주택건설기준 자동 제외 + 용도별 특수 규정(오피스텔 건축기준·숙박업·대규모점포·교육환경평가·복지법·의료법·공연법·공장설립 등) 자동 표시. <b>인허가 절차 타임라인 신설</b> — 주택법(사업계획승인)·건축법(건축허가)·정비사업(도정법) 사업방식별 단계별 순서도 + 병행 심의·영향평가 자동 배치.</li>
-    <li><b>v5.0 변경사항</b>: UI 전면 리뉴얼(건축 청사진) + 사업 5단계 배지·필터 + 핵심 요약 대시보드 + 검토완료 체크/진행률 + 인쇄·PDF + 채광/환기창</li>
-    <li><b>v4.0 변경사항</b>: LAW_DATES 14개로 확장 → 처분시점 분기 12개 항목 적용</li>
-    <li>v3.9 변경사항: 주택건설기준 11·12·16의2·17·22·31·32·32의2·33·50조 신규 / 조례 DB 80→246개 확장</li>
-  </ul>
-</div>
-</main>
-
-<script>
-/* ============================================================
+  .badge.ver{background:var(--accent-soft);color:var(--accent)} .badge.rec{background:var(--ok-soft);color:var(--ok)} .badge.na{background:#eef1f5;color:var(--muted)}
+  .ck-detail{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .tl-side{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px} .tl-side-tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap}
+  .tl-side-tag.req{background:var(--warn-soft);color:var(--warn)} .tl-side-tag.ver{background:var(--accent-soft);color:var(--accent)}
+  .tl-name .law-link{font-size:10.5px;font-weight:500}
+  .topbar-l{flex:none}
+  .topbar-summary{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;margin:0 16px;justify-content:flex-start}
+  .topbar-summary::-webkit-scrollbar{height:0}
+  .ts-chip{font-size:11.5px;font-weight:500;color:var(--ink-2);background:#f1f4f8;border:1px solid var(--line);padding:5px 10px;border-radius:7px;white-space:nowrap;flex:none;font-family:var(--mono);display:inline-flex;align-items:center;gap:6px}
+  .ts-chip.ts-zone{background:var(--accent-soft);color:var(--accent);border-color:#d4e0fb;font-family:var(--sans);font-weight:600}
+  .ts-chip.ts-use{background:#eef6f1;color:var(--ok);border-color:#bfe3d1;font-family:var(--sans);font-weight:600}
+  .ts-chip.ts-region{font-family:var(--sans);font-weight:600;color:var(--ink)}
+  .ts-chip.ts-region .dot{width:7px;height:7px;border-radius:50%}
+  .ts-chip.ts-click{cursor:pointer;transition:border-color .12s,box-shadow .12s}
+  .ts-chip.ts-click:hover{border-color:var(--accent-2);box-shadow:0 1px 4px rgba(37,99,235,.18)}
+  .ts-edit{font-size:12px;border:1px solid var(--accent-2);border-radius:7px;padding:4px 8px;background:#fff;color:var(--ink);font-family:var(--sans);box-shadow:0 0 0 3px rgba(37,99,235,.13);outline:none;flex:none}
+  .ts-edit.num{width:92px;font-family:var(--mono)}
+  .ts-edit-wrap{display:inline-flex;align-items:center;gap:6px;flex:none}
+  @media(max-width:1100px){.topbar-summary{display:none}}
+  /* 법령 기준일·개발자 */
+  .side-foot .sf-base{background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);color:#bcd0ee;border-radius:7px;padding:8px 10px;margin-bottom:10px;font-size:10.5px;line-height:1.5}
+  .side-foot .sf-base b{color:#fff;font-family:var(--mono)}
+  .side-foot .sf-dev{margin-top:9px;font-size:11px;font-weight:600;color:#9fb0c4;font-family:var(--mono);letter-spacing:.02em}
+</style></head><body><div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script>/* ============================================================
    상수 & 데이터
 ============================================================ */
 const CATS=['인허가 절차','대지·건축 일반','주택건설기준','부대복리시설','주차장 기준','소방시설 기준','에너지·친환경 인증','교통·환경 영향평가','발코니·안전','지자체 조례 확인사항','각종 심의 (지자체)','기계설비 기준','지구단위계획','용도별 특수 규정'];
@@ -5153,238 +3672,1977 @@ function scheduleStepNavUpdate(){
   stepNavTick=true;
   requestAnimationFrame(()=>{stepNavTick=false;updateActiveStepNav();});
 }
-
-/* ============================================================
-   이벤트 바인딩
-============================================================ */
-document.querySelectorAll('.step-jump').forEach(btn=>{
-  btn.addEventListener('click',function(){
-    showPage(this.dataset.pageTarget);
-  });
-});
-const topBizEdit=document.getElementById('topBizEdit');
-if(topBizEdit) topBizEdit.addEventListener('click',function(){
-  const form=document.getElementById('topEditForm');
-  if(!form) return;
-  syncTopEditFromMain();
-  const open=form.classList.toggle('open');
-  this.textContent=open?'✎ 수정 닫기 ▴':'✎ 기본정보 수정 ▾';
-  this.setAttribute('aria-expanded',open?'true':'false');
-});
-
-// 판정 필터 (data-f)
-document.querySelectorAll('.fb[data-f]').forEach(btn=>{
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.fb[data-f]').forEach(b=>b.classList.remove('on'));
-    this.classList.add('on');
-    filter=this.dataset.f;
-    render();
-  });
-});
-// 사업단계 필터 (data-ph)
-document.querySelectorAll('.fb[data-ph]').forEach(btn=>{
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.fb[data-ph]').forEach(b=>b.classList.remove('on'));
-    this.classList.add('on');
-    phaseFilter=this.dataset.ph;
-    render();
-  });
-});
-// 인쇄 / PDF
-const btnPrint=document.getElementById('btnPrint');
-if(btnPrint) btnPrint.addEventListener('click',function(){
-  // 인쇄 시 모든 세부사항 펼침
-  allItemsCollapsed=false;
-  document.querySelectorAll('.ci').forEach(ci=>{ci.classList.remove('collapsed');});
-  setTimeout(()=>window.print(),120);
-});
-// 검토완료 체크 초기화
-const btnReset=document.getElementById('btnResetDone');
-if(btnReset) btnReset.addEventListener('click',function(){
-  if(Object.keys(doneState).some(k=>doneState[k])){
-    doneState={};
-    render();
-  }
-});
-
-document.querySelectorAll('.ctab').forEach(btn=>{
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));
-    document.querySelectorAll('.calc-panel').forEach(p=>p.classList.remove('on'));
-    this.classList.add('on');
-    const target=document.getElementById('cp-'+this.dataset.ctab);
-    if(target)target.classList.add('on');
-  });
-});
-
-document.querySelectorAll('.preset-btn[data-preset]').forEach(btn=>{
-  btn.addEventListener('click',function(){applyPkPreset(this.dataset.preset);});
-});
-
-document.querySelectorAll('[data-tf]').forEach(btn=>{
-  btn.addEventListener('click',function(){
-    const k=this.dataset.tf;
-    document.querySelectorAll(`[data-tf="${k}"]`).forEach(b=>b.classList.remove('on'));
-    this.classList.add('on');
-    trafficState[k]=this.dataset.val;
-    if(k==='urban') userTouched.trafficUrban=true;
-    renderTraffic();
-  });
-});
-
-document.getElementById('pt-total').addEventListener('input',renderParkType);
-document.getElementById('pt-use-calc').addEventListener('click',function(){
-  document.getElementById('pt-total').value=window.__pkResult||0;
-  renderParkType();
-});
-
-// 세부사항 모두 접기/펼치기 (전역 토글)
-document.getElementById('toggleAll').addEventListener('click',function(){
-  allItemsCollapsed=!allItemsCollapsed;
-  this.textContent=allItemsCollapsed?'▲ 세부사항 모두 펼치기 (상세 보기)':'▼ 세부사항 모두 접기 (요약 보기)';
-  this.classList.toggle('active', allItemsCollapsed);
-  document.querySelectorAll('.ci').forEach(ci=>{
-    ci.classList.toggle('collapsed',allItemsCollapsed);
-    const key=ci.dataset.itemKey;
-    if(key) itemCollapsed[key]=allItemsCollapsed;
-  });
-});
-
-// 합산 세대수 → 메인 세대수 일치 버튼 (60~85㎡에 일괄 배분)
-document.getElementById('pk-sync-btn').addEventListener('click',function(){
-  const I=getInputs();
-  pkRanges.forEach(r=>{r.units=0;r.area=0;});
-  pkRanges[2].units=I.u; pkRanges[2].area=0;
-  renderParkCalc();
-});
-
-// 법령 적용 시점 선택
-document.getElementById('dt-latest').addEventListener('click',function(){
-  applyDate='latest';
-  this.classList.add('on');
-  document.getElementById('dt-legacy').classList.remove('on');
-  document.getElementById('legacyInputs').style.display='none';
-  render();
-});
-document.getElementById('dt-legacy').addEventListener('click',function(){
-  const y=document.getElementById('legacyYear').value;
-  const m=String(document.getElementById('legacyMonth').value).padStart(2,'0');
-  applyDate=y+'-'+m;
-  this.classList.add('on');
-  document.getElementById('dt-latest').classList.remove('on');
-  document.getElementById('legacyInputs').style.display='inline-flex';
-  render();
-});
-function updateLegacyDate(){
-  if(applyDate !== 'latest'){
-    const y=document.getElementById('legacyYear').value;
-    const m=String(document.getElementById('legacyMonth').value).padStart(2,'0');
-    applyDate=y+'-'+m;
-    render();
-  }
-}
-document.getElementById('legacyYear').addEventListener('change',updateLegacyDate);
-document.getElementById('legacyMonth').addEventListener('change',updateLegacyDate);
-
-document.getElementById('sR').addEventListener('change',function(){
-  // 즉시 모든 preset 버튼 강제 비활성화 (어떤 비동기 코드도 덮어쓸 수 없도록 선제 차단)
-  document.querySelectorAll('.preset-btn[data-preset]').forEach(b=>b.classList.remove('on'));
-  updateCitySelect();
-  userTouched.pkRatios=false;
-  userTouched.ptPct=false;
-  userTouched.trafficUrban=false;
-  lastAppliedKey=null;
-  pkPreset='std'; // 광역시도 변경 시 preset도 초기화
-  render();
-  syncPresetButtonsUI();
-  // 추가 안전망: 비동기 큐 다음 틱에서 한 번 더 동기화
-  setTimeout(syncPresetButtonsUI, 50);
-});
-
-document.getElementById('sC').addEventListener('change',function(){
-  // 즉시 모든 preset 버튼 강제 비활성화
-  document.querySelectorAll('.preset-btn[data-preset]').forEach(b=>b.classList.remove('on'));
-  userTouched.pkRatios=false;
-  userTouched.ptPct=false;
-  userTouched.trafficUrban=false;
-  lastAppliedKey=null;
-  pkPreset='std'; // 시·군·구 변경 시 preset도 초기화
-  render();
-  syncPresetButtonsUI();
-  // 추가 안전망
-  setTimeout(syncPresetButtonsUI, 50);
-});
-
-['sZ','sP','sB','sU','sF','sS','sA','xTraffic','xExcav','xScenic','xEdu','xHeritage','xDisaster','xEnvLoc','xDistrict'].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el){
-    el.addEventListener('change',render);
-    el.addEventListener('input',render);
-  }
-});
-
-// 사업방식 ↔ 건축물 용도 자동 동기화
-document.getElementById('sP').addEventListener('change',function(){
-  const sB=document.getElementById('sB');
-  if(this.value==='gen'){
-    // 일반 건축 선택 → 용도가 주거면 업무시설로 전환
-    if(HOUSING_USES.includes(sB.value)){ sB.value='biz'; }
-  } else {
-    // 주택사업 선택 → 용도가 비주거면 공동주택으로 전환
-    if(!HOUSING_USES.includes(sB.value) && sB.value!=='offi'){ sB.value='apt'; }
-  }
-  render();
-});
-document.getElementById('sB').addEventListener('change',function(){
-  const sP=document.getElementById('sP');
-  // 비주거 용도 선택 → 사업방식이 주택사업이면 일반건축으로 전환
-  if(!HOUSING_USES.includes(this.value) && this.value!=='offi' && sP.value!=='gen'){
-    sP.value='gen';
-  }
-  render();
-});
-
-/* ===== 사업 기본 정보 sticky 동작 ===== */
-let bizCollapsed=false;   // 입력 폼 접힘 여부
-let bizAutoFlag=false;    // 스크롤 자동 축소 1회 플래그
-function syncBizUI(){
-  const st=document.getElementById('bizSticky');
-  if(!st) return;
-  st.classList.toggle('collapsed',bizCollapsed);
-  const tb=document.getElementById('bizToggle');
-  if(tb) tb.textContent = bizCollapsed ? '수정 ▾' : '접기 ▴';
-}
-window.addEventListener('scroll',function(){
-  const st=document.getElementById('bizSticky');
-  if(st){
-    st.classList.remove('stuck');
-    if(bizAutoFlag){ bizAutoFlag=false; bizCollapsed=false; syncBizUI(); }
-  }
-  scheduleStepNavUpdate();
-},{passive:true});
-window.addEventListener('resize',scheduleStepNavUpdate);
+</script>
+<script>/* ===== APP_DATA 어댑터: 클로드 디자인 ↔ 검증 엔진(buildItems) ===== */
 (function(){
-  const bar=document.getElementById('bizBar');
-  const tb=document.getElementById('bizToggle');
-  if(tb) tb.addEventListener('click',function(e){ e.stopPropagation(); bizCollapsed=!bizCollapsed; syncBizUI(); });
-  if(bar) bar.addEventListener('click',function(){ bizCollapsed=!bizCollapsed; syncBizUI(); });
+  var LAW_BASE="2026-06-25"; var DEV="최감용";
+  function stripHtml(s){return String(s==null?'':s).replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();}
+  var USE_BY_LABEL={}; Object.keys(USE_L).forEach(function(k){USE_BY_LABEL[USE_L[k]]=k;});
+  var PT_BY_LABEL={}; Object.keys(PT_L).forEach(function(k){PT_BY_LABEL[PT_L[k]]=k;});
+  var ZONES=Object.keys(ZONE_L).map(function(z){return {id:z,label:ZONE_L[z],bcr:ZONE_LIMITS[z][0],far:ZONE_LIMITS[z][1]};});
+  var BUILDING_USES=Object.keys(USE_L).map(function(k){return USE_L[k];});
+  var BIZ_TYPES=Object.keys(PT_L).map(function(k){return PT_L[k];});
+  var REGIONS=CITIES;
+  var TRAF={'도시교통정비지역':'urban','교통권역':'region','해당 없음':'none'};
+  var DIG={'10m 미만':'u10','10m~20m':'d1020','20m 이상':'o20'};
+  var ENV={'도시지역(주거·상업·공업)':'urban','관리지역':'mng_c','농림지역':'farm','자연환경보전지역':'nature','해당 없음':''};
+  function yn(v){return (v && v.indexOf('해당 없음')<0 && v!=='') ? 'yes':'no';}
+  function toI(input){
+    applyDate = (input.lawMode==='old') ? (input.lawYear+'-'+('0'+input.lawMonth).slice(-2)) : 'latest';
+    return {
+      r:input.sido, c:input.sigungu, z:input.zone,
+      u:Math.max(1,parseInt(input.units)||1), pt:PT_BY_LABEL[input.bizType]||'p',
+      use:USE_BY_LABEL[input.useType]||'apt',
+      f:Math.max(1,parseInt(input.floors)||1), s:Math.max(50,parseInt(input.siteArea)||50),
+      fa:Math.max(100,parseInt(input.totalArea)||100),
+      xTraffic:TRAF[input.trafficZone]||'', xExcav:DIG[input.digDepth]||'',
+      xScenic:yn(input.landscapeZone), xEdu:yn(input.eduZone),
+      xHeritage:yn(input.heritageZone), xDisaster:yn(input.disasterZone),
+      xEnvLoc:(input.envLocation in ENV)?ENV[input.envLocation]:'', xDistrict:yn(input.districtPlan)
+    };
+  }
+  function detailsFrom(it){
+    var hit=it.hit||'';
+    return (it.nt||[]).filter(Boolean).map(function(n){var t=stripHtml(n);return {name:t, met: !!(hit && t.indexOf(hit)>=0), value:''};});
+  }
+  function assessReviews(input){
+    var I=toI(input); var all=buildItems(I).all;
+    return all.filter(function(it){return it.c===7||it.c===10;}).map(function(it,idx){
+      var t=String(it.t).replace(' ⚠ 구법',''); var hit=it.hit||'';
+      return {id:'r'+it.c+'_'+idx, cat: it.c===7?'assess':'council', label:t,
+        required: it.s==='A', vars: stripHtml(it.th).slice(0,70), desc: stripHtml(it.rq),
+        laws: (it.lg||[]).map(function(n){return {name:n};}),
+        detail: detailsFrom(it), matched: (it.s==='A'&&hit)?[{name:hit,value:''}]:[],
+        procedure: stripHtml(it.rq), note:'참고용 사전검토 — 최종 대상 여부는 허가권자·법제처 원문 확인'};
+    });
+  }
+  var CATMAP={1:'site',2:'house',3:'community',4:'park',5:'fire',8:'fire',6:'energy',11:'mech',9:'zone',12:'zone',0:'etc',13:'etc'};
+  function evaluate(input){
+    var I=toI(input); var all=buildItems(I).all;
+    var lim=ZONE_LIMITS[input.zone]||[0,0];
+    var bcr=input.siteArea>0?(input.buildingArea/input.siteArea*100):0;
+    var far=input.siteArea>0?(input.totalArea/input.siteArea*100):0;
+    var checks=[
+      {id:'bcr',cat:'zone',status:'judge',label:'건폐율',basis:'국토계획법 시행령 제84조',limit:lim[0]+'% 이하',actual:bcr.toFixed(1)+'%',pass:bcr<=lim[0],detail:'건축면적 ÷ 대지면적. 용도지역 법정상한 이내여야 함('+ (ZONE_L[input.zone]||'')+').'},
+      {id:'far',cat:'zone',status:'judge',label:'용적률',basis:'국토계획법 시행령 제85조',limit:lim[1]+'% 이하',actual:far.toFixed(1)+'%',pass:far<=lim[1],detail:'지상 연면적 ÷ 대지면적. 용도지역 법정상한 이내여야 함.'},
+    ];
+    all.filter(function(it){return CATMAP[it.c]!=null;}).forEach(function(it,idx){
+      var t=String(it.t).replace(' ⚠ 구법','');
+      checks.push({id:'c'+it.c+'_'+idx, cat:CATMAP[it.c], status:it.s, label:t,
+        basis:(it.lg&&it.lg[0])?it.lg[0]:stripHtml(it.th),
+        limit: stripHtml(it.th)||'-', actual: stripHtml(it.rq)||'-', pass:true,
+        detail:(it.nt||[]).filter(Boolean).map(stripHtml).join(' · ')});
+    });
+    return {zone:input.zone, computedBCR:bcr, computedFAR:far, checks:checks};
+  }
+  function communityFacilities(input){
+    applyDate = (input.lawMode==='old') ? (input.lawYear+'-'+('0'+input.lawMonth).slice(-2)) : 'latest';
+    var use=USE_BY_LABEL[input.useType]||'apt';
+    var isHousing=['apt','mixed','row'].indexOf(use)>=0;
+    var u=Math.max(1,parseInt(input.units)||1);
+    var total = u>=100 ? (u<1000? Math.round(u*2.5) : Math.round(500+u*2)) : 0;
+    var daycare = (typeof isAfterDate==='function' && typeof LAW_DATES!=='undefined') ? isAfterDate(LAW_DATES.daycare) : true;
+    var ordRes=getCityOrd(input.sido,input.sigungu); var ord=ordRes?ordRes.data:null;
+    function R(item,std,kind,status,value,point){return {item:item,std:std,kind:kind,status:status,value:value||'',point:point};}
+    function inst(ok){return ok?['req','설치대상']:['no','해당없음'];}
+    var t1=inst(isHousing&&u>=100), s2=isHousing&&u>=100&&u<150, t3=inst(isHousing&&u>=150), t4=inst(isHousing&&u>=300), t5=inst(isHousing&&u>=500);
+    var t6=inst(isHousing&&daycare&&u>=500), s9=isHousing&&u>=150, t11=inst(isHousing&&u>=50);
+    var k10 = u>=2000?['req','설치대상']:(u>=100?['info','세부확인']:['no','해당없음']);
+    var rows=[
+      R('주민공동시설 총량', isHousing?(u>=100?(u<1000?(u.toLocaleString('ko-KR')+'세대 × 2.5㎡'):('500㎡ + '+u.toLocaleString('ko-KR')+'세대 × 2㎡')):'100세대 미만 총량제 미적용'):'해당 없음', t1[0],t1[1], (isHousing&&u>=100)?('법정 총량 '+total.toLocaleString('ko-KR')+'㎡ 이상'):(u+'세대'), '조례로 ±1/4 가감. 옥내 전용면적+옥외 부지면적 비교 (주택건설기준 제55조의2)'),
+      R('100~149세대 구간', '총량 기준 중심 확인', s2?'req':'no', s2?'해당 구간':'해당 구간 아님', u+'세대', '시설 종류는 승인권자 협의·조례 추가기준 확인'),
+      R('150세대 이상 — 경로당·어린이놀이터', '150세대 이상 의무', t3[0],t3[1], u+'세대', '경로당 일조·채광·남녀구분·급수·취사·화장실 / 놀이터 실외 3m 이격'),
+      R('300세대 이상 — 어린이집', '어린이집 추가', t4[0],t4[1], u+'세대', '영유아보육법, 1인당 4.29㎡, 사용검사 시까지 설치'),
+      R('500세대 이상 — 운동·도서관·돌봄', '주민운동시설+작은도서관+다함께돌봄센터 추가', t5[0],t5[1], u+'세대', '작은도서관 33㎡↑·자료 1,000점↑, 다함께돌봄 과반 반대 시 제외 가능'),
+      R('국공립어린이집', daycare?'500세대 이상 의무 / 300~499세대 협의':'구법 시점 500세대 의무 미적용 가능', t6[0],t6[1], (isHousing&&daycare&&u>=300&&u<500)?'300~499세대 협의 검토':(u+'세대'), '영유아보육법·지자체 보육수요·커뮤니티 배치 검토'),
+      R('공용식당·공용취사장', '고령친화 주거환경 주민공동시설 범위 검토', isHousing?'info':'no', isHousing?'세부확인':'해당없음', '조례·사업계획 협의', '2026.5.6. 개정 취지. 설치의무·면적산입·운영주체 협의'),
+      R('조례 추가시설', '제55조의2 제4·6항 — 조례가 추가 종류·면적 정함', isHousing?'info':'no', isHousing?'세부확인':'해당없음', ord?ord.note:'지자체 조례 확인', '주택·건축·공동주택관리 조례의 추가 주민공동시설 확인'),
+      R('노유자시설 연계', '어린이집·경로당·돌봄센터 피난·방염·접근성·이격 연계', s9?'req':'no', s9?'연계 검토 대상':'해당없음', u+'세대', '위해시설 50m 이격·방염·장애인 접근·피난동선·놀이터 3m'),
+      R('유치원·교육환경', '2,000세대 이상 유치원 + 교육환경평가·교육청 협의', k10[0],k10[1], u+'세대', '통학거리·기존학교·교육환경보호구역 200m 금지·제한시설'),
+      R('관리사무소 등', '50세대 이상: 10㎡ + 50세대 초과 세대당 500㎠ (최대 100㎡)', t11[0],t11[1], (isHousing&&u>=50)?('법정 '+Math.min(100,10+(u-50)*0.05).toFixed(1)+'㎡ 이상'):(u+'세대'), '경비원 휴게시설(산업안전보건법) / 관리사무소 접근성 (주택건설기준 제28조)')
+    ];
+    return {total:total, rows:rows};
+  }
+  // 사업방식별 인허가 타임라인 + 단계별 병행 심의·영향평가 태그(검증 엔진 c7/c10 대상 판정)
+  function permitTimeline(input){
+    var I=toI(input);
+    var all=buildItems(I).all;
+    var c=all.filter(function(it){return it.c===7||it.c===10;});
+    var pt=I.pt, use=I.use, u=I.u;
+    var isHousing=['apt','mixed','row'].indexOf(use)>=0;
+    var ren=['rc','rd'].indexOf(pt)>=0, as=['ra','wa'].indexOf(pt)>=0, pub=['pr','ps'].indexOf(pt)>=0;
+    var housingLaw=isHousing&&u>=30&&pt!=='gen';
+    var DIG=/굴토|지하안전/;
+    function chip(it){return {t:String(it.t).replace(' ⚠ 구법',''), k: it.s==='A'?'req':'ver'};}
+    var planSide=c.filter(function(it){return (it.s==='A'||it.s==='V')&&!DIG.test(it.t);}).map(chip);
+    var consSide=c.filter(function(it){return DIG.test(it.t)&&(it.s==='A'||it.s==='V');}).map(chip);
+    if(!consSide.length) consSide=[{t:'굴토(흙막이) 심의',k:'ver'},{t:'지하안전 확인',k:'ver'}];
+    var fa=I.fa;
+    var useTags=[{t:'기계설비 사용전검사',k:(fa>=10000||u>=500)?'req':'ver'},{t:'소방 완공검사',k:'req'}];
+    var ux={lodge:'숙박업 신고',sales:'대규모점포 등록',welfare:'복지시설 설치신고',medical:'의료기관 개설신고',factory:'공장설립 승인',culture:'공연장 등록'};
+    if(ux[use]) useTags=useTags.concat([{t:ux[use],k:'req'}]);
+    var saleSide= pub?[]:[{t:'분양보증 (HUG)',k:'req'}];
+    function S(label,org,desc,side){return {label:label,org:org||'—',desc:desc,side:side||[]};}
+    var route, steps;
+    if(ren){route='정비사업 (도시 및 주거환경정비법)';
+      steps=[S('정비구역 지정·정비계획','도정법 제8조','기본계획→정비계획→구역지정(도시계획위 심의)'),
+        S('추진위원회 구성 승인','도정법 제31조','토지등소유자 과반 동의'),
+        S('조합설립 인가','도정법 제35조','재건축 3/4+동별 과반 / 재개발 3/4+면적 1/2'),
+        S('사업시행계획 인가','도정법 제50조','건축계획 확정 — 각종 영향평가·심의 병행',planSide),
+        S('관리처분계획 인가','도정법 제74조','분양신청→권리가액→관리처분'),
+        S('이주·철거·착공','도정법 제81조','기존 멸실→착공',consSide),
+        S('준공인가·사용검사','도정법 제83조','준공→입주',useTags),
+        S('이전고시·청산','도정법 제86조','소유권 이전→조합 청산')];
+    }else if(as&&housingLaw){route='지역·직장주택조합 (주택법)';
+      steps=[S('조합원 모집 신고·공개모집','주택법 제11조의3','대지 50%↑ 사용권원 확보 후 신고'),
+        S('창립총회·조합설립 인가','주택법 제11조','조합원 20명↑·예정세대 50%↑ / 토지 80%+소유 15%'),
+        S('주택건설 사업계획승인','주택법 제15조','사업계획+각종 영향평가·심의 병행',planSide),
+        S('착공신고','주택법 제16조','굴토·지하안전 확인 후 착공',consSide),
+        S('일반분양 입주자모집','주택법 제54조','조합분 외 일반분양 모집공고',saleSide),
+        S('사용검사','주택법 제49조','준공→입주',useTags),
+        S('입주·소유권이전·청산','','사용검사필증→입주→조합 청산')];
+    }else if(housingLaw){route='공동주택 (주택법)';
+      steps=[S('사전 기획·부지 확보','','용도지역·지구단위·건폐/용적·일조 사전검토',[{t:'지구단위계획 확인',k:'ver'},{t:'토지이용계획 확인',k:'ver'}]),
+        S('주택건설 사업계획승인','주택법 제15조','사업계획 + 각종 영향평가·심의 병행 → 승인 (시장·군수·구청장 등)',planSide),
+        S('착공신고','주택법 제16조','착공 전 굴토·지하안전 등 확인 → 착공신고',consSide),
+        S('입주자 모집공고 승인','주택법 제54조',pub?'공공 — 입주자 모집 별도':'선분양 시 분양보증 후 모집공고 승인',saleSide),
+        S('사용검사','주택법 제49조','공사 완료 → 사용검사 → 입주',useTags),
+        S('입주·소유권 보존등기','','사용검사필증 → 입주 → 소유권 이전')];
+    }else{route='일반 건축 (건축법) · '+(USE_L[use]||'');
+      steps=[S('사전 기획·부지 검토','','용도지역·지구단위·건폐/용적·높이 사전검토',[{t:'지구단위계획 확인',k:'ver'},{t:'토지이용계획 확인',k:'ver'}]),
+        S('건축 사전결정(선택)','건축법 제10조','입지·규모 적법 사전확인(의무 아님)'),
+        S('건축허가','건축법 제11조','건축허가 + 각종 심의·영향평가 병행',planSide),
+        S('착공신고','건축법 제21조','착공 전 굴토·지하안전 등 확인',consSide),
+        S('사용승인','건축법 제22조','공사 완료 → 사용승인 → 용도별 운영신고',useTags),
+        S('사용·운영','','사용승인서 교부 → 운영')];
+    }
+    return {route:route, steps:steps.map(function(s,i){return {id:i,label:s.label,org:s.org,days:0,desc:s.desc,side:s.side};})};
+  }
+
+  // ===== 검토 보고서 HTML 생성 (인쇄/PDF) =====
+  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];});}
+  function buildReportHTML(input){
+    var ev=evaluate(input), rev=assessReviews(input), tl=permitTimeline(input);
+    var nf=function(n){return Number(n||0).toLocaleString('ko-KR');};
+    var zone=USE_BY_LABEL?ZONE_L[input.zone]:input.zone; zone=ZONE_L[input.zone]||input.zone;
+    var lim=ZONE_LIMITS[input.zone]||[0,0];
+    var bcr=ev.computedBCR||0, far=ev.computedFAR||0;
+    var bcrOk=bcr<=lim[0], farOk=far<=lim[1];
+    var use=USE_BY_LABEL[input.useType]||'apt'; var isApt=(use==='apt'||use==='mixed');
+    var now=new Date(); var ymd=now.getFullYear()+'.'+('0'+(now.getMonth()+1)).slice(-2)+'.'+('0'+now.getDate()).slice(-2);
+    var revReq=rev.filter(function(r){return r.required;});
+    var TABN={site:'대지·건축 일반',house:'주택건설기준',community:'부대복리·주민공동시설',park:'주차장',fire:'소방·피난·안전',energy:'에너지·친환경',mech:'기계설비',zone:'용도지역·조례·지구단위',etc:'인허가·용도별 특수'};
+    var TABORD=['site','house','community','park','fire','energy','mech','zone','etc'];
+    var byTab={}; ev.checks.forEach(function(c){ if(c.id==='bcr'||c.id==='far')return; (byTab[c.cat]=byTab[c.cat]||[]).push(c); });
+    function statTxt(s){return s==='A'?'대상':s==='V'?'검토':s==='R'?'권장':'비대상';}
+    function statCls(s){return s==='A'?'r-req':s==='V'?'r-ver':s==='R'?'r-rec':'r-na';}
+    var H=[];
+    H.push('<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>건축 사업 법규 사전검토 보고서</title>');
+    H.push('<style>'
+      +'*{box-sizing:border-box}body{font-family:"Malgun Gothic","맑은 고딕",sans-serif;color:#1a2433;margin:0;background:#f0f2f5;font-size:12px;line-height:1.5}'
+      +'.tb{position:sticky;top:0;background:#1b2738;color:#fff;padding:10px 24px;display:flex;justify-content:space-between;align-items:center}'
+      +'.tb button{font-size:13px;padding:8px 16px;border:none;border-radius:7px;cursor:pointer;margin-left:8px}'
+      +'.tb .pr{background:#2563eb;color:#fff}.tb .cl{background:#3a4658;color:#cfd8e3}'
+      +'.doc{max-width:820px;margin:18px auto;background:#fff;padding:40px 44px;box-shadow:0 2px 12px rgba(0,0,0,.1)}'
+      +'h1{font-size:21px;margin:0 0 4px;letter-spacing:-.01em}.sub{color:#5b6b80;font-size:12px;margin-bottom:6px}'
+      +'.meta{color:#5b6b80;font-size:11px;border-bottom:2px solid #1b2738;padding-bottom:10px;margin-bottom:22px}'
+      +'h2{font-size:14px;margin:26px 0 10px;padding-left:9px;border-left:4px solid #2563eb}'
+      +'table{width:100%;border-collapse:collapse;margin-bottom:6px}'
+      +'th,td{border:1px solid #d7dee8;padding:7px 9px;text-align:left;vertical-align:top}'
+      +'th{background:#f1f4f8;font-weight:700;font-size:11px;white-space:nowrap;width:120px}'
+      +'.ov th{width:130px}.ov td{font-weight:500}'
+      +'.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px}'
+      +'.ok{background:#e7f5ef;color:#047857}.bad{background:#fdeced;color:#b91c1c}'
+      +'.r-req{background:#fdf2e2;color:#b45309}.r-ver{background:#eef3ff;color:#1d4ed8}.r-rec{background:#e7f5ef;color:#047857}.r-na{background:#eef1f5;color:#8294a8}'
+      +'.tl{list-style:none;padding:0;margin:0}.tl li{padding:8px 0;border-bottom:1px dashed #e3e8ef}'
+      +'.tl .n{display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;background:#1b2738;color:#fff;border-radius:50%;font-size:10px;margin-right:8px}'
+      +'.side{margin-top:5px}.side .tag{margin:2px 4px 2px 0}'
+      +'.ck th:first-child{width:auto}.ck td.b{font-family:monospace;color:#5b6b80;font-size:10.5px}'
+      +'.cap{font-size:11px;color:#5b6b80}.disc{margin-top:28px;padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:11px;color:#92560a;line-height:1.6}'
+      +'@media print{.tb{display:none}body{background:#fff}.doc{box-shadow:none;margin:0;max-width:none;padding:0}h2{break-after:avoid}table,li{break-inside:avoid}}'
+      +'</style></head><body>');
+    H.push('<div class="tb"><b>건축 사업 법규 사전검토 보고서</b><div><button class="pr" onclick="window.print()">🖨 인쇄 / PDF 저장</button><button class="cl" onclick="window.close()">닫기</button></div></div>');
+    H.push('<div class="doc">');
+    H.push('<h1>건축 사업 법규 사전검토 보고서</h1><div class="sub">'+esc(input.sido)+' '+esc(input.sigungu)+' · '+esc(input.useType)+'</div>');
+    H.push('<div class="meta">생성일 '+ymd+' · 법령 검토 기준일 <b>'+LAW_BASE+'</b> (이후 시행·개정 법령 미반영) · 개발자 : '+DEV+'</div>');
+    // 1. 사업 개요
+    H.push('<h2>1. 사업 개요</h2><table class="ov">');
+    H.push('<tr><th>소재지</th><td>'+esc(input.sido)+' '+esc(input.sigungu)+'</td><th>사업방식</th><td>'+esc(input.bizType)+'</td></tr>');
+    H.push('<tr><th>용도지역</th><td>'+esc(zone)+'</td><th>주용도</th><td>'+esc(input.useType)+'</td></tr>');
+    H.push('<tr><th>대지면적</th><td>'+nf(input.siteArea)+' ㎡</td><th>건축면적</th><td>'+nf(input.buildingArea)+' ㎡</td></tr>');
+    H.push('<tr><th>전체연면적</th><td>'+nf(input.totalArea)+' ㎡</td><th>최고층수 / 세대</th><td>'+nf(input.floors)+'층 / '+nf(input.units)+'세대·실</td></tr>');
+    H.push('<tr><th>건폐율</th><td>'+bcr.toFixed(1)+'% / 한도 '+lim[0]+'% <span class="tag '+(bcrOk?'ok">적합':'bad">초과')+'</span></td><th>용적률</th><td>'+far.toFixed(1)+'% / 한도 '+lim[1]+'% <span class="tag '+(farOk?'ok">적합':'bad">초과')+'</span></td></tr>');
+    H.push('<tr><th>법령 적용시점</th><td colspan="3">'+(input.lawMode==='old'?(input.lawYear+'년 '+input.lawMonth+'월 (구법·처분시 기준)'):'최신 법령 기준')+'</td></tr>');
+    H.push('</table>');
+    // 2. 인허가 절차
+    H.push('<h2>2. 인허가 절차 — '+esc(tl.route)+'</h2><ul class="tl">');
+    tl.steps.forEach(function(s,i){
+      var side=(s.side&&s.side.length)?('<div class="side">'+s.side.map(function(t){return '<span class="tag '+(t.k==='req'?'r-req':'r-ver')+'">'+esc(t.t)+'</span>';}).join('')+'</div>'):'';
+      H.push('<li><span class="n">'+(i+1)+'</span><b>'+esc(s.label)+'</b>'+(s.org&&s.org!=='—'?' <span class="cap">['+esc(s.org)+']</span>':'')+(s.desc?'<div class="cap" style="margin-top:3px">'+esc(s.desc)+'</div>':'')+side+'</li>');
+    });
+    H.push('</ul>');
+    // 3. 심의·영향평가
+    H.push('<h2>3. 심의·영향평가 대상 ('+revReq.length+'건 대상 / 총 '+rev.length+'건)</h2><table class="ck"><tr><th style="width:auto">항목</th><th style="width:90px">대상</th><th style="width:200px">근거 법령</th></tr>');
+    rev.forEach(function(r){
+      H.push('<tr><td>'+esc(r.label)+(r.required&&r.matched&&r.matched[0]?'<div class="cap" style="margin-top:2px">▶ '+esc(r.matched[0].name)+'</div>':'')+'</td><td><span class="tag '+(r.required?'r-req">대상':'r-na">비대상')+'</span></td><td class="b">'+esc((r.laws||[]).map(function(l){return l.name;}).join(' / '))+'</td></tr>');
+    });
+    H.push('</table>');
+    // 4. 법규 체크리스트
+    H.push('<h2>4. 법규 체크리스트</h2>');
+    TABORD.forEach(function(k){
+      var arr=byTab[k]; if(!arr||!arr.length)return;
+      var nA=arr.filter(function(c){return c.status==='A';}).length, nV=arr.filter(function(c){return c.status==='V';}).length;
+      H.push('<table class="ck"><tr><th style="width:auto">'+TABN[k]+' <span class="cap">(대상 '+nA+' · 검토 '+nV+' / '+arr.length+'건)</span></th><th style="width:80px">판정</th><th style="width:190px">근거 법령</th></tr>');
+      arr.forEach(function(c){
+        H.push('<tr><td>'+esc(c.label)+'</td><td><span class="tag '+statCls(c.status)+'">'+statTxt(c.status)+'</span></td><td class="b">'+esc(c.basis)+'</td></tr>');
+      });
+      H.push('</table>');
+    });
+    // 5. 주민공동시설
+    if(isApt){ var cf=communityFacilities(input);
+      H.push('<h2>5. 주민공동시설 세부설치기준 (총량 '+nf(cf.total)+'㎡)</h2><table class="ck"><tr><th style="width:170px">항목</th><th>기준</th><th style="width:120px">현재</th></tr>');
+      cf.rows.forEach(function(r){ H.push('<tr><td><b>'+esc(r.item)+'</b></td><td>'+esc(r.std)+(r.point?'<div class="cap" style="margin-top:2px">'+esc(r.point)+'</div>':'')+'</td><td><span class="tag '+(r.kind==='req'?'r-req':r.kind==='info'?'r-ver':'r-na')+'">'+esc(r.status)+'</span>'+(r.value?'<div class="cap" style="margin-top:2px">'+esc(r.value)+'</div>':'')+'</td></tr>'); });
+      H.push('</table>');
+    }
+    H.push('<div class="disc"><b>※ 면책</b> 본 보고서는 입력값을 기준으로 법제처 원문 데이터에 따라 자동 산정한 <b>참고용 사전검토</b> 자료입니다. 실제 적용 기준은 지자체 조례·지구단위계획·허가권자 협의에 따라 달라질 수 있으며, 최종 적합 여부는 인허가 절차에서 확정됩니다.<br>법령 검토 기준일 <b>'+LAW_BASE+'</b> 이후 시행·개정·신설된 법령은 포함되지 않으므로, 시행시점이 이후인 사업은 최신 원문을 확인하십시오. · 원 개발자 : '+DEV+'</div>');
+    H.push('</div></body></html>');
+    return H.join('');
+  }
+
+  window.APP_DATA={ZONES:ZONES,BUILDING_USES:BUILDING_USES,REGIONS:REGIONS,BIZ_TYPES:BIZ_TYPES,PERMIT_STEPS:[],assessReviews:assessReviews,communityFacilities:communityFacilities,evaluate:evaluate,permitTimeline:permitTimeline,buildReportHTML:buildReportHTML,LAW_BASE:LAW_BASE,DEV:DEV};
+})();
+</script>
+<script>// 건축법규콘솔 - 공유 UI 컴포넌트 + 스타일 주입
+const {
+  useState,
+  useEffect,
+  useMemo,
+  useRef
+} = React;
+
+// ---- 스타일 주입 ----
+(function injectStyles() {
+  const css = `
+  .app { display: grid; grid-template-columns: 248px 1fr; height: 100vh; background: var(--bg); }
+
+  /* 사이드바 */
+  .sidebar { background: linear-gradient(180deg,#101a27,#0d1521); color: #cdd8e6; display: flex; flex-direction: column; border-right: 1px solid #0a1018; }
+  .brand { padding: 22px 22px 18px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .brand-mark { width: 34px; height: 34px; border-radius: 8px; background: var(--accent-2); display: grid; place-items: center; box-shadow: 0 4px 14px rgba(37,99,235,.45); flex: none; }
+  .brand-mark svg { width: 19px; height: 19px; }
+  .brand-name { font-weight: 600; font-size: 15px; color: #fff; letter-spacing: -.01em; line-height: 1.15; }
+  .brand-sub { font-size: 11px; color: #6f8198; margin-top: 1px; font-family: var(--mono); }
+
+  .nav { padding: 16px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .nav-label { font-size: 10.5px; letter-spacing: .12em; color: #5e7188; padding: 6px 12px 8px; font-weight: 600; }
+  .step { display: flex; align-items: flex-start; gap: 12px; padding: 11px 12px; border-radius: 9px; background: transparent; border: none; color: #9fb0c4; text-align: left; width: 100%; transition: background .15s, color .15s; position: relative; }
+  .step:hover { background: rgba(255,255,255,.04); color: #e4ecf5; }
+  .step.active { background: rgba(37,99,235,.16); color: #fff; }
+  .step.active::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent-2); }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid currentColor; display: grid; place-items: center; font-size: 12px; font-weight: 600; flex: none; font-family: var(--mono); opacity: .7; }
+  .step.active .step-num { background: var(--accent-2); border-color: var(--accent-2); color: #fff; opacity: 1; }
+  .step.done .step-num { background: var(--ok); border-color: var(--ok); color: #fff; opacity: 1; }
+  .step-txt { padding-top: 1px; }
+  .step-name { display: block; font-size: 13.5px; font-weight: 500; line-height: 1.3; }
+  .step-desc { display: block; font-size: 11px; color: #6f8198; margin-top: 2px; line-height: 1.3; }
+  .step.active .step-desc { color: #9fb8d6; }
+
+  .side-foot { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,.06); font-size: 11px; color: #5e7188; line-height: 1.5; }
+
+  .substep-wrap { display: flex; flex-direction: column; gap: 1px; margin: 2px 0 6px 24px; padding-left: 12px; border-left: 1px solid rgba(255,255,255,.1); }
+  .substep { display: flex; align-items: center; gap: 9px; padding: 7px 12px; border: none; background: transparent; color: #8294a8; text-align: left; width: 100%; border-radius: 7px; font-size: 12.5px; transition: background .14s, color .14s; }
+  .substep:hover { background: rgba(255,255,255,.04); color: #cfe0f0; }
+  .substep.active { color: #fff; background: rgba(37,99,235,.14); font-weight: 500; }
+  .substep-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex: none; opacity: .7; }
+
+  .step4-tabs { display: flex; flex-wrap: wrap; gap: 5px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 5px; margin-bottom: 18px; box-shadow: var(--shadow); }
+  .step4-tabs button { padding: 9px 16px; border: none; background: transparent; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--ink-2); transition: all .14s; }
+  .step4-tabs button:hover { background: #f1f4f8; color: var(--ink); }
+  .step4-tabs button.on { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(29,78,216,.25); }
+  .tab-count { display: inline-block; margin-left: 7px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,.08); padding: 1px 7px; border-radius: 999px; }
+  .step4-tabs button.on .tab-count { background: rgba(255,255,255,.25); }
+
+  /* 메인 */
+  .main { display: flex; flex-direction: column; overflow: hidden; background: #eef1f5; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 64px; background: #fff; border-bottom: 1px solid var(--line); flex: none; }
+  .topbar-l { display: flex; align-items: baseline; gap: 14px; }
+  .topbar h1 { font-size: 18px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+  .topbar-tag { font-size: 12px; color: var(--ink-2); font-family: var(--mono); }
+  .topbar-r { display: flex; align-items: center; gap: 14px; }
+  .proj-chip { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-2); background: #f1f4f8; border: 1px solid var(--line); padding: 7px 12px; border-radius: 8px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+
+  .scroll { overflow-y: auto; flex: 1; }
+  .page { max-width: 920px; margin: 0 auto; padding: 36px 32px 80px; animation: fade .35s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .page-head { margin-bottom: 26px; }
+  .eyebrow { font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: .04em; font-family: var(--mono); }
+  .page-title { font-size: 26px; font-weight: 600; margin: 7px 0 6px; letter-spacing: -.02em; }
+  .page-lede { font-size: 14.5px; color: var(--ink-2); line-height: 1.55; max-width: 600px; }
+
+  /* 카드 */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden; }
+  .card-head { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .card-head h3 { margin: 0; font-size: 15px; font-weight: 600; }
+  .card-head .hint { font-size: 12px; color: var(--muted); }
+  .card-body { padding: 22px; }
+
+  /* 폼 */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px 20px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 13px 14px; }
+  .rev-input-card .field label { font-size: 11px; }
+  .rev-input-card .field select { padding: 7px 9px; font-size: 12.5px; }
+
+  /* 심의·영향평가 — 체크리스트와 통일된 행 스타일 */
+  .rev-row { border-bottom: 1px solid var(--line); }
+  .rev-row:last-child { border-bottom: none; }
+  .check-row.clickable { cursor: pointer; }
+  .check-row.clickable:hover { background: #fafbfc; }
+  .check-row.clickable.on { background: #fffaf3; box-shadow: inset 3px 0 0 var(--warn); }
+  .check-row.clickable.on:hover { background: #fff5ea; }
+  .ck-caret { font-size: 8px; margin-left: 5px; opacity: .6; }
+  .rev-row-detail { margin: 0 10px 10px 40px; padding: 14px 16px; background: #f7f9fc; border: 1px solid var(--line); border-radius: 9px; animation: fade .2s ease; }
+  .rev-detail-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-size: 12px; color: var(--ink-2); }
+  .rev-detail-meta b { color: var(--ink); margin-right: 6px; }
+  .law-link { font-size: 11px; color: var(--accent); background: var(--accent-soft); border: 1px solid #d4e0fb; padding: 3px 9px; border-radius: 6px; text-decoration: none; font-weight: 500; white-space: nowrap; }
+  .law-link:hover { background: #e0e9fd; }
+  .info-pill { display: inline-block; background: var(--warn-soft); color: var(--warn); border: 1px solid #f0cf9a; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px; font-family: var(--mono); white-space: nowrap; }
+  .info-none { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+  .detail-label { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--ink); background: #eef1f5; padding: 3px 9px; border-radius: 5px; }
+  .crit-detail-text { font-size: 12px; color: var(--ink-2); line-height: 1.5; padding: 9px 12px; background: #fff; border: 1px solid var(--line); border-radius: 7px; }
+
+  /* 주민공동시설 세부설치기준 표 */
+  .cf-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .cf-table thead th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink-2); background: #f1f4f8; padding: 11px 16px; border-bottom: 1px solid var(--line-strong); }
+  .cf-table td { padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.5; }
+  .cf-table tr:last-child td { border-bottom: none; }
+  .cf-table tr:hover td { background: #fafbfc; }
+  .cf-item { font-weight: 700; color: var(--ink); white-space: nowrap; width: 120px; }
+  .cf-std { color: var(--ink); width: 34%; }
+  .cf-status { width: 130px; }
+  .cf-point { color: var(--ink-2); font-size: 12px; }
+  .cf-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+  .cf-badge.req { background: var(--bad-soft); color: var(--bad); }
+  .cf-badge.no { background: #eef1f5; color: var(--muted); }
+  .cf-badge.info { background: var(--warn-soft); color: var(--warn); }
+  .cf-badge.link { background: var(--accent-soft); color: var(--accent); }
+  .cf-value { font-size: 11px; color: var(--ink-2); margin-top: 6px; font-family: var(--mono); line-height: 1.4; }
+  .crit-mini { background: var(--warn); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 5px; white-space: nowrap; }
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field.col-span { grid-column: 1 / -1; }
+  .field label { font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
+  .field .unit-wrap { position: relative; display: flex; align-items: center; }
+  .field input, .field select { width: 100%; padding: 10px 12px; font-size: 14px; border: 1px solid var(--line-strong); border-radius: 8px; background: #fff; color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--accent-2); box-shadow: 0 0 0 3px rgba(37,99,235,.13); }
+  .field .unit-wrap .unit { position: absolute; right: 12px; font-size: 12.5px; color: var(--muted); font-family: var(--mono); pointer-events: none; }
+  .field .unit-wrap input { padding-right: 40px; }
+  .field .help { font-size: 11.5px; color: var(--muted); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip { padding: 9px 15px; border: 1px solid var(--line-strong); border-radius: 999px; background: #fff; font-size: 13px; color: var(--ink-2); transition: all .14s; font-weight: 500; }
+  .chip:hover { border-color: var(--accent-2); color: var(--accent); }
+  .chip.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row .t-label { font-size: 13.5px; font-weight: 500; }
+  .toggle-row .t-basis { font-size: 11.5px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+  .switch { width: 44px; height: 25px; border-radius: 999px; background: #cbd5e1; border: none; position: relative; transition: background .18s; flex: none; }
+  .switch.on { background: var(--ok); }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: #fff; transition: transform .18s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+  .switch.on::after { transform: translateX(19px); }
+
+  /* 버튼 */
+  .btn { padding: 11px 20px; border-radius: 9px; border: 1px solid transparent; font-size: 14px; font-weight: 500; transition: all .15s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #1a44c4; box-shadow: 0 4px 14px rgba(29,78,216,.3); }
+  .btn-ghost { background: #fff; color: var(--ink-2); border-color: var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--ink-2); color: var(--ink); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+  .footer-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+
+  /* 통계 / 미터 */
+  .meters { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .meter { padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .meter-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .meter-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .meter-val { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+  .meter-val small { color: var(--muted); font-weight: 400; }
+  .bar { height: 9px; background: #eef1f5; border-radius: 999px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 999px; transition: width .6s cubic-bezier(.2,.8,.2,1); }
+  .bar-limit { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); opacity: .55; }
+  .meter-foot { font-size: 11.5px; color: var(--muted); margin-top: 9px; }
+
+  /* 절차 타임라인 */
+  .timeline { position: relative; padding-left: 8px; }
+  .tl-item { display: flex; gap: 16px; padding-bottom: 4px; }
+  .tl-rail { display: flex; flex-direction: column; align-items: center; flex: none; }
+  .tl-dot { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 600; font-family: var(--mono); flex: none; border: 2px solid var(--line-strong); background: #fff; color: var(--muted); transition: all .2s; }
+  .tl-item.active .tl-dot { border-color: var(--accent); background: var(--accent); color: #fff; box-shadow: 0 0 0 4px var(--accent-soft); }
+  .tl-item.done .tl-dot { border-color: var(--ok); background: var(--ok); color: #fff; }
+  .tl-line { width: 2px; flex: 1; background: var(--line); margin: 4px 0; min-height: 18px; }
+  .tl-item.done .tl-line { background: var(--ok); }
+  .tl-body { padding-bottom: 20px; flex: 1; }
+  .tl-item:last-child .tl-body { padding-bottom: 0; }
+  .tl-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: #fff; transition: all .18s; cursor: pointer; }
+  .tl-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow); }
+  .tl-item.active .tl-card { border-color: var(--accent); background: var(--accent-soft); }
+  .tl-name { font-size: 14.5px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .tl-meta { display: flex; gap: 16px; margin-top: 5px; font-size: 12px; color: var(--ink-2); }
+  .tl-meta b { font-weight: 600; color: var(--ink); }
+  .tl-desc { font-size: 12.5px; color: var(--ink-2); margin-top: 7px; line-height: 1.5; }
+
+  /* 심의 항목 */
+  .review-item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .review-item:last-child { border-bottom: none; }
+  .rev-icon { width: 38px; height: 38px; border-radius: 9px; display: grid; place-items: center; flex: none; }
+  .rev-icon svg { width: 19px; height: 19px; }
+  .rev-main { flex: 1; }
+  .rev-name { font-size: 14px; font-weight: 600; }
+  .rev-basis { font-size: 11.5px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+  .rev-reason { font-size: 12px; color: var(--ink-2); margin-top: 4px; }
+
+  /* 뱃지 */
+  .badge { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .badge.req { background: var(--warn-soft); color: var(--warn); }
+  .badge.notreq { background: #eef1f5; color: var(--ink-2); }
+  .badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .badge.bad { background: var(--bad-soft); color: var(--bad); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* 체크리스트 */
+  .summary-banner { border-radius: 12px; padding: 24px 26px; display: flex; align-items: center; gap: 22px; margin-bottom: 22px; color: #fff; }
+  .summary-banner.ok { background: linear-gradient(135deg,#047857,#0f9b6c); }
+  .summary-banner.bad { background: linear-gradient(135deg,#b91c1c,#dc4444); }
+  .sb-ring { width: 72px; height: 72px; flex: none; }
+  .sb-txt h2 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
+  .sb-txt p { margin: 0; font-size: 13.5px; opacity: .92; line-height: 1.5; }
+  .sb-stats { margin-left: auto; display: flex; gap: 26px; text-align: center; }
+  .sb-stat .n { font-size: 28px; font-weight: 700; font-family: var(--mono); line-height: 1; }
+  .sb-stat .l { font-size: 11.5px; opacity: .85; margin-top: 5px; }
+
+  .check-row { display: grid; grid-template-columns: 30px 1fr auto auto; gap: 16px; align-items: center; padding: 15px 6px; border-bottom: 1px solid var(--line); transition: background .15s; }
+  .check-row:hover { background: #fafbfc; }
+  .check-row:last-child { border-bottom: none; }
+  .ck-icon { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+  .ck-icon svg { width: 14px; height: 14px; }
+  .ck-name { font-size: 14px; font-weight: 600; }
+  .ck-basis { font-size: 11.5px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+  .ck-detail { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
+  .ck-vals { text-align: right; font-family: var(--mono); font-size: 12.5px; min-width: 110px; }
+  .ck-vals .limit { color: var(--ink-2); }
+  .ck-vals .actual { font-weight: 600; margin-top: 2px; }
+
+  .filter-tabs { display: flex; gap: 4px; background: #eef1f5; padding: 4px; border-radius: 9px; }
+  .filter-tabs button { padding: 7px 15px; border: none; background: transparent; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--ink-2); transition: all .14s; }
+  .filter-tabs button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+  .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 13.5px; }
+
+  /* 조밀 2단 레이아웃 */
+  .page.wide { max-width: 1140px; }
+  .split { display: grid; grid-template-columns: 1fr 340px; gap: 22px; align-items: start; }
+  .split .card { margin-bottom: 0; }
+  .split .stack { display: flex; flex-direction: column; gap: 22px; }
+  .side-sticky { position: sticky; top: 8px; display: flex; flex-direction: column; gap: 22px; }
+  .card.tight .card-body { padding: 16px 18px; }
+  .card.tight .card-head { padding: 13px 18px; }
+  .seg { display: flex; gap: 4px; background: #eef1f5; padding: 4px; border-radius: 9px; }
+  .seg button { flex: 1; padding: 8px 10px; border: none; background: transparent; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--ink-2); transition: all .14s; }
+  .seg button.on { background: #fff; color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .dup-row { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line-strong); }
+  .dup-check { display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 500; color: var(--ink); cursor: pointer; user-select: none; }
+  .dup-check input { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; }
+  .dup-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; animation: fade .25s ease; }
+
+  /* 심의 대상 판정 — 개편 */
+  .rev-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 26px; }
+  .rev-sum-card { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-radius: 12px; border: 1px solid var(--line); background: #fff; }
+  .rev-sum-card.req { background: var(--warn-soft); border-color: #f3d9b0; }
+  .rev-sum-n { font-family: var(--mono); font-size: 34px; font-weight: 700; line-height: 1; }
+  .rev-sum-card.req .rev-sum-n { color: var(--warn); }
+  .rev-sum-card.notreq .rev-sum-n { color: var(--ink-2); }
+  .rev-sum-l { font-size: 13.5px; color: var(--ink-2); }
+  .rev-sum-l b { color: var(--ink); }
+
+  .rev-group-head { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .rev-grid { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+  .rev-grid { display: flex; flex-direction: column; gap: 10px; }
+  .rev-card { padding: 13px 16px; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+  .rev-card.req { border-left: 4px solid var(--warn); background: #fffdfa; }
+  .rev-card:not(.req) { background: #fbfcfd; }
+  .rev-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+  .rev-card-title { display: flex; align-items: center; gap: 10px; }
+  .rev-card .rev-name { font-size: 13.5px; font-weight: 700; }
+  .law-link { font-size: 10.5px; color: var(--accent); background: var(--accent-soft); border: 1px solid #d4e0fb; padding: 2px 7px; border-radius: 5px; text-decoration: none; font-weight: 500; white-space: nowrap; }
+  .law-link:hover { background: #e0e9fd; }
+
+  .rev-banner { display: flex; align-items: baseline; gap: 9px; padding: 8px 11px; border-radius: 7px; margin-bottom: 10px; font-size: 12px; line-height: 1.45; }
+  .rev-banner.req { background: var(--warn-soft); color: var(--ink); }
+  .rev-banner.notreq { background: #eef1f5; color: var(--ink-2); }
+  .rev-banner-tag { font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 5px; white-space: nowrap; flex: none; }
+  .rev-banner.req .rev-banner-tag { background: var(--bad); color: #fff; }
+  .rev-banner.notreq .rev-banner-tag { background: #c4cdd9; color: #fff; }
+  .rev-banner-txt b { color: var(--warn); }
+
+  .rev-meta-line { font-size: 11.5px; color: var(--ink-2); margin-bottom: 5px; line-height: 1.45; display: flex; gap: 7px; flex-wrap: wrap; align-items: baseline; }
+  .rev-meta-k { font-weight: 600; color: var(--ink); font-size: 10.5px; background: #eef1f5; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+  .rev-desc { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .law-chips { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+  .law-chip { font-size: 11px; background: #fff; border: 1px solid var(--line-strong); padding: 3px 8px; border-radius: 6px; color: var(--ink); font-family: var(--mono); }
+  .law-chip em { font-style: normal; color: var(--muted); font-size: 10px; }
+
+  .rev-applied { margin: 9px 0 4px; padding: 7px 11px; background: #fffaf0; border: 1px solid #f0d9a8; border-radius: 7px; font-size: 11.5px; font-weight: 600; color: var(--warn); }
+  .rev-toggle { margin-top: 8px; background: none; border: none; color: var(--ink-2); font-size: 11.5px; font-weight: 600; padding: 3px 0; }
+  .rev-toggle:hover { color: var(--accent); }
+  .rev-detail { margin-top: 8px; animation: fade .2s ease; }
+  .crit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .crit { display: flex; gap: 9px; align-items: center; font-size: 11.5px; color: var(--ink-2); line-height: 1.4; padding: 6px 11px; border-radius: 6px; background: #fff; border: 1px solid var(--line); }
+  .crit.met { background: #fff7ee; border-color: #f0dcc0; color: var(--ink); font-weight: 600; }
+  .crit-text { flex: 1; }
+  .crit-tag { background: var(--warn); color: #fff; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 5px; white-space: nowrap; font-family: var(--mono); }
+  .rev-foot { font-size: 11px; color: var(--ink-2); margin-top: 8px; line-height: 1.45; }
+  .rev-foot b { color: var(--ink); margin-right: 6px; }
+  .rev-foot.note { display: flex; align-items: center; gap: 6px; color: var(--warn); margin-top: 5px; }
+
+  .rev-section { margin-bottom: 22px; }
+  .rev-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-bottom: 9px; margin-bottom: 12px; border-bottom: 2px solid var(--ink); }
+  .rev-section-title { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+  .rev-section-desc { font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
+  .rev-section-count { font-size: 12px; color: var(--ink-2); white-space: nowrap; font-family: var(--mono); }
+  .rev-section-count b { font-size: 15px; color: var(--warn); font-weight: 700; }
+  `;
+  const tag = document.createElement("style");
+  tag.textContent = css;
+  document.head.appendChild(tag);
 })();
 
-// 초기 기본 사업 정보 — 과천 사례 (경기도 과천시 / 제2종일반주거 / 아파트 280세대 / 지상7층 / 대지 30,000㎡ / 연면적 62,000㎡ / 민간분양)
-function setDefaultProject(){
-  const sR=document.getElementById('sR'); if(sR) sR.value='경기도';
-  updateCitySelect();
-  const sC=document.getElementById('sC'); if(sC) sC.value='과천시';
-  const sZ=document.getElementById('sZ'); if(sZ) sZ.value='zone4';
-  const sB=document.getElementById('sB'); if(sB) sB.value='apt';
-  const sP=document.getElementById('sP'); if(sP) sP.value='p';
+// ---- 아이콘 ----
+const Icon = {
+  building: p => /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    ...p
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01M9 17h6"
+  })),
+  check: p => /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2.5",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    ...p
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M20 6 9 17l-5-5"
+  })),
+  x: p => /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2.5",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    ...p
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M18 6 6 18M6 6l12 12"
+  })),
+  arrow: p => /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    ...p
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M5 12h14M12 5l7 7-7 7"
+  })),
+  back: p => /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    ...p
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M19 12H5M12 19l-7-7 7-7"
+  })),
+  scale: p => /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    ...p
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 3v18M7 7l-4 7h8zM17 7l-4 7h8zM5 21h14"
+  })),
+  doc: p => /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    ...p
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M14 2v6h6M9 13h6M9 17h4"
+  })),
+  alert: p => /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    ...p
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"
+  }))
+};
+Object.assign(window, {
+  Icon,
+  useState,
+  useEffect,
+  useMemo,
+  useRef
+});</script>
+<script>// 건축법규콘솔 - 메인 앱
+const {
+  ZONES,
+  BUILDING_USES,
+  REGIONS,
+  BIZ_TYPES,
+  assessReviews,
+  communityFacilities,
+  evaluate,
+  permitTimeline,
+  LAW_BASE,
+  DEV
+} = window.APP_DATA;
+const SIDO_LIST = Object.keys(REGIONS);
+const NOW_YEAR = new Date().getFullYear();
+const LAW_YEARS = Array.from({
+  length: 5
+}, (_, i) => NOW_YEAR - i);
+const LAW_MONTHS = Array.from({
+  length: 12
+}, (_, i) => i + 1);
+
+// 심의 판정 입력 항목 정의
+const REVIEW_INPUTS = [{
+  key: "trafficZone",
+  label: "도시교통정비지역 구분",
+  options: ["도시교통정비지역", "교통권역", "해당 없음"]
+}, {
+  key: "digDepth",
+  label: "지하 굴착깊이",
+  options: ["10m 미만", "10m~20m", "20m 이상"]
+}, {
+  key: "landscapeZone",
+  label: "경관지구·중점경관관리구역",
+  options: ["해당 없음", "경관지구", "중점경관관리구역"]
+}, {
+  key: "eduZone",
+  label: "교육환경보호구역(학교 200m)",
+  options: ["해당 없음", "상대보호구역", "절대보호구역"]
+}, {
+  key: "heritageZone",
+  label: "매장유산 유존지역·고시구역",
+  options: ["해당 없음", "매장유산 유존지역", "역사문화환경 보존지역"]
+}, {
+  key: "disasterZone",
+  label: "자연재해위험개선지구·해일위험지구",
+  options: ["해당 없음", "자연재해위험개선지구", "해일위험지구"]
+}, {
+  key: "envLocation",
+  label: "소규모 환경평가 입지(용도지역)",
+  options: ["도시지역(주거·상업·공업)", "관리지역", "농림지역", "자연환경보전지역", "해당 없음"]
+}, {
+  key: "districtPlan",
+  label: "지구단위계획에 따른 사업",
+  options: ["해당 없음", "해당(지구단위계획 시행)"]
+}];
+const STEPS = [{
+  id: 0,
+  name: "기본정보 입력",
+  desc: "대지·건축물 제원"
+}, {
+  id: 1,
+  name: "인허가 절차",
+  desc: "신청 단계 및 소요"
+}, {
+  id: 2,
+  name: "심의·영향평가",
+  desc: "대상 여부 판정"
+}, {
+  id: 3,
+  name: "법규 체크리스트",
+  desc: "적합성 검토 결과"
+}];
+const DEFAULT_INPUT = {
+  sido: "경기도",
+  sigungu: "과천시",
+  zone: "zone4",
+  useType: "공동주택 (아파트)",
+  siteArea: 30000,
+  buildingArea: 15000,
+  totalArea: 62000,
+  floors: 18,
+  units: 280,
+  bizType: "민간분양",
+  dupZone: false,
+  dupBCR: "",
+  dupFAR: "",
+  lawMode: "latest",
+  lawYear: 2024,
+  lawMonth: 1,
+  trafficZone: "도시교통정비지역",
+  digDepth: "10m~20m",
+  landscapeZone: "해당 없음",
+  eduZone: "해당 없음",
+  heritageZone: "해당 없음",
+  disasterZone: "해당 없음",
+  envLocation: "도시지역(주거·상업·공업)",
+  districtPlan: "해당(지구단위계획 시행)",
+  sunlight: true,
+  evac: true,
+  bf: true
+};
+const STORAGE_KEY = "bcc_state_v8";
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    if (s && s.input) return s;
+  } catch (e) {}
+  return {
+    step: 0,
+    input: DEFAULT_INPUT,
+    done: []
+  };
 }
-setDefaultProject();
-render();
-</script>
-<footer style="max-width:1360px;margin:24px auto 40px;padding:14px 20px;border-top:1px solid #d2dae5;color:#64748b;font-size:11px;line-height:1.7;text-align:center">
-  건축 사업 법규검토 콘솔 · <b style="color:#0b1b2e">개발자 : 최감용</b><br>
-  본 도구 및 산정 로직의 출처(개발자 최감용) 표기는 재배포·인용 시에도 유지해 주세요.
-</footer>
-</body>
-</html>
+function ChipSelect({
+  value,
+  options,
+  onChange,
+  cls,
+  display
+}) {
+  const [edit, setEdit] = useState(false);
+  if (edit) return /*#__PURE__*/React.createElement("select", {
+    className: "ts-edit",
+    autoFocus: true,
+    value: value,
+    onChange: e => {
+      onChange(e.target.value);
+      setEdit(false);
+    },
+    onBlur: () => setEdit(false)
+  }, options.map(o => /*#__PURE__*/React.createElement("option", {
+    key: o.v,
+    value: o.v
+  }, o.t)));
+  return /*#__PURE__*/React.createElement("span", {
+    className: "ts-chip ts-click " + (cls || ""),
+    onClick: () => setEdit(true),
+    title: "클릭하여 수정"
+  }, display);
+}
+function ChipNum({
+  value,
+  onChange,
+  prefix,
+  suffix,
+  cls
+}) {
+  const [edit, setEdit] = useState(false);
+  if (edit) return /*#__PURE__*/React.createElement("input", {
+    className: "ts-edit num",
+    autoFocus: true,
+    type: "number",
+    value: value,
+    onChange: e => onChange(e.target.value),
+    onBlur: () => setEdit(false),
+    onKeyDown: e => {
+      if (e.key === "Enter") setEdit(false);
+    }
+  });
+  return /*#__PURE__*/React.createElement("span", {
+    className: "ts-chip ts-click " + (cls || ""),
+    onClick: () => setEdit(true),
+    title: "클릭하여 수정"
+  }, prefix || "", Number(value || 0).toLocaleString("ko-KR"), suffix || "");
+}
+function ChipRegion({
+  input,
+  setInput
+}) {
+  const [edit, setEdit] = useState(false);
+  if (edit) return /*#__PURE__*/React.createElement("span", {
+    className: "ts-edit-wrap"
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "ts-edit",
+    autoFocus: true,
+    value: input.sido,
+    onChange: e => setInput({
+      sido: e.target.value,
+      sigungu: (REGIONS[e.target.value] || [])[0]
+    })
+  }, SIDO_LIST.map(s => /*#__PURE__*/React.createElement("option", {
+    key: s,
+    value: s
+  }, s))), /*#__PURE__*/React.createElement("select", {
+    className: "ts-edit",
+    value: input.sigungu,
+    onChange: e => {
+      setInput({
+        sigungu: e.target.value
+      });
+      setEdit(false);
+    },
+    onBlur: () => setEdit(false)
+  }, (REGIONS[input.sido] || []).map(g => /*#__PURE__*/React.createElement("option", {
+    key: g,
+    value: g
+  }, g))));
+  return /*#__PURE__*/React.createElement("span", {
+    className: "ts-chip ts-click ts-region",
+    onClick: () => setEdit(true),
+    title: "클릭하여 수정"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dot",
+    style: {
+      background: "var(--ok)"
+    }
+  }), input.sido, " ", input.sigungu);
+}
+function App() {
+  const [state, setState] = useState(load);
+  const [step4Tab, setStep4Tab] = useState("house");
+  const [step3Tab, setStep3Tab] = useState("assess");
+  const {
+    step,
+    input,
+    done
+  } = state;
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
+  const setStep = s => setState(p => ({
+    ...p,
+    step: s
+  }));
+  const setInput = patch => setState(p => ({
+    ...p,
+    input: {
+      ...p.input,
+      ...patch
+    }
+  }));
+  const markDone = s => setState(p => ({
+    ...p,
+    done: p.done.includes(s) ? p.done : [...p.done, s]
+  }));
+  const next = () => {
+    markDone(step);
+    if (step < 3) setStep(step + 1);
+  };
+  const prev = () => {
+    if (step > 0) setStep(step - 1);
+  };
+  const result = useMemo(() => evaluate(input), [input]);
+  const reviews = useMemo(() => assessReviews(input), [input]);
+  const isApt = input.useType === "공동주택 (아파트)" || input.useType === "주상복합 (주거+상업)";
+  const nf = n => Number(n || 0).toLocaleString("ko-KR");
+  const zoneLabel = (ZONES.find(z => z.id === input.zone) || {}).label || input.zone;
+  const isHousing = ["공동주택 (아파트)", "주상복합 (주거+상업)", "연립·다세대주택", "오피스텔 (준주택)"].indexOf(input.useType) !== -1;
+  const TABDEF = [{
+    key: "site",
+    name: "대지·건축 일반"
+  }, {
+    key: "house",
+    name: "주택건설기준"
+  }, {
+    key: "community",
+    name: "부대복리·주민공동시설"
+  }, {
+    key: "park",
+    name: "주차장"
+  }, {
+    key: "fire",
+    name: "소방·피난·안전"
+  }, {
+    key: "energy",
+    name: "에너지·친환경"
+  }, {
+    key: "mech",
+    name: "기계설비"
+  }, {
+    key: "zone",
+    name: "용도지역·조례·지구단위"
+  }, {
+    key: "etc",
+    name: "인허가·용도별 특수"
+  }];
+  const STEP4_TABS = TABDEF.filter(t => t.key === "community" ? isApt || result.checks.some(c => c.cat === "community") : result.checks.some(c => c.cat === t.key));
+  const activeStep4Tab = STEP4_TABS.some(t => t.key === step4Tab) ? step4Tab : STEP4_TABS[0].key;
+  const STEP3_TABS = [{
+    key: "assess",
+    name: "영향평가 및 사전검토"
+  }, {
+    key: "council",
+    name: "지자체 심의"
+  }];
+  const goTab = t => {
+    setStep(3);
+    setStep4Tab(t);
+  };
+  const goTab3 = t => {
+    setStep(2);
+    setStep3Tab(t);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "app"
+  }, /*#__PURE__*/React.createElement("aside", {
+    className: "sidebar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "brand"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "brand-mark"
+  }, /*#__PURE__*/React.createElement(Icon.building, {
+    style: {
+      color: "#fff"
+    }
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "brand-name"
+  }, "건축법규콘솔"), /*#__PURE__*/React.createElement("div", {
+    className: "brand-sub"
+  }, "CODECHECK"))), /*#__PURE__*/React.createElement("nav", {
+    className: "nav"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "nav-label"
+  }, "검토 절차"), STEPS.map(s => /*#__PURE__*/React.createElement(React.Fragment, {
+    key: s.id
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "step" + (s.id === step ? " active" : "") + (done.includes(s.id) ? " done" : ""),
+    onClick: () => setStep(s.id)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "step-num"
+  }, done.includes(s.id) && s.id !== step ? /*#__PURE__*/React.createElement(Icon.check, {
+    style: {
+      width: 13,
+      height: 13
+    }
+  }) : s.id + 1), /*#__PURE__*/React.createElement("span", {
+    className: "step-txt"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "step-name"
+  }, s.name), /*#__PURE__*/React.createElement("span", {
+    className: "step-desc"
+  }, s.desc))), s.id === 2 && step === 2 && /*#__PURE__*/React.createElement("div", {
+    className: "substep-wrap"
+  }, STEP3_TABS.map(t => /*#__PURE__*/React.createElement("button", {
+    key: t.key,
+    className: "substep" + (step3Tab === t.key ? " active" : ""),
+    onClick: () => goTab3(t.key)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "substep-dot"
+  }), t.name))), s.id === 3 && step === 3 && /*#__PURE__*/React.createElement("div", {
+    className: "substep-wrap"
+  }, STEP4_TABS.map(t => /*#__PURE__*/React.createElement("button", {
+    key: t.key,
+    className: "substep" + (activeStep4Tab === t.key ? " active" : ""),
+    onClick: () => goTab(t.key)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "substep-dot"
+  }), t.name)))))), /*#__PURE__*/React.createElement("div", {
+    className: "side-foot"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sf-base"
+  }, "법령 검토 기준일 ", /*#__PURE__*/React.createElement("b", null, LAW_BASE), /*#__PURE__*/React.createElement("br", null), "이후 시행·개정 법령은 미반영"), "본 콘솔의 판정은 입력값 기반의 참고용 사전검토이며, 최종 적합 여부는 허가권자 협의로 확정됩니다.", /*#__PURE__*/React.createElement("div", {
+    className: "sf-dev"
+  }, "개발자 : ", DEV))), /*#__PURE__*/React.createElement("main", {
+    className: "main"
+  }, /*#__PURE__*/React.createElement("header", {
+    className: "topbar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "topbar-l"
+  }, /*#__PURE__*/React.createElement("h1", null, STEPS[step].name), /*#__PURE__*/React.createElement("span", {
+    className: "topbar-tag"
+  }, "STEP ", step + 1, " / 4")), /*#__PURE__*/React.createElement("div", {
+    className: "topbar-summary"
+  }, /*#__PURE__*/React.createElement(ChipRegion, {
+    input: input,
+    setInput: setInput
+  }), /*#__PURE__*/React.createElement(ChipSelect, {
+    cls: "ts-zone",
+    value: input.zone,
+    display: zoneLabel,
+    onChange: v => setInput({
+      zone: v
+    }),
+    options: ZONES.map(z => ({
+      v: z.id,
+      t: z.label
+    }))
+  }), /*#__PURE__*/React.createElement(ChipSelect, {
+    cls: "ts-use",
+    value: input.useType,
+    display: input.useType,
+    onChange: v => setInput({
+      useType: v
+    }),
+    options: BUILDING_USES.map(u => ({
+      v: u,
+      t: u
+    }))
+  }), /*#__PURE__*/React.createElement(ChipNum, {
+    prefix: "대지 ",
+    suffix: "㎡",
+    value: input.siteArea,
+    onChange: v => setInput({
+      siteArea: v
+    })
+  }), /*#__PURE__*/React.createElement(ChipNum, {
+    prefix: "건축 ",
+    suffix: "㎡",
+    value: input.buildingArea,
+    onChange: v => setInput({
+      buildingArea: v
+    })
+  }), /*#__PURE__*/React.createElement(ChipNum, {
+    prefix: "연면적 ",
+    suffix: "㎡",
+    value: input.totalArea,
+    onChange: v => setInput({
+      totalArea: v
+    })
+  }), /*#__PURE__*/React.createElement(ChipNum, {
+    suffix: "층",
+    value: input.floors,
+    onChange: v => setInput({
+      floors: v
+    })
+  }), /*#__PURE__*/React.createElement(ChipNum, {
+    suffix: "세대/실",
+    value: input.units,
+    onChange: v => setInput({
+      units: v
+    })
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "scroll"
+  }, step === 0 && /*#__PURE__*/React.createElement(Step1, {
+    input: input,
+    setInput: setInput,
+    onNext: next
+  }), step === 1 && /*#__PURE__*/React.createElement(Step2, {
+    input: input,
+    onNext: next,
+    onPrev: prev
+  }), step === 2 && /*#__PURE__*/React.createElement(Step3, {
+    reviews: reviews,
+    input: input,
+    setInput: setInput,
+    tab: step3Tab,
+    setTab: setStep3Tab,
+    onNext: next,
+    onPrev: prev
+  }), step === 3 && /*#__PURE__*/React.createElement(Step4, {
+    result: result,
+    input: input,
+    tab: activeStep4Tab,
+    setTab: setStep4Tab,
+    tabs: STEP4_TABS,
+    onPrev: prev
+  }))));
+}
+
+// ---------- STEP 1 : 기본정보 입력 ----------
+function Field({
+  label,
+  help,
+  children
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "field"
+  }, /*#__PURE__*/React.createElement("label", null, label), children, help && /*#__PURE__*/React.createElement("span", {
+    className: "help"
+  }, help));
+}
+function NumInput({
+  value,
+  onChange,
+  unit
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "unit-wrap"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: value,
+    onChange: e => onChange(e.target.value)
+  }), unit && /*#__PURE__*/React.createElement("span", {
+    className: "unit"
+  }, unit));
+}
+function Step1({
+  input,
+  setInput,
+  onNext
+}) {
+  const zone = ZONES.find(z => z.id === input.zone) || ZONES[0];
+  const bcr = input.siteArea > 0 ? input.buildingArea / input.siteArea * 100 : 0;
+  const far = input.siteArea > 0 ? input.totalArea / input.siteArea * 100 : 0;
+  const limitBCR = input.dupZone && input.dupBCR !== "" ? Number(input.dupBCR) : zone.bcr;
+  const limitFAR = input.dupZone && input.dupFAR !== "" ? Number(input.dupFAR) : zone.far;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "page wide"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "page-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow"
+  }, "STEP 01 — INPUT"), /*#__PURE__*/React.createElement("div", {
+    className: "page-title"
+  }, "기본정보 입력"), /*#__PURE__*/React.createElement("div", {
+    className: "page-lede"
+  }, "대지·용도·사업 정보를 입력하면 건폐율·용적률이 실시간 계산되어 이후 적합성 검토에 반영됩니다.")), /*#__PURE__*/React.createElement("div", {
+    className: "split"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stack"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card tight"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("h3", null, "대지 위치 · 용도")), /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid2"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "광역시·도"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: input.sido,
+    onChange: e => setInput({
+      sido: e.target.value,
+      sigungu: REGIONS[e.target.value][0]
+    })
+  }, SIDO_LIST.map(s => /*#__PURE__*/React.createElement("option", {
+    key: s,
+    value: s
+  }, s)))), /*#__PURE__*/React.createElement(Field, {
+    label: "시·군·구"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: input.sigungu,
+    onChange: e => setInput({
+      sigungu: e.target.value
+    })
+  }, (REGIONS[input.sido] || []).map(g => /*#__PURE__*/React.createElement("option", {
+    key: g,
+    value: g
+  }, g)))), /*#__PURE__*/React.createElement(Field, {
+    label: "용도지역"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: input.zone,
+    onChange: e => setInput({
+      zone: e.target.value
+    })
+  }, ZONES.map(z => /*#__PURE__*/React.createElement("option", {
+    key: z.id,
+    value: z.id
+  }, z.label)))), /*#__PURE__*/React.createElement(Field, {
+    label: "주용도",
+    help: "건축법 시행령 별표1"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: input.useType,
+    onChange: e => setInput({
+      useType: e.target.value
+    })
+  }, BUILDING_USES.map(u => /*#__PURE__*/React.createElement("option", {
+    key: u,
+    value: u
+  }, u))))), /*#__PURE__*/React.createElement("div", {
+    className: "dup-row"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "dup-check"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: input.dupZone,
+    onChange: e => setInput({
+      dupZone: e.target.checked
+    })
+  }), /*#__PURE__*/React.createElement("span", null, "지구단위계획구역")), input.dupZone && /*#__PURE__*/React.createElement("div", {
+    className: "dup-fields"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "건폐율 보정한도"
+  }, /*#__PURE__*/React.createElement(NumInput, {
+    value: input.dupBCR,
+    onChange: v => setInput({
+      dupBCR: v
+    }),
+    unit: "%"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "용적률 보정한도"
+  }, /*#__PURE__*/React.createElement(NumInput, {
+    value: input.dupFAR,
+    onChange: v => setInput({
+      dupFAR: v
+    }),
+    unit: "%"
+  })))))), /*#__PURE__*/React.createElement("div", {
+    className: "card tight"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("h3", null, "사업정보"), /*#__PURE__*/React.createElement("span", {
+    className: "hint"
+  }, "㎡ · 층 · 세대/실")), /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid3"
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "사업방식"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: input.bizType,
+    onChange: e => setInput({
+      bizType: e.target.value
+    })
+  }, BIZ_TYPES.map(b => /*#__PURE__*/React.createElement("option", {
+    key: b,
+    value: b
+  }, b)))), /*#__PURE__*/React.createElement(Field, {
+    label: "대지면적"
+  }, /*#__PURE__*/React.createElement(NumInput, {
+    value: input.siteArea,
+    onChange: v => setInput({
+      siteArea: v
+    }),
+    unit: "㎡"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "건축면적"
+  }, /*#__PURE__*/React.createElement(NumInput, {
+    value: input.buildingArea,
+    onChange: v => setInput({
+      buildingArea: v
+    }),
+    unit: "㎡"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "전체연면적"
+  }, /*#__PURE__*/React.createElement(NumInput, {
+    value: input.totalArea,
+    onChange: v => setInput({
+      totalArea: v
+    }),
+    unit: "㎡"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "최고층수"
+  }, /*#__PURE__*/React.createElement(NumInput, {
+    value: input.floors,
+    onChange: v => setInput({
+      floors: v
+    }),
+    unit: "층"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "세대수/객실수"
+  }, /*#__PURE__*/React.createElement(NumInput, {
+    value: input.units,
+    onChange: v => setInput({
+      units: v
+    }),
+    unit: "세대/실"
+  }))))), /*#__PURE__*/React.createElement("div", {
+    className: "card tight"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("h3", null, "법령 적용시점")), /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid2",
+    style: {
+      alignItems: "end"
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "적용 기준"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "seg"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: input.lawMode === "latest" ? "on" : "",
+    onClick: () => setInput({
+      lawMode: "latest"
+    })
+  }, "최신법령"), /*#__PURE__*/React.createElement("button", {
+    className: input.lawMode === "old" ? "on" : "",
+    onClick: () => setInput({
+      lawMode: "old"
+    })
+  }, "구법"))), input.lawMode === "old" ? /*#__PURE__*/React.createElement(Field, {
+    label: "시행 시점 (최근 5년)"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("select", {
+    value: input.lawYear,
+    onChange: e => setInput({
+      lawYear: Number(e.target.value)
+    })
+  }, LAW_YEARS.map(y => /*#__PURE__*/React.createElement("option", {
+    key: y,
+    value: y
+  }, y, "년"))), /*#__PURE__*/React.createElement("select", {
+    value: input.lawMonth,
+    onChange: e => setInput({
+      lawMonth: Number(e.target.value)
+    })
+  }, LAW_MONTHS.map(m => /*#__PURE__*/React.createElement("option", {
+    key: m,
+    value: m
+  }, m, "월"))))) : /*#__PURE__*/React.createElement("div", {
+    className: "help",
+    style: {
+      paddingBottom: 11,
+      lineHeight: 1.5
+    }
+  }, "법령 검토 기준일 ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: "var(--accent)"
+    }
+  }, LAW_BASE), " 기준 — 이후 시행·개정·신설 법령은 미반영. 시행시점이 이후인 사업은 최신 원문을 확인하세요."))))), /*#__PURE__*/React.createElement("div", {
+    className: "side-sticky"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card tight"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("h3", null, "실시간 산정")), /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement(Meter, {
+    name: "건폐율",
+    value: bcr,
+    limit: limitBCR,
+    suffix: "%"
+  }), /*#__PURE__*/React.createElement(Meter, {
+    name: "용적률",
+    value: far,
+    limit: limitFAR,
+    suffix: "%"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "meter-foot",
+    style: {
+      marginTop: 14
+    }
+  }, input.dupZone ? "지구단위계획 보정" : zone.label, " 한도 — 건폐율 ", /*#__PURE__*/React.createElement("b", null, limitBCR, "%"), " · 용적률 ", /*#__PURE__*/React.createElement("b", null, limitFAR, "%")))), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    style: {
+      justifyContent: "center"
+    },
+    onClick: onNext
+  }, "인허가 절차 검토 ", /*#__PURE__*/React.createElement(Icon.arrow, {
+    style: {
+      width: 17,
+      height: 17
+    }
+  })))));
+}
+function Meter({
+  name,
+  value,
+  limit,
+  suffix
+}) {
+  const pass = value <= limit;
+  const pct = Math.min(value / (limit * 1.2) * 100, 100);
+  const limitPct = limit / (limit * 1.2) * 100;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "meter"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "meter-top"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "meter-name"
+  }, name), /*#__PURE__*/React.createElement("span", {
+    className: "meter-val",
+    style: {
+      color: pass ? "var(--ok)" : "var(--bad)"
+    }
+  }, value.toFixed(1), suffix, " ", /*#__PURE__*/React.createElement("small", null, "/ ", limit, suffix))), /*#__PURE__*/React.createElement("div", {
+    className: "bar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bar-fill",
+    style: {
+      width: pct + "%",
+      background: pass ? "var(--ok)" : "var(--bad)"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "bar-limit",
+    style: {
+      left: limitPct + "%"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "meter-foot"
+  }, pass ? "법정한도 이내" : "법정한도 초과 — 계획 조정 필요"));
+}
+
+// ---------- STEP 2 : 인허가 절차 (사업방식별 + 병행 심의·평가 태그) ----------
+function Step2({
+  input,
+  onNext,
+  onPrev
+}) {
+  const [active, setActive] = useState(1);
+  const {
+    route,
+    steps
+  } = permitTimeline(input);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "page"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "page-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow"
+  }, "STEP 02 — PERMIT"), /*#__PURE__*/React.createElement("div", {
+    className: "page-title"
+  }, "인허가 절차"), /*#__PURE__*/React.createElement("div", {
+    className: "page-lede"
+  }, "선택한 사업방식에 따른 인허가 흐름과 단계별 근거 법령·병행 심의/영향평가를 안내합니다. 단계를 선택하면 상세를 확인합니다.")), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("h3", null, route), /*#__PURE__*/React.createElement("span", {
+    className: "hint"
+  }, "총 ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: "var(--ink)"
+    }
+  }, steps.length), "단계 · 색 태그=병행 심의·영향평가(빨강 대상/주황 확인)")), /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "timeline"
+  }, steps.map((s, i) => /*#__PURE__*/React.createElement("div", {
+    key: s.id,
+    className: "tl-item" + (i === active ? " active" : i < active ? " done" : "")
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tl-rail"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tl-dot"
+  }, i < active ? /*#__PURE__*/React.createElement(Icon.check, {
+    style: {
+      width: 14,
+      height: 14
+    }
+  }) : i + 1), i < steps.length - 1 && /*#__PURE__*/React.createElement("div", {
+    className: "tl-line"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "tl-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tl-card",
+    onClick: () => setActive(i)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tl-name"
+  }, s.label, s.org && s.org !== "—" && /*#__PURE__*/React.createElement("span", {
+    className: "law-link",
+    style: {
+      marginLeft: 9
+    }
+  }, s.org)), (i === active || s.desc && s.desc.length < 60) && /*#__PURE__*/React.createElement("div", {
+    className: "tl-desc"
+  }, s.desc), s.side && s.side.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "tl-side"
+  }, s.side.map((t, j) => /*#__PURE__*/React.createElement("span", {
+    key: j,
+    className: "tl-side-tag " + t.k
+  }, t.t)))))))))), /*#__PURE__*/React.createElement("div", {
+    className: "footer-nav"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-ghost",
+    onClick: onPrev
+  }, /*#__PURE__*/React.createElement(Icon.back, {
+    style: {
+      width: 17,
+      height: 17
+    }
+  }), " 기본정보"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: onNext
+  }, "심의·영향평가 ", /*#__PURE__*/React.createElement(Icon.arrow, {
+    style: {
+      width: 17,
+      height: 17
+    }
+  }))));
+}
+
+// ---------- STEP 3 : 심의 및 영향평가 ----------
+function ReviewRow({
+  r
+}) {
+  const [open, setOpen] = useState(false);
+  const matched = r.matched && r.matched.length ? r.matched[0] : null;
+  const lawQuery = encodeURIComponent((r.laws && r.laws[0] ? r.laws[0].name : r.label).replace(/\s+제.*$/, ""));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "rev-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "check-row clickable" + (r.required ? " on" : ""),
+    onClick: () => setOpen(!open)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ck-icon",
+    style: {
+      background: r.required ? "var(--warn-soft)" : "#eef1f5",
+      color: r.required ? "var(--warn)" : "var(--muted)"
+    }
+  }, r.required ? /*#__PURE__*/React.createElement(Icon.alert, null) : /*#__PURE__*/React.createElement(Icon.doc, null)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "ck-name"
+  }, r.label), /*#__PURE__*/React.createElement("div", {
+    className: "ck-basis"
+  }, r.laws.map(l => l.name).join(" / ")), /*#__PURE__*/React.createElement("div", {
+    className: "ck-detail"
+  }, r.required && matched ? matched.name : `기준변수 · ${r.vars}`)), /*#__PURE__*/React.createElement("div", {
+    className: "ck-vals"
+  }, r.required && matched && matched.value ? /*#__PURE__*/React.createElement("span", {
+    className: "info-pill"
+  }, "▶ 사업정보 : ", matched.value) : /*#__PURE__*/React.createElement("span", {
+    className: "info-none"
+  }, "판정 —")), /*#__PURE__*/React.createElement("span", {
+    className: "badge " + (r.required ? "req" : "notreq")
+  }, r.required ? "대상" : "비대상", /*#__PURE__*/React.createElement("span", {
+    className: "ck-caret"
+  }, open ? "▲" : "▼"))), open && /*#__PURE__*/React.createElement("div", {
+    className: "rev-row-detail"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "rev-detail-meta"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "detail-label"
+  }, "세부기준"), /*#__PURE__*/React.createElement("a", {
+    className: "law-link",
+    href: `https://www.law.go.kr/LSW/lsSc.do?menuId=1&query=${lawQuery}`,
+    target: "_blank",
+    rel: "noreferrer",
+    onClick: e => e.stopPropagation()
+  }, "법제처 원문확인")), /*#__PURE__*/React.createElement("ul", {
+    className: "crit-list"
+  }, r.detail.filter(c => c.name).map((c, i) => /*#__PURE__*/React.createElement("li", {
+    key: i,
+    className: "crit" + (c.met ? " met" : "")
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "crit-text"
+  }, c.name), c.met && /*#__PURE__*/React.createElement("span", {
+    className: "crit-mini"
+  }, "해당", c.value ? ` · ${c.value}` : "")))), /*#__PURE__*/React.createElement("div", {
+    className: "rev-foot"
+  }, /*#__PURE__*/React.createElement("b", null, "절차"), " ", r.procedure), /*#__PURE__*/React.createElement("div", {
+    className: "rev-foot note"
+  }, /*#__PURE__*/React.createElement(Icon.alert, {
+    style: {
+      width: 13,
+      height: 13
+    }
+  }), " ", r.note)));
+}
+function Step3({
+  reviews,
+  input,
+  setInput,
+  tab,
+  setTab,
+  onNext,
+  onPrev
+}) {
+  const reqCount = reviews.filter(r => r.required).length;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "page wide"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "page-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow"
+  }, "STEP 03 — REVIEW"), /*#__PURE__*/React.createElement("div", {
+    className: "page-title"
+  }, "심의 및 영향평가"), /*#__PURE__*/React.createElement("div", {
+    className: "page-lede"
+  }, "입력한 규모와 입지조건을 기준으로 거쳐야 할 심의·영향평가 대상 여부를 자동 판정합니다. 현재 계획 기준 ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: "var(--ink)"
+    }
+  }, reqCount, "개"), " 항목이 대상입니다.")), /*#__PURE__*/React.createElement("div", {
+    className: "card tight rev-input-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("h3", null, "입지·여건 입력사항"), /*#__PURE__*/React.createElement("span", {
+    className: "hint"
+  }, "상세 심의대상 판정용")), /*#__PURE__*/React.createElement("div", {
+    className: "card-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid4"
+  }, REVIEW_INPUTS.map(f => /*#__PURE__*/React.createElement(Field, {
+    key: f.key,
+    label: f.label
+  }, /*#__PURE__*/React.createElement("select", {
+    value: input[f.key],
+    onChange: e => setInput({
+      [f.key]: e.target.value
+    })
+  }, f.options.map(o => /*#__PURE__*/React.createElement("option", {
+    key: o,
+    value: o
+  }, o)))))))), (() => {
+    const cats = [{
+      key: "assess",
+      title: "영향평가 및 사전검토",
+      desc: "관계법령에 따른 영향평가·사전검토 대상"
+    }, {
+      key: "council",
+      title: "지자체 심의",
+      desc: "건축위원회 등 지방자치단체 심의 대상"
+    }];
+    const sortReq = arr => [...arr].sort((a, b) => (b.required ? 1 : 0) - (a.required ? 1 : 0));
+    const activeCat = cats.find(c => c.key === tab) || cats[0];
+    const items = sortReq(reviews.filter(r => r.cat === activeCat.key));
+    const reqN = items.filter(r => r.required).length;
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: "step4-tabs"
+    }, cats.map(cat => {
+      const n = reviews.filter(r => r.cat === cat.key && r.required).length;
+      return /*#__PURE__*/React.createElement("button", {
+        key: cat.key,
+        className: tab === cat.key ? "on" : "",
+        onClick: () => setTab(cat.key)
+      }, cat.title, /*#__PURE__*/React.createElement("span", {
+        className: "tab-count"
+      }, n));
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("h3", null, activeCat.title), /*#__PURE__*/React.createElement("span", {
+      className: "hint"
+    }, activeCat.desc, " · ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: "var(--warn)"
+      }
+    }, reqN), " / ", items.length, " 대상")), /*#__PURE__*/React.createElement("div", {
+      className: "card-body",
+      style: {
+        paddingTop: 4,
+        paddingBottom: 4
+      }
+    }, items.map(r => /*#__PURE__*/React.createElement(ReviewRow, {
+      key: r.id,
+      r: r
+    })))));
+  })(), /*#__PURE__*/React.createElement("div", {
+    className: "footer-nav",
+    style: {
+      marginTop: 26
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-ghost",
+    onClick: onPrev
+  }, /*#__PURE__*/React.createElement(Icon.back, {
+    style: {
+      width: 17,
+      height: 17
+    }
+  }), " 인허가 절차"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: onNext
+  }, "법규 체크리스트 ", /*#__PURE__*/React.createElement(Icon.arrow, {
+    style: {
+      width: 17,
+      height: 17
+    }
+  }))));
+}
+function CheckRow({
+  c
+}) {
+  const [open, setOpen] = useState(false);
+  const judge = c.status === "judge";
+  const ok = c.pass;
+  const STAT = {
+    A: ["대상", "req"],
+    V: ["검토", "ver"],
+    N: ["비대상", "na"],
+    R: ["권장", "rec"]
+  };
+  const sta = judge ? null : STAT[c.status] || ["의무·산정", "notreq"];
+  const iconBg = judge ? ok ? "var(--ok-soft)" : "var(--bad-soft)" : c.status === "A" ? "var(--warn-soft)" : "var(--accent-soft)";
+  const iconCol = judge ? ok ? "var(--ok)" : "var(--bad)" : c.status === "A" ? "var(--warn)" : "var(--accent)";
+  const lawQuery = encodeURIComponent((String(c.basis).split("/")[0] || c.label).replace(/\s+제.*$/, "").trim());
+  return /*#__PURE__*/React.createElement("div", {
+    className: "rev-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "check-row clickable" + (!judge && c.status === "A" ? " on" : ""),
+    onClick: () => setOpen(!open)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ck-icon",
+    style: {
+      background: iconBg,
+      color: iconCol
+    }
+  }, judge ? ok ? /*#__PURE__*/React.createElement(Icon.check, null) : /*#__PURE__*/React.createElement(Icon.x, null) : c.status === "A" ? /*#__PURE__*/React.createElement(Icon.alert, null) : /*#__PURE__*/React.createElement(Icon.doc, null)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "ck-name"
+  }, c.label), /*#__PURE__*/React.createElement("div", {
+    className: "ck-basis"
+  }, c.basis), /*#__PURE__*/React.createElement("div", {
+    className: "ck-detail"
+  }, "기준 ", c.limit)), /*#__PURE__*/React.createElement("div", {
+    className: "ck-vals"
+  }, judge ? /*#__PURE__*/React.createElement("span", {
+    className: "info-pill",
+    style: !ok ? {
+      background: "var(--bad-soft)",
+      color: "var(--bad)",
+      borderColor: "#f0b3b3"
+    } : null
+  }, "▶ ", c.actual) : /*#__PURE__*/React.createElement("span", {
+    className: "info-none"
+  }, "—")), /*#__PURE__*/React.createElement("span", {
+    className: "badge " + (judge ? ok ? "ok" : "bad" : sta[1])
+  }, judge ? ok ? "적합" : "초과" : sta[0], /*#__PURE__*/React.createElement("span", {
+    className: "ck-caret"
+  }, open ? "▲" : "▼"))), open && /*#__PURE__*/React.createElement("div", {
+    className: "rev-row-detail"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "rev-detail-meta"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "detail-label"
+  }, "세부기준"), /*#__PURE__*/React.createElement("a", {
+    className: "law-link",
+    href: `https://www.law.go.kr/LSW/lsSc.do?menuId=1&query=${lawQuery}`,
+    target: "_blank",
+    rel: "noreferrer",
+    onClick: e => e.stopPropagation()
+  }, "법제처 원문확인")), /*#__PURE__*/React.createElement("div", {
+    className: "crit-detail-text"
+  }, c.detail || c.actual), /*#__PURE__*/React.createElement("div", {
+    className: "rev-foot"
+  }, /*#__PURE__*/React.createElement("b", null, "기준"), " ", c.limit)));
+}
+
+// ---------- STEP 4 : 법규 체크리스트 ----------
+function Ring({
+  pct,
+  ok
+}) {
+  const r = 30,
+    c = 2 * Math.PI * r;
+  return /*#__PURE__*/React.createElement("svg", {
+    className: "sb-ring",
+    viewBox: "0 0 72 72"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "36",
+    cy: "36",
+    r: r,
+    fill: "none",
+    stroke: "rgba(255,255,255,.25)",
+    strokeWidth: "7"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "36",
+    cy: "36",
+    r: r,
+    fill: "none",
+    stroke: "#fff",
+    strokeWidth: "7",
+    strokeLinecap: "round",
+    strokeDasharray: c,
+    strokeDashoffset: c * (1 - pct / 100),
+    transform: "rotate(-90 36 36)",
+    style: {
+      transition: "stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1)"
+    }
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "36",
+    y: "41",
+    textAnchor: "middle",
+    fill: "#fff",
+    fontSize: "17",
+    fontWeight: "700",
+    fontFamily: "var(--mono)"
+  }, Math.round(pct), "%"));
+}
+function Step4({
+  result,
+  input,
+  tab,
+  setTab,
+  tabs,
+  onPrev
+}) {
+  const {
+    checks
+  } = result;
+  const isApt = input.useType === "공동주택 (아파트)" || input.useType === "주상복합 (주거+상업)";
+  const JUDGE = ["bcr", "far"];
+  const judgeChecks = checks.filter(c => JUDGE.indexOf(c.id) !== -1);
+  const passed = judgeChecks.filter(c => c.pass).length;
+  const failed = judgeChecks.length - passed;
+  const infoCount = checks.length - judgeChecks.length;
+  const allPass = failed === 0;
+  const pct = judgeChecks.length ? passed / judgeChecks.length * 100 : 100;
+  const CAT_DESC = {
+    site: "정북일조·채광·인동·승강기·공개공지·조경·대지공지·환기·실내공기질",
+    house: "주택건설기준(소음·배치·세대경계·층간소음·계단·복도·CCTV 등) — 공동주택 전용",
+    community: "주민공동시설 세부설치기준 + 부대복리(미술작품·CPTED·자전거·관리사무소 등)",
+    park: "법정 부설주차·주차구획·장애인·전기차·확장형",
+    fire: "스프링클러·방화구획·직통/특별피난계단·옥내소화전·발코니 대피공간",
+    energy: "에너지절약·녹색건축·제로에너지·BF·빗물이용",
+    mech: "기계설비법·환기설비 기술기준",
+    zone: "건폐율·용적률·층수·지자체 조례·지구단위계획",
+    etc: "사업계획승인·건축허가·정비/조합·용도별 특수규정"
+  };
+  const activeTab = tabs.find(t => t.key === tab) || tabs[0];
+  const cf = tab === "community" ? communityFacilities(input) : null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "page wide"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "page-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow"
+  }, "STEP 04 — RESULT"), /*#__PURE__*/React.createElement("div", {
+    className: "page-title"
+  }, "법규 체크리스트"), /*#__PURE__*/React.createElement("div", {
+    className: "page-lede"
+  }, "입력 정보를 토대로 적용 법령별 검토 결과입니다. 건폐율·용적률은 적합 여부를 판정하고, 그 외 항목은 의무·산정 기준을 안내합니다.")), /*#__PURE__*/React.createElement("div", {
+    className: "summary-banner " + (allPass ? "ok" : "bad")
+  }, /*#__PURE__*/React.createElement(Ring, {
+    pct: pct,
+    ok: allPass
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "sb-txt"
+  }, /*#__PURE__*/React.createElement("h2", null, allPass ? "지역·지구 기준 적합" : "법정상한 초과 항목 있음"), /*#__PURE__*/React.createElement("p", null, allPass ? "건폐율·용적률이 법정상한 이내입니다. 아래 의무·산정 항목을 계획에 반영하세요." : `${failed}개 항목이 법정상한을 초과합니다. 계획 조정이 필요합니다.`)), /*#__PURE__*/React.createElement("div", {
+    className: "sb-stats"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sb-stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "n"
+  }, passed), /*#__PURE__*/React.createElement("div", {
+    className: "l"
+  }, "적합")), /*#__PURE__*/React.createElement("div", {
+    className: "sb-stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "n"
+  }, failed), /*#__PURE__*/React.createElement("div", {
+    className: "l"
+  }, "초과")), /*#__PURE__*/React.createElement("div", {
+    className: "sb-stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "n"
+  }, infoCount), /*#__PURE__*/React.createElement("div", {
+    className: "l"
+  }, "의무·산정")))), /*#__PURE__*/React.createElement("div", {
+    className: "step4-tabs"
+  }, tabs.map(t => /*#__PURE__*/React.createElement("button", {
+    key: t.key,
+    className: tab === t.key ? "on" : "",
+    onClick: () => setTab(t.key)
+  }, t.name))), tab === "community" ? /*#__PURE__*/React.createElement(React.Fragment, null, isApt && cf && /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card-head"
+  }, /*#__PURE__*/React.createElement("h3", null, "주민공동시설 세부설치기준"), /*#__PURE__*/React.createElement("span", {
+    className: "hint"
+  }, "공동주택 전용 · 주택건설기준 제55조의2 · 총량 ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: "var(--ink)"
+    }
+  }, cf.total.toLocaleString("ko-KR"), "㎡"))), /*#__PURE__*/React.createElement("div", {
+    className: "card-body",
+    style: {
+      padding: 0
+    }
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "cf-table"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "항목"), /*#__PURE__*/React.createElement("th", null, "기준"), /*#__PURE__*/React.createElement("th", null, "현재 입력"), /*#__PURE__*/React.createElement("th", null, "확인 포인트"))), /*#__PURE__*/React.createElement("tbody", null, cf.rows.map((row, i) => /*#__PURE__*/React.createElement("tr", {
+    key: i
+  }, /*#__PURE__*/React.createElement("td", {
+    className: "cf-item"
+  }, row.item), /*#__PURE__*/React.createElement("td", {
+    className: "cf-std"
+  }, row.std), /*#__PURE__*/React.createElement("td", {
+    className: "cf-status"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cf-badge " + row.kind
+  }, row.status), row.value && /*#__PURE__*/React.createElement("div", {
+    className: "cf-value"
+  }, row.value)), /*#__PURE__*/React.createElement("td", {
+    className: "cf-point"
+  }, row.point))))))), (() => {
+    const items = checks.filter(c => c.cat === "community");
+    return items.length ? /*#__PURE__*/React.createElement("div", {
+      className: "card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("h3", null, "부대복리시설"), /*#__PURE__*/React.createElement("span", {
+      className: "hint"
+    }, "미술작품·범죄예방(CPTED)·자전거주차·관리사무소·의무관리 등")), /*#__PURE__*/React.createElement("div", {
+      className: "card-body",
+      style: {
+        paddingTop: 4,
+        paddingBottom: 4
+      }
+    }, items.map(c => /*#__PURE__*/React.createElement(CheckRow, {
+      key: c.id,
+      c: c
+    })))) : null;
+  })()) : (() => {
+    const items = checks.filter(c => c.cat === tab);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("h3", null, activeTab.name), /*#__PURE__*/React.createElement("span", {
+      className: "hint"
+    }, CAT_DESC[tab])), /*#__PURE__*/React.createElement("div", {
+      className: "card-body",
+      style: {
+        paddingTop: 4,
+        paddingBottom: 4
+      }
+    }, items.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      className: "empty"
+    }, "현재 용도·규모 기준 해당 항목이 없습니다.") : items.map(c => /*#__PURE__*/React.createElement(CheckRow, {
+      key: c.id,
+      c: c
+    }))));
+  })(), /*#__PURE__*/React.createElement("div", {
+    className: "footer-nav"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-ghost",
+    onClick: onPrev
+  }, /*#__PURE__*/React.createElement(Icon.back, {
+    style: {
+      width: 17,
+      height: 17
+    }
+  }), " 심의·영향평가"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: () => {
+      const w = window.open("", "_blank");
+      if (!w) {
+        alert("팝업이 차단되었습니다. 브라우저에서 팝업을 허용한 뒤 다시 시도하세요.");
+        return;
+      }
+      w.document.open();
+      w.document.write(window.APP_DATA.buildReportHTML(input));
+      w.document.close();
+    }
+  }, "검토 보고서 생성 ", /*#__PURE__*/React.createElement(Icon.doc, {
+    style: {
+      width: 16,
+      height: 16
+    }
+  }))));
+}
+ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));</script>
+</body></html>
