@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.9 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.10 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -3704,33 +3704,39 @@ function scheduleStepNavUpdate(){
     var hit=it.hit||'';
     return (it.nt||[]).filter(Boolean).map(function(n){var t=stripHtml(n);return {name:t, met: !!(hit && t.indexOf(hit)>=0), value:''};});
   }
+  function latestStatusMap(I){var saved=applyDate;applyDate='latest';var m={};buildItems(I).all.forEach(function(it){m[it.c+'|'+String(it.t).replace(' ⚠ 구법','')]=it.s;});applyDate=saved;return m;}
   function assessReviews(input){
     var I=toI(input); var all=buildItems(I).all;
+    var old=input.lawMode==='old'; var lm=old?latestStatusMap(I):{};
     return all.filter(function(it){return it.c===7||it.c===10;}).map(function(it,idx){
-      var t=String(it.t).replace(' ⚠ 구법',''); var hit=it.hit||'';
+      var t=String(it.t).replace(' ⚠ 구법',''); var hit=it.hit||''; var legacy=old&&/⚠ 구법/.test(it.t);
+      var ls=lm[it.c+'|'+t]; var lawDiff=(old&&ls!=null&&ls!==it.s)?ls:null;
       return {id:'r'+it.c+'_'+idx, cat: it.c===7?'assess':'council', label:t,
         required: it.s==='A', vars: stripHtml(it.th).slice(0,70), desc: stripHtml(it.rq),
         laws: (it.lg||[]).map(function(n){return {name:n};}),
         detail: detailsFrom(it), matched: (it.s==='A'&&hit)?[{name:hit,value:''}]:[],
-        procedure: stripHtml(it.rq), note:'참고용 사전검토 — 최종 대상 여부는 허가권자·법제처 원문 확인'};
+        procedure: stripHtml(it.rq), note:'참고용 사전검토 — 최종 대상 여부는 허가권자·법제처 원문 확인',
+        legacy:legacy, lawDiff:lawDiff};
     });
   }
   var CATMAP={1:'site',2:'house',3:'community',4:'park',5:'fire',8:'fire',6:'energy',11:'mech',9:'zone',12:'zone',0:'etc',13:'etc'};
   function evaluate(input){
     var I=toI(input); var all=buildItems(I).all;
+    var old=input.lawMode==='old'; var lm=old?latestStatusMap(I):{};
     var lim=ZONE_LIMITS[input.zone]||[0,0];
     var bcr=input.siteArea>0?(input.buildingArea/input.siteArea*100):0;
     var far=input.siteArea>0?(input.totalArea/input.siteArea*100):0;
     var checks=[
-      {id:'bcr',cat:'zone',status:'judge',label:'건폐율',basis:'국토계획법 시행령 제84조',limit:lim[0]+'% 이하',actual:bcr.toFixed(1)+'%',pass:bcr<=lim[0],detail:'건축면적 ÷ 대지면적. 용도지역 법정상한 이내여야 함('+ (ZONE_L[input.zone]||'')+').'},
-      {id:'far',cat:'zone',status:'judge',label:'용적률',basis:'국토계획법 시행령 제85조',limit:lim[1]+'% 이하',actual:far.toFixed(1)+'%',pass:far<=lim[1],detail:'지상 연면적 ÷ 대지면적. 용도지역 법정상한 이내여야 함.'},
+      {id:'bcr',cat:'zone',status:'judge',label:'건폐율',basis:'국토계획법 시행령 제84조',limit:lim[0]+'% 이하',actual:bcr.toFixed(1)+'%',pass:bcr<=lim[0],detail:'건축면적 ÷ 대지면적. 용도지역 법정상한 이내여야 함('+ (ZONE_L[input.zone]||'')+').',legacy:false,lawDiff:null},
+      {id:'far',cat:'zone',status:'judge',label:'용적률',basis:'국토계획법 시행령 제85조',limit:lim[1]+'% 이하',actual:far.toFixed(1)+'%',pass:far<=lim[1],detail:'지상 연면적 ÷ 대지면적. 용도지역 법정상한 이내여야 함.',legacy:false,lawDiff:null}
     ];
     all.filter(function(it){return CATMAP[it.c]!=null;}).forEach(function(it,idx){
-      var t=String(it.t).replace(' ⚠ 구법','');
+      var t=String(it.t).replace(' ⚠ 구법',''); var legacy=old&&/⚠ 구법/.test(it.t);
+      var ls=lm[it.c+'|'+t]; var lawDiff=(old&&ls!=null&&ls!==it.s)?ls:null;
       checks.push({id:'c'+it.c+'_'+idx, cat:CATMAP[it.c], status:it.s, label:t,
         basis:(it.lg&&it.lg[0])?it.lg[0]:stripHtml(it.th),
         limit: stripHtml(it.th)||'-', actual: stripHtml(it.rq)||'-', pass:true,
-        detail:(it.nt||[]).filter(Boolean).map(stripHtml).join(' · ')});
+        detail:(it.nt||[]).filter(Boolean).map(stripHtml).join(' · '), legacy:legacy, lawDiff:lawDiff});
     });
     return {zone:input.zone, computedBCR:bcr, computedFAR:far, checks:checks};
   }
@@ -4127,6 +4133,11 @@ const {
   .ck-icon { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; }
   .ck-icon svg { width: 14px; height: 14px; }
   .ck-name { font-size: 14px; font-weight: 600; }
+  .lawchg { display: inline-block; margin-left: 7px; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; vertical-align: middle; letter-spacing: -.2px; }
+  .lawbanner { display: flex; align-items: flex-start; gap: 10px; background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #ea580c; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.5; color: #7c2d12; }
+  .lawbanner b { color: #9a3412; }
+  .lawbanner .lawchg { margin-left: 0; }
+  .lawbanner-ic { font-size: 16px; line-height: 1.2; }
   .ck-basis { font-size: 11.5px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
   .ck-detail { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
   .ck-vals { text-align: right; font-family: var(--mono); font-size: 12.5px; min-width: 110px; }
@@ -5203,7 +5214,10 @@ function ReviewRow({
     }
   }, r.required ? /*#__PURE__*/React.createElement(Icon.alert, null) : /*#__PURE__*/React.createElement(Icon.doc, null)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "ck-name"
-  }, r.label), /*#__PURE__*/React.createElement("div", {
+  }, r.label, (r.lawDiff || r.legacy) && /*#__PURE__*/React.createElement("span", {
+    className: "lawchg",
+    title: r.lawDiff ? "최신법령 판정과 다름" : "구법 기준 적용"
+  }, r.lawDiff ? "구법 변동" : "구법")), /*#__PURE__*/React.createElement("div", {
     className: "ck-basis"
   }, r.laws.map(l => l.name).join(" / ")), /*#__PURE__*/React.createElement("div", {
     className: "ck-detail"
@@ -5240,7 +5254,12 @@ function ReviewRow({
     className: "crit-mini"
   }, "해당", c.value ? ` · ${c.value}` : "")))), /*#__PURE__*/React.createElement("div", {
     className: "rev-foot"
-  }, /*#__PURE__*/React.createElement("b", null, "절차"), " ", r.procedure), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("b", null, "절차"), " ", r.procedure), (r.lawDiff || r.legacy) && /*#__PURE__*/React.createElement("div", {
+    className: "rev-foot",
+    style: {
+      color: "var(--warn)"
+    }
+  }, /*#__PURE__*/React.createElement("b", null, "법령시점"), " ", r.lawDiff ? "최신법령 기준 " + (r.lawDiff === "A" ? "대상" : "비대상") + " → 구법 적용 시 " + (r.required ? "대상" : "비대상") + "으로 변동" : "선택 처분시점에 미시행 — 당시(구법) 기준 적용"), /*#__PURE__*/React.createElement("div", {
     className: "rev-foot note"
   }, /*#__PURE__*/React.createElement(Icon.alert, {
     style: {
@@ -5367,6 +5386,13 @@ function CheckRow({
 }) {
   const [open, setOpen] = useState(false);
   const judge = c.status === "judge";
+  var SLAB = {
+    A: "대상",
+    V: "검토",
+    N: "비대상",
+    R: "권장",
+    judge: "판정"
+  };
   const ok = c.pass;
   const STAT = {
     A: ["대상", "req"],
@@ -5391,7 +5417,10 @@ function CheckRow({
     }
   }, judge ? ok ? /*#__PURE__*/React.createElement(Icon.check, null) : /*#__PURE__*/React.createElement(Icon.x, null) : c.status === "A" ? /*#__PURE__*/React.createElement(Icon.alert, null) : /*#__PURE__*/React.createElement(Icon.doc, null)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "ck-name"
-  }, c.label), /*#__PURE__*/React.createElement("div", {
+  }, c.label, (c.lawDiff || c.legacy) && /*#__PURE__*/React.createElement("span", {
+    className: "lawchg",
+    title: c.lawDiff ? "최신법령: " + (SLAB[c.lawDiff] || c.lawDiff) + " / 구법: " + (SLAB[c.status] || c.status) : "구법 기준 적용"
+  }, c.lawDiff ? "구법 변동" : "구법")), /*#__PURE__*/React.createElement("div", {
     className: "ck-basis"
   }, c.basis), /*#__PURE__*/React.createElement("div", {
     className: "ck-detail"
@@ -5426,7 +5455,13 @@ function CheckRow({
     className: "crit-detail-text"
   }, c.detail || c.actual), /*#__PURE__*/React.createElement("div", {
     className: "rev-foot"
-  }, /*#__PURE__*/React.createElement("b", null, "기준"), " ", c.limit)));
+  }, /*#__PURE__*/React.createElement("b", null, "기준"), " ", c.limit), (c.lawDiff || c.legacy) && /*#__PURE__*/React.createElement("div", {
+    className: "rev-foot",
+    style: {
+      color: "var(--warn)",
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("b", null, "법령시점"), " ", c.lawDiff ? "최신법령 기준 " + (SLAB[c.lawDiff] || c.lawDiff) + " → 구법 적용 시 " + (SLAB[c.status] || c.status) + "으로 변동" : "선택한 처분시점에 강화규정 미시행 — 당시(구법) 기준 적용")));
 }
 
 // ---------- STEP 4 : 법규 체크리스트 ----------
@@ -5539,7 +5574,17 @@ function Step4({
     className: "n"
   }, infoCount), /*#__PURE__*/React.createElement("div", {
     className: "l"
-  }, "의무·산정")))), /*#__PURE__*/React.createElement("div", {
+  }, "의무·산정")))), input.lawMode === "old" && (() => {
+    const lc = checks.filter(c => c.lawDiff).length;
+    const lg = checks.filter(c => c.legacy && !c.lawDiff).length;
+    return lc + lg ? /*#__PURE__*/React.createElement("div", {
+      className: "lawbanner"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "lawbanner-ic"
+    }, "⏱"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "구법(", input.lawYear, ".", input.lawMonth, ") 적용"), " — 최신법령과 다른 항목 ", /*#__PURE__*/React.createElement("b", null, lc + lg), "건 (판정 변동 ", lc, " · 구법 기준 ", lg, "). 각 항목 옆 ", /*#__PURE__*/React.createElement("span", {
+      className: "lawchg"
+    }, "구법"), " 표시를 확인하세요.")) : null;
+  })(), /*#__PURE__*/React.createElement("div", {
     className: "step4-tabs"
   }, tabs.map(t => /*#__PURE__*/React.createElement("button", {
     key: t.key,
