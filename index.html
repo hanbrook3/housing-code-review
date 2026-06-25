@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.19 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.21 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -3909,8 +3909,8 @@ function scheduleStepNavUpdate(){
     var old=input.lawMode==='old'; var lm=old?latestStatusMap(I):{};
     var zl=getZoneLimit(input.sido,input.sigungu,input.zone);
     var zoneNm=ZONE_L[input.zone]||'';
-    var bcr=input.siteArea>0?(input.buildingArea/input.siteArea*100):0;
-    var _ffa=(parseInt(input.farArea)>0?parseInt(input.farArea):(parseInt(input.totalArea)||0)); var far=input.siteArea>0?(_ffa/input.siteArea*100):0;
+    var hasBcr=parseInt(input.buildingArea)>0; var bcr=(hasBcr&&input.siteArea>0)?(parseInt(input.buildingArea)/input.siteArea*100):0; var bcrMax=Math.round((input.siteArea||0)*zl.bcr/100);
+    var hasFar=parseInt(input.farArea)>0; var far=(hasFar&&input.siteArea>0)?(parseInt(input.farArea)/input.siteArea*100):0; var farMax=Math.round((input.siteArea||0)*zl.far/100);
     var bcrBasis=zl.verified?(zl.src+' '+zl.bcrJo):(zl.src+' (적용값 확인 필요)');
     var farBasis=zl.verified?(zl.src+' '+zl.farJo):(zl.src+' (적용값 확인 필요)');
     var bcrDet=zl.verified
@@ -3919,10 +3919,11 @@ function scheduleStepNavUpdate(){
     var farDet=zl.verified
       ?('지상 연면적 ÷ 대지면적. 적용 기준: '+zl.src+' '+zl.farJo+' ('+zoneNm+' '+zl.far+'% 이하, 시행 '+zl.ef+'). 위임근거: 국토계획법 제78조 → 영 제85조.'+(zl.note?(' ※ '+zl.note):''))
       :('지상 연면적 ÷ 대지면적. 표시값은 '+zoneNm+' 법정 한도(영 제85조 상한)이며, 실제 적용 용적률은 '+(input.sigungu||'해당 지자체')+' 도시·군계획조례에서 확인하세요. 위임근거: 국토계획법 제78조.');
-    farDet += (parseInt(input.farArea)>0?(' / 적용 연면적 '+parseInt(input.farArea).toLocaleString()+'㎡(용적률산정용)'):' / ⚠ 용적률산정용 연면적 미입력 → 전체연면적 기준(지하·주차·주민공동시설 제외 시 감소)');
+    bcrDet += (hasBcr?(' / 적용 건축면적 '+parseInt(input.buildingArea).toLocaleString()+'㎡'):(' / 건축면적 미입력 — 법정 건폐율 '+zl.bcr+'% 기준 허용 최대 건축면적 '+bcrMax.toLocaleString()+'㎡ 역산 표시. 실제 건축면적 입력 시 적합/초과 판정'));
+    farDet += (hasFar?(' / 적용 연면적 '+parseInt(input.farArea).toLocaleString()+'㎡(용적률산정용)'):(' / 용적률산정용 연면적 미입력 — 법정 용적률 '+zl.far+'% 기준 허용 최대 연면적 '+farMax.toLocaleString()+'㎡ 역산 표시. 실제 계획(용적률산정용) 연면적 입력 시 적합/초과 판정'));
     var checks=[
-      {id:'bcr',cat:'zone',status:'judge',label:'건폐율',basis:bcrBasis,limit:zl.bcr+'% 이하',actual:bcr.toFixed(1)+'%',pass:bcr<=zl.bcr,detail:bcrDet,legacy:false,lawDiff:null},
-      {id:'far',cat:'zone',status:'judge',label:'용적률',basis:farBasis,limit:zl.far+'% 이하',actual:far.toFixed(1)+'%',pass:far<=zl.far,detail:farDet,legacy:false,lawDiff:null}
+      {id:'bcr',cat:'zone',status:'judge',label:'건폐율',basis:bcrBasis,limit:(hasBcr?(zl.bcr+'% 이하'):('법정 '+zl.bcr+'%')),actual:(hasBcr?(bcr.toFixed(1)+'%'):('법정 허용 '+bcrMax.toLocaleString()+'㎡')),pass:(hasBcr?(bcr<=zl.bcr):true),infoOnly:!hasBcr,detail:bcrDet,legacy:false,lawDiff:null},
+      {id:'far',cat:'zone',status:'judge',label:'용적률',basis:farBasis,limit:(hasFar?(zl.far+'% 이하'):('법정 '+zl.far+'%')),actual:(hasFar?(far.toFixed(1)+'%'):('법정 허용 '+farMax.toLocaleString()+'㎡')),pass:(hasFar?(far<=zl.far):true),infoOnly:!hasFar,detail:farDet,legacy:false,lawDiff:null}
     ];
     all.filter(function(it){return CATMAP[it.c]!=null;}).forEach(function(it,idx){
       var t=String(it.t).replace(' ⚠ 구법',''); var legacy=old&&/⚠ 구법/.test(it.t);
@@ -4573,10 +4574,6 @@ const REVIEW_INPUTS = [{
   key: "envLocation",
   label: "소규모 환경평가 입지(용도지역)",
   options: ["도시지역(주거·상업·공업)", "관리지역", "농림지역", "자연환경보전지역", "해당 없음"]
-}, {
-  key: "districtPlan",
-  label: "지구단위계획에 따른 사업",
-  options: ["해당 없음", "해당(지구단위계획 시행)"]
 }];
 const STEPS = [{
   id: 0,
@@ -4601,7 +4598,7 @@ const DEFAULT_INPUT = {
   zone: "zone4",
   useType: "공동주택 (아파트)",
   siteArea: 30000,
-  buildingArea: 15000,
+  buildingArea: "",
   totalArea: 62000,
   farArea: "",
   floors: 18,
@@ -5006,11 +5003,15 @@ function Step1({
   onNext
 }) {
   const zone = ZONES.find(z => z.id === input.zone) || ZONES[0];
-  const bcr = input.siteArea > 0 ? input.buildingArea / input.siteArea * 100 : 0;
-  const farFA = Number(input.farArea) > 0 ? Number(input.farArea) : Number(input.totalArea);
-  const far = input.siteArea > 0 ? farFA / input.siteArea * 100 : 0;
-  const limitBCR = input.dupZone && input.dupBCR !== "" ? Number(input.dupBCR) : zone.bcr;
-  const limitFAR = input.dupZone && input.dupFAR !== "" ? Number(input.dupFAR) : zone.far;
+  const bcr = Number(input.buildingArea) > 0 && input.siteArea > 0 ? Number(input.buildingArea) / input.siteArea * 100 : 0;
+  const bcrEmpty = !(Number(input.buildingArea) > 0);
+  const far = Number(input.farArea) > 0 && input.siteArea > 0 ? Number(input.farArea) / input.siteArea * 100 : 0;
+  const farEmpty = !(Number(input.farArea) > 0);
+  const _zl = (typeof getZoneLimit === "function") ? getZoneLimit(input.sido, input.sigungu, input.zone) : { bcr: zone.bcr, far: zone.far };
+  const limitBCR = input.dupZone && input.dupBCR !== "" ? Number(input.dupBCR) : _zl.bcr;
+  const bcrMaxArea = Math.round((Number(input.siteArea) || 0) * limitBCR / 100);
+  const limitFAR = input.dupZone && input.dupFAR !== "" ? Number(input.dupFAR) : _zl.far;
+  const farMaxArea = Math.round((Number(input.siteArea) || 0) * limitFAR / 100);
   return /*#__PURE__*/React.createElement("div", {
     className: "page wide"
   }, /*#__PURE__*/React.createElement("div", {
@@ -5247,11 +5248,13 @@ function Step1({
     name: "건폐율",
     value: bcr,
     limit: limitBCR,
-    suffix: "%"
+    suffix: "%",
+    valueText: bcrEmpty ? ("법정 허용 " + bcrMaxArea.toLocaleString() + "㎡") : null
   }), /*#__PURE__*/React.createElement(Meter, {
     name: "용적률",
     value: far,
     limit: limitFAR,
+    valueText: farEmpty ? ("법정 허용 " + farMaxArea.toLocaleString() + "㎡") : null,
     suffix: "%"
   })), /*#__PURE__*/React.createElement("div", {
     className: "meter-foot",
@@ -5275,11 +5278,12 @@ function Meter({
   name,
   value,
   limit,
-  suffix
+  suffix,
+  valueText
 }) {
   const pass = value <= limit;
-  const pct = Math.min(value / (limit * 1.2) * 100, 100);
   const limitPct = limit / (limit * 1.2) * 100;
+  const pct = valueText ? limitPct : Math.min(value / (limit * 1.2) * 100, 100);
   return /*#__PURE__*/React.createElement("div", {
     className: "meter"
   }, /*#__PURE__*/React.createElement("div", {
@@ -5289,9 +5293,9 @@ function Meter({
   }, name), /*#__PURE__*/React.createElement("span", {
     className: "meter-val",
     style: {
-      color: pass ? "var(--ok)" : "var(--bad)"
+      color: valueText ? "var(--accent)" : (pass ? "var(--ok)" : "var(--bad)")
     }
-  }, value.toFixed(1), suffix, " ", /*#__PURE__*/React.createElement("small", null, "/ ", limit, suffix))), /*#__PURE__*/React.createElement("div", {
+  }, valueText ? valueText : value.toFixed(1) + suffix, " ", /*#__PURE__*/React.createElement("small", null, "/ ", valueText ? "법정 " : "", limit, suffix))), /*#__PURE__*/React.createElement("div", {
     className: "bar"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bar-fill",
@@ -5605,8 +5609,8 @@ function CheckRow({
     R: ["권장", "rec"]
   };
   const sta = judge ? null : STAT[c.status] || ["의무·산정", "notreq"];
-  const iconBg = judge ? ok ? "var(--ok-soft)" : "var(--bad-soft)" : c.status === "A" ? "var(--warn-soft)" : "var(--accent-soft)";
-  const iconCol = judge ? ok ? "var(--ok)" : "var(--bad)" : c.status === "A" ? "var(--warn)" : "var(--accent)";
+  const iconBg = judge ? (c.infoOnly ? "var(--accent-soft)" : (ok ? "var(--ok-soft)" : "var(--bad-soft)")) : c.status === "A" ? "var(--warn-soft)" : "var(--accent-soft)";
+  const iconCol = judge ? (c.infoOnly ? "var(--accent)" : (ok ? "var(--ok)" : "var(--bad)")) : c.status === "A" ? "var(--warn)" : "var(--accent)";
   const lawQuery = encodeURIComponent((String(c.basis).split("/")[0] || c.label).replace(/\s+제.*$/, "").trim());
   return /*#__PURE__*/React.createElement("div", {
     className: "rev-row"
@@ -5619,7 +5623,7 @@ function CheckRow({
       background: iconBg,
       color: iconCol
     }
-  }, judge ? ok ? /*#__PURE__*/React.createElement(Icon.check, null) : /*#__PURE__*/React.createElement(Icon.x, null) : c.status === "A" ? /*#__PURE__*/React.createElement(Icon.alert, null) : /*#__PURE__*/React.createElement(Icon.doc, null)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, judge ? (c.infoOnly ? /*#__PURE__*/React.createElement(Icon.doc, null) : (ok ? /*#__PURE__*/React.createElement(Icon.check, null) : /*#__PURE__*/React.createElement(Icon.x, null))) : c.status === "A" ? /*#__PURE__*/React.createElement(Icon.alert, null) : /*#__PURE__*/React.createElement(Icon.doc, null)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "ck-name"
   }, c.label, (c.lawDiff || c.legacy) && /*#__PURE__*/React.createElement("span", {
     className: "lawchg",
@@ -5632,7 +5636,7 @@ function CheckRow({
     className: "ck-vals"
   }, judge ? /*#__PURE__*/React.createElement("span", {
     className: "info-pill",
-    style: !ok ? {
+    style: (!c.infoOnly && !ok) ? {
       background: "var(--bad-soft)",
       color: "var(--bad)",
       borderColor: "#f0b3b3"
@@ -5643,8 +5647,8 @@ function CheckRow({
   }, c.val) : /*#__PURE__*/React.createElement("span", {
     className: "info-none"
   }, "—"))), /*#__PURE__*/React.createElement("span", {
-    className: "badge " + (judge ? ok ? "ok" : "bad" : sta[1])
-  }, judge ? ok ? "적합" : "초과" : sta[0], /*#__PURE__*/React.createElement("span", {
+    className: "badge " + (judge ? (c.infoOnly ? "ver" : (ok ? "ok" : "bad")) : sta[1])
+  }, judge ? (c.infoOnly ? "법정 한도" : (ok ? "적합" : "초과")) : sta[0], /*#__PURE__*/React.createElement("span", {
     className: "ck-caret"
   }, open ? "▲" : "▼"))), open && /*#__PURE__*/React.createElement("div", {
     className: "rev-row-detail"
@@ -5742,7 +5746,7 @@ function Step4({
   } = result;
   const isApt = input.useType === "공동주택 (아파트)" || input.useType === "주상복합 (주거+상업)";
   const JUDGE = ["bcr", "far"];
-  const judgeChecks = checks.filter(c => JUDGE.indexOf(c.id) !== -1);
+  const judgeChecks = checks.filter(c => JUDGE.indexOf(c.id) !== -1 && !c.infoOnly);
   const passed = judgeChecks.filter(c => c.pass).length;
   const failed = judgeChecks.length - passed;
   const infoCount = checks.length - judgeChecks.length;
