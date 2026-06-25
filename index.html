@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.16 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.17 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -897,7 +897,7 @@ function buildItems(I){
   function a(o){A.push(o);}
 
   /* ============ 1. 인허가 절차 ============ */
-  a({c:0,t:'사업계획승인 대상 여부',s:(isHousing&&u>=30)?'A':'N',
+  a({c:0,t:'사업계획승인 대상 여부',s:(isHousing&&u>=30)?'A':'N',na:!isHousing,
     th:isHousing?`아파트·연립·다세대 30세대 이상 (현재 ${u}세대)`:`주택 외 용도 (${USE_L[use]}) — 사업계획승인 미적용`,
     rq:isHousing
       ?(u>=30?'사업계획승인 신청 필요 (시장·군수·구청장 또는 특별시장·광역시장·도지사)':'건축허가 절차로 진행 가능 (30세대 미만)')
@@ -923,7 +923,7 @@ function buildItems(I){
       needBuildPermit?'<b>건축신고 대상 여부</b>: 연면적 100㎡ 미만 등 소규모는 신고로 갈음 (건축법 제14조) — 본 규모는 허가 대상':null,
     ].filter(Boolean)});
 
-  a({c:0,t:'입주자모집공고 승인 (분양)',s:(isHousing&&u>=30&&!pub)?'A':'N',
+  a({c:0,t:'입주자모집공고 승인 (분양)',s:(isHousing&&u>=30&&!pub)?'A':'N',na:!isHousing,
     th:isHousing?`분양사업 30세대 이상 (현재 ${u}세대 / ${PT_L[pt]})`:`주택 외 용도 — 미적용 (건축물 분양법 별도 확인)`,
     rq:isHousing
       ?(u>=30&&!pub?'분양 전 입주자모집공고 승인 필수':'미해당 (공공임대 또는 30세대 미만)')
@@ -1009,7 +1009,7 @@ function buildItems(I){
     lg:['건축법 제61조제1항','건축법 시행령 제86조제1항',`${cityRef} 건축조례`],
     nt:['<b>적용 지역</b>: 전용주거지역·일반주거지역 (준주거 제외)','<b>높이 10m 이하</b>: 인접대지경계선 1.5m 이상 (조례로 구체 거리)','<b>높이 10m 초과</b>: 해당 건축물 각 부분 높이의 1/2 이상 (조례)','현행 시행령 제86조제1항 기준은 10m']});
 
-  a({c:1,t:'채광방향 일조 (공동주택 동간 거리)',s:isHousing?'A':'N',
+  a({c:1,t:'채광방향 일조 (공동주택 동간 거리)',s:isHousing?'A':'N',na:!isHousing,
     th:isHousing?`공동주택 채광 기준 — 전 용도지역 적용 (영 제86조③, 현재 ${ZONE_L[z]||z}: 인접대지 ${['zone6','zone8'].includes(z)?'4':'2'}배)`:`${USE_L[use]} — 공동주택 전용 기준 미적용`,
     rq:isHousing?'채광창 있는 벽면 → 인접대지경계선까지 수평거리 2배 이하 (근린상업·준주거 4배 이하) / 인동간격 0.5배 이상 (도시형 0.25배) — 공동주택은 용도지역 무관 적용(영 제86조③)':'공동주택 외 용도 — 미적용',
     lg:['건축법 제61조제2항','건축법 시행령 제86조제3항',`${cityRef} 건축조례`],
@@ -1036,13 +1036,13 @@ function buildItems(I){
     lg:['건축법 제64조제2항','건축법 시행령 제90조','건축물의 설비기준 등에 관한 규칙 제10조'],
     nt:['<b>일반승강기 겸용 가능</b>: 비상용 사양 충족 시','<b>승강장 면적</b>: 1대당 6㎡ 이상 (옥외 제외)','<b>피난층 출구에서 공지까지</b>: 30m 이하','<b>승강로</b>: 내화구조 / 갑종 방화문']});
 
-  a({c:1,t:'헬리포트 / 인명구조 공간',s:f>=11?'V':'N',
+  a({c:1,t:'헬리포트 / 인명구조 공간',s:(f>=11&&fa>=10000)?'A':'N',
     th:`11층 이상 + 11층 이상 층 바닥면적 합계 10,000㎡ 이상 (현재 ${f}층)`,
     rq:f>=11?'11층 이상 층의 바닥면적 합계가 10,000㎡ 이상이면 옥상 헬리포트 또는 인명구조 공간 — 전체 연면적 아님, 합계 확인 필요':'11층 미만 — 미해당',
     lg:['건축법 시행령 제40조'],
     nt:['<b>판정 면적</b>: 전체 연면적이 아닌 11층 이상 층의 바닥면적 합계','<b>헬리포트</b>: 옥상 평탄부 직경 10m 이상 + H 표지','<b>인명구조 공간</b>: 22m×22m 이상','<b>옥상 출입문</b>: 비상문 자동개폐장치']});
 
-  a({c:1,t:'환기설비',s:isHousing?(u>=30?'A':'N'):'V',
+  a({c:1,t:'환기설비',s:isHousing?(u>=30?'A':'N'):(['culture','sales','medical','edu','welfare','lodge'].includes(use)?'A':'V'),
     th:isHousing?`30세대 이상 공동주택 (현재 ${u}세대)`:`${USE_L[use]} — 다중이용시설 등(건축법 시행령 제87조②·설비규칙 별표) 용도·규모 확인`,
     rq:isHousing?(u>=30?'시간당 0.5회 이상 환기능력 (기계환기 또는 자연환기 병행)':'자연환기 기준'):'다중이용시설 해당 시 기계환기설비 — 용도별 환기 기준 확인',
     lg:['건축법 시행령 제87조','건축물의 설비기준 등에 관한 규칙 제11조'],
@@ -1445,16 +1445,35 @@ function buildItems(I){
     lg:['공동주택관리법 제2조제1항제2호','공동주택관리법 제64조'],
     nt:['<b>의무관리 (공동주택관리법 제2조)</b>:','&nbsp;&nbsp;가. 300세대 이상','&nbsp;&nbsp;나. 150세대 이상 + 승강기','&nbsp;&nbsp;다. 150세대 이상 + 중앙집중식·지역난방','&nbsp;&nbsp;라. 주상복합 + 주택 150세대 이상','<b>관리사무소장</b>: 주택관리사(보) 이상','<b>500세대 이상</b>: 주택관리사 의무 (보 불가)']});
 
-  a({c:3,t:'자전거 주차장 (자전거이용 활성화법)',s:'V',
-    th:'공동주택 (다세대주택 제외) — 부설주차장 연계 설치',
-    rq:'주차장법 시행령 별표1에 따라 설치하는 <b>자동차 주차대수의 20%</b>에 해당하는 자전거 주차대수의 주차장 설치 (별표1 제3호) — 단, 지자체 조례 기준 우선 확인',
-    lg:['자전거 이용 활성화에 관한 법률 제11조','동법 시행령 제7조제1항 별표1 <개정 2017.12.29.>',`${cityRef} 자전거이용 활성화 조례`],
+  a({c:4,t:'자전거 주차장 (자전거 이용 활성화법)',s:'A',
+    th:'자동차 부설주차대수의 20%(주택·문화·판매·업무·근생·숙박 등) / 10%(운동·창고·공장·기숙사 등) — 산정 5대 미만 면제',
+    rq:'부설주차장 설치대상 건축물·주택단지는 자전거 주차장 설치 의무 — 자동차 주차대수 기준 비율(시행령 별표1)로 산정',
+    lg:['자전거 이용 활성화에 관한 법률 제11조제3항','동법 시행령 제7조제1항 [별표1] <시행 2025.8.28.>',`${cityRef} 자전거 이용시설 조례`],
+    crit:[
+      {n:'주택단지·문화·판매·업무·근린생활·숙박 등(주차장법 시행령 별표1 제2·3·5호): 자동차 주차대수의 20%', m:!['factory','etc'].includes(use)},
+      {n:'운동·창고·공장·기숙사·테마파크·데이터센터·그 밖(별표1 제1·4·6호): 자동차 주차대수의 10%', m:['factory','etc'].includes(use)},
+      {n:'산정 결과 5대 미만: 설치 면제(별표1 비고)', m:false},
+    ],
     nt:[
-      '<b>법정 기준 (별표1)</b> — 자전거 주차대수는 <b>자동차 주차대수 기준 비율</b>로 산정 (세대당 기준 아님):',
-      '&nbsp;&nbsp;• 제3호: 주차장법 시행령 별표1에 따라 설치하는 자동차 주차대수의 <b>20%</b> — 공동주택 포함 (단, <b>다세대주택 제외</b>)',
-      '<b>조례 조정</b>: 지자체 조례로 설치 기준을 1/2 범위에서 조정 가능 — 시·군별 상이',
-      '⚠ <b>해석 주의 (확인필요)</b>: 주택법 사업계획승인 대상 공동주택의 주차는 주택건설기준 제27조에 따르므로, 별표1 제3호("주차장법 별표1에 따라 설치하는") 문언의 직접 적용 여부는 지자체별 해석이 갈림 — 사업계획승인권자·조례 확인 필수',
-      '<b>위치</b>: 필로티 하부, 주동 인근 등 접근성 좋은 곳 권장',
+      '<b>근거</b>: 자전거법 제11조③ — 부설주차장 설치자·주택 사업주체는 자전거 주차장을 설치하여야 함(강행규정) + 시행령 별표1 비율',
+      '<b>조례 조정</b>: 지자체 조례로 1/2 범위에서 완화·강화 가능 — 해당 시·군 조례 확인',
+      '<b>규격</b>: 자전거 1대당 거치면적·거치대 형식은 지자체 조례/지침 확인(확인필요)',
+      '<b>위치</b>: 필로티 하부·주동 인근 등 접근성 좋은 곳 권장',
+    ]});
+
+  a({c:4,t:'개인형 이동장치(PM) 주차·거치',s:'R',
+    th:'법정 부설 설치의무 없음 — 지자체 PM 조례·지구단위계획 권장 시 반영',
+    rq:'전동킥보드 등 PM 주차구역·거치대는 건축물 부설 설치 법정 의무가 없음 — 도로교통법은 통행·주정차 금지만 규정',
+    lg:['도로교통법 제2조제19호의2(개인형 이동장치 정의)','(참고) 지자체 개인형 이동장치 이용안전 증진 조례'],
+    crit:[
+      {n:'국가 법령상 건축물 부설 PM 주차·거치 설치의무: 없음', m:false},
+      {n:'지자체 PM 조례: 공공 설치사업(시장 재량)·대여업 노력의무·무단방치 단속(건축주 의무 아님)', m:false},
+      {n:'지구단위계획·지자체 지침에서 권장·요구 시 반영', m:false},
+    ],
+    nt:[
+      '<b>현황</b>: PM은 도로교통법상 차량 분류·통행/주정차 금지 규정만 — 부설 주차시설 설치 의무 조문 없음',
+      '<b>지자체 조례</b>: 서울 등 PM 이용안전 증진 조례는 공공 거치/주차시설 설치사업·대여업 규율·단속 중심',
+      '⚠ 사업지 지자체 지침·지구단위계획의 PM 주차·거치 권장 여부 확인 권장',
     ]});
 
   a({c:3,t:'미술작품 설치 (문화예술진흥법)',s:fa>=10000?'A':'N',
@@ -1538,7 +1557,7 @@ function buildItems(I){
       '⚠ 「비주거 부설주차」 탭에서 용도·시설면적 입력 시 자동 산정',
     ].filter(Boolean)});
 
-  a({c:4,t:'노인복지주택 주차 기준 (제27조제4항)',s:'V',
+  a({c:4,t:'노인복지주택 주차 기준 (제27조제4항)',s:'V',na:!isHousing,
     th:'「노인복지법」 노인복지주택 — 적용 시 별도 기준',
     rq:'노인복지주택 — 주차대수 <b>0.3대/세대</b> (전용 60㎡ 이하 <b>0.2대/세대</b>) 이상',
     lg:['주택건설기준 제27조제4항','노인복지법'],
@@ -1783,7 +1802,7 @@ function buildItems(I){
     ]});
 
   /* ============ 7. 에너지·친환경 ============ */
-  a({c:1,t:'실내공기질 측정·공고 (신축 공동주택)',s:isHousing?(u>=100?'A':'N'):'N',
+  a({c:1,t:'실내공기질 측정·공고 (신축 공동주택)',s:isHousing?(u>=100?'A':'N'):'N',na:!isHousing,
     th:isHousing?`신축 공동주택 100세대 이상 (현재 ${u}세대)`:`${USE_L[use]} — 공동주택 측정·공고 대상 아님(다중이용시설은 유지기준 별도)`,
     rq:isHousing?(u>=100?'시공자가 입주예정자 입회하에 실내공기질 측정 → 시·군·구청장 제출(입주 7일 전까지) + 입주 7일 전부터 60일간 공고':'100세대 미만 — 측정·공고 의무 미적용'):'신축 공동주택(100세대↑) 대상 — 비주거 다중이용시설은 실내공기질 유지기준 별도(시행령 제2조①)',
     lg:['실내공기질 관리법 제9조','실내공기질 관리법 시행령 제2조제3항','실내공기질 관리법 시행규칙 제7조'],
@@ -2092,7 +2111,7 @@ function buildItems(I){
       '<b>경관지구</b>: 추가 높이 제한',
     ].filter(Boolean)});
 
-  a({c:9,t:'지구단위계획 적용',s:'V',
+  a({c:9,t:'지구단위계획 적용',s:(xDistrict==='yes'?'A':'N'),
     th:'해당 대지 지구단위계획 지정 여부',
     rq:'지구단위계획 결정도·조서 내 건축 규제 전항목 검토',
     lg:['국토계획법 제49조~제54조','지구단위계획 수립지침'],
@@ -2292,7 +2311,7 @@ function buildItems(I){
       '<b>점검 결과 보고</b>: 시·군·구청',
     ]});
 
-  a({c:11,t:'환기설비 기술기준',s:isHousing?(u>=30?'A':'N'):'V',
+  a({c:11,t:'환기설비 기술기준',s:isHousing?(u>=30?'A':'N'):(['culture','sales','medical','edu','welfare','lodge'].includes(use)?'A':'V'),
     th:isHousing?'30세대 이상 공동주택':`${USE_L[use]} — 다중이용시설 등 해당 시 적용`,
     rq:'기계환기 또는 자연환기 — 시간당 0.5회 이상 / KS B 6879 (헤파필터·미세먼지) 권장',
     lg:['건축법 시행령 제87조','건축물의 설비기준 등에 관한 규칙 제11조','기계설비 기술기준 KDS 31'],
@@ -2304,7 +2323,7 @@ function buildItems(I){
     ]});
 
   /* ============ 12. 지구단위계획 ============ */
-  a({c:12,t:'지구단위계획 결정 여부 확인',s:'V',
+  a({c:12,t:'지구단위계획 결정 여부 확인',s:(xDistrict==='yes'?'A':'N'),
     th:'해당 대지의 지구단위계획 지정 여부',
     rq:'토지이용규제 정보서비스(luris.molit.go.kr) 또는 시·군·구 도시계획과 확인',
     lg:['국토의 계획 및 이용에 관한 법률 제49조~제54조','지구단위계획 수립지침 (국토교통부)'],
@@ -2315,7 +2334,7 @@ function buildItems(I){
       '<b>확인 채널</b>: luris.molit.go.kr / 시·군·구 도시계획과 / 일사편리(국토부)',
     ]});
 
-  a({c:12,t:'건축한계선 / 벽면한계선',s:'V',
+  a({c:12,t:'건축한계선 / 벽면한계선',s:(xDistrict==='yes'?'A':'N'),
     th:'지구단위계획 결정도·조서에 명시된 경우',
     rq:'건축한계선·벽면한계선·벽면지정선 준수 — 결정도면 정밀 확인',
     lg:['국토계획법 제52조','지구단위계획 수립지침'],
@@ -2327,7 +2346,7 @@ function buildItems(I){
       '⚠ 결정도면 vs 실측 도면 정합성 사전 확인',
     ]});
 
-  a({c:12,t:'용도 / 건폐율 / 용적률 / 높이 (지구단위계획)',s:'V',
+  a({c:12,t:'용도 / 건폐율 / 용적률 / 높이 (지구단위계획)',s:(xDistrict==='yes'?'A':'N'),
     th:'지구단위계획 고시 기준',
     rq:'국토계획법 시행령 + 지자체 도시계획 조례 + <b>지구단위계획 강화 기준</b> 통합 검토',
     lg:['지구단위계획 결정 고시문',`${cityRef} 도시계획 조례`,'국토계획법 시행령'],
@@ -2339,7 +2358,7 @@ function buildItems(I){
       '<b>완화·권장 사항</b>: 친환경·공공기여 시 인센티브',
     ]});
 
-  a({c:12,t:'공공보행통로 / 차량 출입구 / 공개공지',s:'V',
+  a({c:12,t:'공공보행통로 / 차량 출입구 / 공개공지',s:(xDistrict==='yes'?'A':'N'),
     th:'지구단위계획 또는 건축조례 명시 시',
     rq:'결정도면에 명시된 공공보행통로·차량 출입구 위치·공개공지·기반시설 부담 등 준수',
     lg:['지구단위계획 결정 고시문','건축법 제43조'],
@@ -2351,7 +2370,7 @@ function buildItems(I){
       '<b>공공기여</b>: 인센티브 받는 경우 — 협상 결과 명시',
     ]});
 
-  a({c:12,t:'형태·색채·재질 / 입면 가이드라인',s:'V',
+  a({c:12,t:'형태·색채·재질 / 입면 가이드라인',s:(xDistrict==='yes'?'A':'N'),
     th:'경관지구·중점경관관리구역·지구단위계획 명시 시',
     rq:'지구단위계획 또는 경관계획에서 정한 형태·색채·재질·옥외광고물 기준 준수',
     lg:['지구단위계획 결정 고시문',`${cityRef} 경관 조례`,'경관법'],
@@ -3875,7 +3894,7 @@ function scheduleStepNavUpdate(){
         laws: (it.lg||[]).map(function(n){return {name:n};}),
         detail: detailsFrom(it), matched: (it.s==='A'&&hit)?[{name:hit,value:''}]:[],
         procedure: stripHtml(it.rq), note:'참고용 사전검토 — 최종 대상 여부는 허가권자·법제처 원문 확인',
-        legacy:legacy, lawDiff:lawDiff};
+        legacy:legacy, lawDiff:lawDiff, na:!!it.na};
     });
   }
   var CATMAP={1:'site',2:'house',3:'community',4:'park',5:'fire',8:'fire',6:'energy',11:'mech',9:'zone',12:'zone',0:'etc',13:'etc'};
@@ -3904,7 +3923,7 @@ function scheduleStepNavUpdate(){
       checks.push({id:'c'+it.c+'_'+idx, cat:CATMAP[it.c], status:it.s, label:t,
         basis:(it.lg&&it.lg[0])?it.lg[0]:stripHtml(it.th),
         limit: stripHtml(it.th)||'-', actual: stripHtml(it.rq)||'-', pass:true,
-        detail:(it.nt||[]).filter(Boolean).map(stripHtml).join(' · '), legacy:legacy, lawDiff:lawDiff});
+        detail:(it.nt||[]).filter(Boolean).map(stripHtml).join(' · '), legacy:legacy, lawDiff:lawDiff, na:!!it.na, crit:it.crit||null});
     });
     return {zone:input.zone, computedBCR:bcr, computedFAR:far, checks:checks};
   }
@@ -4739,8 +4758,8 @@ function App() {
   const prev = () => {
     if (step > 0) setStep(step - 1);
   };
-  const result = useMemo(() => evaluate(input), [input]);
-  const reviews = useMemo(() => assessReviews(input), [input]);
+  const result = useMemo(() => { const _r = evaluate(input); return Object.assign({}, _r, { checks: _r.checks.filter(c => !c.na) }); }, [input]);
+  const reviews = useMemo(() => assessReviews(input).filter(r => !r.na), [input]);
   const isApt = input.useType === "공동주택 (아파트)" || input.useType === "주상복합 (주거+상업)";
   const nf = n => Number(n || 0).toLocaleString("ko-KR");
   const zoneLabel = (ZONES.find(z => z.id === input.zone) || {}).label || input.zone;
@@ -5619,7 +5638,24 @@ function CheckRow({
     target: "_blank",
     rel: "noreferrer",
     onClick: e => e.stopPropagation()
-  }, "법제처 원문확인")), /*#__PURE__*/React.createElement("div", {
+  }, "법제처 원문확인")), (c.crit && c.crit.length ? /*#__PURE__*/React.createElement("ul", {
+    className: "crit-list"
+  }, c.crit.map((x, i) => /*#__PURE__*/React.createElement("li", {
+    key: i,
+    className: "crit" + (x.m ? " met" : "")
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "crit-text"
+  }, x.n), x.m && /*#__PURE__*/React.createElement("span", {
+    className: "crit-mini"
+  }, "해당")))) : (c.status === "A") && /*#__PURE__*/React.createElement("ul", {
+    className: "crit-list"
+  }, /*#__PURE__*/React.createElement("li", {
+    className: "crit met"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "crit-text"
+  }, c.limit), /*#__PURE__*/React.createElement("span", {
+    className: "crit-mini"
+  }, "해당 → 판정대상")))), /*#__PURE__*/React.createElement("div", {
     className: "crit-detail-text"
   }, c.detail || c.actual), /*#__PURE__*/React.createElement("div", {
     className: "rev-foot"
