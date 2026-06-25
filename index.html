@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.18 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.19 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -963,7 +963,7 @@ function buildItems(I){
     nt:['<b>조합원 자격</b>: 무주택 세대주 또는 85㎡ 이하 1주택 (지역조합은 6개월 이상 거주 등)','<b>토지 사용권</b>: 80% 이상 사용권원 + 소유권 15% 이상','<b>조합원 수 유지</b>: 설립인가~사용검사까지 예정세대수 50% 이상 + 조합원 20명 이상 (시행령 제20조⑦)','<b>총회 직접출석</b>: 일반 10% 이상·창립/주요의결 20% 이상 (시행령 제20조④)','조합설립인가 후 2년 내 사업계획승인 미신청 시 총회 의결로 해산 여부 결정']});
 
   /* ============ 2. 대지·건축 일반 ============ */
-  a({c:1,t:'대지의 조경',s:s>=200?'A':'N',
+  a({c:1,t:'대지의 조경',s:s>=200?'A':'N',val:(s>=200)?('약 '+Math.round(s*(fa>=2000?15:(fa>=1000?10:5))/100).toLocaleString()+'㎡ ('+(fa>=2000?15:(fa>=1000?10:5))+'%)'):null,
     th:`대지면적 200㎡ 이상 (현재 ${s.toLocaleString()}㎡)`,
     rq:s>=200?`${cityRef} 건축조례 기준 적용 — 일반적으로 대지면적의 15% 이상 (연면적 2,000㎡ 이상 건축물)`:'미해당',
     lg:['건축법 제42조','건축법 시행령 제27조','조경기준(국토교통부 고시)',`${cityRef} 건축조례`],
@@ -992,12 +992,12 @@ function buildItems(I){
     dgBound=`${cityRef} 건축조례 별표(대지 안의 공지)에서 ${USE_L[use]}의 인접대지경계선 이격거리 확인 — 데이터 미수록`;
     dgSrc=`${cityRef} 건축조례`;
   }
-  a({c:1,t:'대지안의 공지 — 건축선 이격',s:'A',
+  a({c:1,t:'대지안의 공지 — 건축선 이격',s:'A',val:(dgUseKey!=='etc')?dgBuild:null,
     th:`${USE_L[use]} — ${dgSrc}`,
     rq:dgBuild,
     lg:['건축법 제58조','건축법 시행령 제80조의2',dgSrc],
     nt:['<b>기준</b>: 건축선으로부터 건축물 각 부분까지 띄어야 할 거리','<b>바닥면적 조건</b>: 용도별 합계 500/1,000㎡ 이상 등 별표 조건 확인','전용·일반공업지역·산업단지는 공장·창고·위험물 등 제외','출처: '+dgSrc]});
-  a({c:1,t:'대지안의 공지 — 인접대지경계선 이격',s:'A',
+  a({c:1,t:'대지안의 공지 — 인접대지경계선 이격',s:'A',val:(dgUseKey!=='etc')?dgBound:null,
     th:`${USE_L[use]} — ${dgSrc}`,
     rq:dgBound,
     lg:['건축법 제58조','건축법 시행령 제80조의2',dgSrc],
@@ -1018,7 +1018,7 @@ function buildItems(I){
   const ospZone=['zone3','zone4','zone5','zone6','zone7','zone8','zone9','zone10'].includes(z);
   const ospUseSet=['culture','sales','biz','lodge'];  // 건축법 시행령 제27조의2①1: 문화집회·종교·판매·운수·업무·숙박(앱 분류 매핑)
   const ospStat = !ospZone?'N':(use==='mixed'?'V':(use==='nbr'?'V':(ospUseSet.includes(use)?(fa>=5000?'A':'N'):'N')));
-  a({c:1,t:'공개공지 확보',s:ospStat,
+  a({c:1,t:'공개공지 확보',s:ospStat,val:(ospStat==='A')?(Math.round(s*0.05).toLocaleString()+'~'+Math.round(s*0.1).toLocaleString()+'㎡ (5~10%)'):null,
     th:`일반주거·준주거·상업·준공업 + 대상용도 5,000㎡ 이상 (현재 ${ZONE_L[z]||z} / ${USE_L[use]} / ${fa.toLocaleString()}㎡)`,
     rq:!ospZone?`${ZONE_L[z]||z} — 공개공지 대상 지역 아님(전용주거 등)`:(use==='mixed'?'주상복합 — 비주거 용도분(문화·판매·업무·숙박) 바닥면적 5,000㎡ 이상 시 대상':(use==='nbr'?'근린생활시설 — 건축조례(제2호) 다중이용시설 지정 여부 확인':(ospUseSet.includes(use)?(fa>=5000?'공개공지 확보 의무 — 대지면적의 5~10% 범위(조례)':`${USE_L[use]} — 대상 용도이나 바닥면적 5,000㎡ 미만`):`${USE_L[use]} — 공개공지 대상 용도 아님(시행령 제27조의2①1 미열거)`))),
     lg:['건축법 제43조','건축법 시행령 제27조의2',`${cityRef} 건축조례`],
@@ -3910,7 +3910,7 @@ function scheduleStepNavUpdate(){
     var zl=getZoneLimit(input.sido,input.sigungu,input.zone);
     var zoneNm=ZONE_L[input.zone]||'';
     var bcr=input.siteArea>0?(input.buildingArea/input.siteArea*100):0;
-    var far=input.siteArea>0?(input.totalArea/input.siteArea*100):0;
+    var _ffa=(parseInt(input.farArea)>0?parseInt(input.farArea):(parseInt(input.totalArea)||0)); var far=input.siteArea>0?(_ffa/input.siteArea*100):0;
     var bcrBasis=zl.verified?(zl.src+' '+zl.bcrJo):(zl.src+' (적용값 확인 필요)');
     var farBasis=zl.verified?(zl.src+' '+zl.farJo):(zl.src+' (적용값 확인 필요)');
     var bcrDet=zl.verified
@@ -3919,6 +3919,7 @@ function scheduleStepNavUpdate(){
     var farDet=zl.verified
       ?('지상 연면적 ÷ 대지면적. 적용 기준: '+zl.src+' '+zl.farJo+' ('+zoneNm+' '+zl.far+'% 이하, 시행 '+zl.ef+'). 위임근거: 국토계획법 제78조 → 영 제85조.'+(zl.note?(' ※ '+zl.note):''))
       :('지상 연면적 ÷ 대지면적. 표시값은 '+zoneNm+' 법정 한도(영 제85조 상한)이며, 실제 적용 용적률은 '+(input.sigungu||'해당 지자체')+' 도시·군계획조례에서 확인하세요. 위임근거: 국토계획법 제78조.');
+    farDet += (parseInt(input.farArea)>0?(' / 적용 연면적 '+parseInt(input.farArea).toLocaleString()+'㎡(용적률산정용)'):' / ⚠ 용적률산정용 연면적 미입력 → 전체연면적 기준(지하·주차·주민공동시설 제외 시 감소)');
     var checks=[
       {id:'bcr',cat:'zone',status:'judge',label:'건폐율',basis:bcrBasis,limit:zl.bcr+'% 이하',actual:bcr.toFixed(1)+'%',pass:bcr<=zl.bcr,detail:bcrDet,legacy:false,lawDiff:null},
       {id:'far',cat:'zone',status:'judge',label:'용적률',basis:farBasis,limit:zl.far+'% 이하',actual:far.toFixed(1)+'%',pass:far<=zl.far,detail:farDet,legacy:false,lawDiff:null}
@@ -3929,7 +3930,7 @@ function scheduleStepNavUpdate(){
       checks.push({id:'c'+it.c+'_'+idx, cat:CATMAP[it.c], status:it.s, label:t,
         basis:(it.lg&&it.lg[0])?it.lg[0]:stripHtml(it.th),
         limit: stripHtml(it.th)||'-', actual: stripHtml(it.rq)||'-', pass:true,
-        detail:(it.nt||[]).filter(Boolean).map(stripHtml).join(' · '), legacy:legacy, lawDiff:lawDiff, na:!!it.na, crit:it.crit||null});
+        detail:(it.nt||[]).filter(Boolean).map(stripHtml).join(' · '), legacy:legacy, lawDiff:lawDiff, na:!!it.na, crit:it.crit||null, val:(it.val!=null?stripHtml(String(it.val)):null)});
     });
     return {zone:input.zone, computedBCR:bcr, computedFAR:far, checks:checks};
   }
@@ -4602,6 +4603,7 @@ const DEFAULT_INPUT = {
   siteArea: 30000,
   buildingArea: 15000,
   totalArea: 62000,
+  farArea: "",
   floors: 18,
   units: 280,
   bizType: "민간분양",
@@ -5005,7 +5007,8 @@ function Step1({
 }) {
   const zone = ZONES.find(z => z.id === input.zone) || ZONES[0];
   const bcr = input.siteArea > 0 ? input.buildingArea / input.siteArea * 100 : 0;
-  const far = input.siteArea > 0 ? input.totalArea / input.siteArea * 100 : 0;
+  const farFA = Number(input.farArea) > 0 ? Number(input.farArea) : Number(input.totalArea);
+  const far = input.siteArea > 0 ? farFA / input.siteArea * 100 : 0;
   const limitBCR = input.dupZone && input.dupBCR !== "" ? Number(input.dupBCR) : zone.bcr;
   const limitFAR = input.dupZone && input.dupFAR !== "" ? Number(input.dupFAR) : zone.far;
   return /*#__PURE__*/React.createElement("div", {
@@ -5142,6 +5145,14 @@ function Step1({
     value: input.totalArea,
     onChange: v => setInput({
       totalArea: v
+    }),
+    unit: "㎡"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "용적률 산정용 연면적"
+  }, /*#__PURE__*/React.createElement(NumInput, {
+    value: input.farArea,
+    onChange: v => setInput({
+      farArea: v
     }),
     unit: "㎡"
   })), /*#__PURE__*/React.createElement(Field, {
@@ -5626,9 +5637,12 @@ function CheckRow({
       color: "var(--bad)",
       borderColor: "#f0b3b3"
     } : null
-  }, "▶ ", c.actual) : /*#__PURE__*/React.createElement("span", {
+  }, "▶ ", c.actual) : (c.val ? /*#__PURE__*/React.createElement("span", {
+    className: "info-pill",
+    style: { background: "var(--accent-soft)", color: "var(--accent)", borderColor: "#c9d8f5" }
+  }, c.val) : /*#__PURE__*/React.createElement("span", {
     className: "info-none"
-  }, "—")), /*#__PURE__*/React.createElement("span", {
+  }, "—"))), /*#__PURE__*/React.createElement("span", {
     className: "badge " + (judge ? ok ? "ok" : "bad" : sta[1])
   }, judge ? ok ? "적합" : "초과" : sta[0], /*#__PURE__*/React.createElement("span", {
     className: "ck-caret"
