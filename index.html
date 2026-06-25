@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.22 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.23 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -879,6 +879,28 @@ function regionLabel(I){
 /* ============================================================
    검토 항목 빌드 (50+ 항목)
 ============================================================ */
+/* 대지 안의 공지 별표 → 용도행별 세부기준 + 선택용도 해당표시 */
+function dgCritRows(cat, dgKey, use){
+  if(!cat) return null;
+  var rows=[];
+  if(cat.apt) rows.push({n:'공동주택(아파트): '+cat.apt, k:'apt'});
+  if(cat.row) rows.push({n:'연립·다세대: '+cat.row, k:'row'});
+  (cat.etc||'').split(' / ').forEach(function(s){s=s.trim(); if(s) rows.push({n:s, k:'etc'});});
+  var KW={culture:['문화','집회'],sales:['판매'],lodge:['숙박'],biz:['업무'],medical:['의료','병원'],edu:['교육','연구'],welfare:['노유자','복지'],factory:['공장','창고'],offi:['업무'],nbr:['근린','판매']};
+  var kws=KW[use]||[]; var anyEtc=false;
+  rows.forEach(function(rw){
+    if(dgKey==='apt') rw.m=(rw.k==='apt');
+    else if(dgKey==='row') rw.m=(rw.k==='row');
+    else { rw.m=(rw.k==='etc' && kws.some(function(k){return rw.n.indexOf(k)>=0;})); if(rw.m) anyEtc=true; }
+  });
+  if(dgKey==='etc' && !anyEtc){
+    var done=false;
+    for(var i=rows.length-1;i>=0;i--){ if(rows[i].k==='etc' && /그\s*밖/.test(rows[i].n)){rows[i].m=true;done=true;break;} }
+    if(!done){ for(var j=rows.length-1;j>=0;j--){ if(rows[j].k==='etc'){rows[j].m=true;break;} } }
+  }
+  return rows.map(function(rw){return {n:rw.n,m:!!rw.m};});
+}
+function dgVal(crit){ if(!crit) return null; var h=crit.filter(function(x){return x.m;}); return h.length?h.map(function(x){return x.n.replace(/^[^:]*: /,'');}).join(' · '):null; }
 function buildItems(I){
   const r=I.r, c=I.c, u=I.u, pt=I.pt, f=I.f, fa=I.fa, s=I.s, z=I.z;
   const use=I.use||'apt';
@@ -987,17 +1009,19 @@ function buildItems(I){
   let dgBuild, dgBound, dgSrc;
   if(dgRec){
     dgBuild=dgRec.build[dgUseKey]; dgBound=dgRec.bound[dgUseKey]; dgSrc=dgRec.src;
+    var dgBuildCrit=dgCritRows(dgRec.build,dgUseKey,use), dgBoundCrit=dgCritRows(dgRec.bound,dgUseKey,use);
   } else {
     dgBuild=`${cityRef} 건축조례 별표(대지 안의 공지)에서 ${USE_L[use]}의 건축선 이격거리 확인 — 데이터 미수록`;
     dgBound=`${cityRef} 건축조례 별표(대지 안의 공지)에서 ${USE_L[use]}의 인접대지경계선 이격거리 확인 — 데이터 미수록`;
     dgSrc=`${cityRef} 건축조례`;
+   var dgBuildCrit=null, dgBoundCrit=null;
   }
-  a({c:1,t:'대지안의 공지 — 건축선 이격',s:'A',val:(dgUseKey!=='etc')?dgBuild:null,
+  a({c:1,t:'대지안의 공지 — 건축선 이격',s:'A',val:dgVal(dgBuildCrit),crit:dgBuildCrit,
     th:`${USE_L[use]} — ${dgSrc}`,
     rq:dgBuild,
     lg:['건축법 제58조','건축법 시행령 제80조의2',dgSrc],
     nt:['<b>기준</b>: 건축선으로부터 건축물 각 부분까지 띄어야 할 거리','<b>바닥면적 조건</b>: 용도별 합계 500/1,000㎡ 이상 등 별표 조건 확인','전용·일반공업지역·산업단지는 공장·창고·위험물 등 제외','출처: '+dgSrc]});
-  a({c:1,t:'대지안의 공지 — 인접대지경계선 이격',s:'A',val:(dgUseKey!=='etc')?dgBound:null,
+  a({c:1,t:'대지안의 공지 — 인접대지경계선 이격',s:'A',val:dgVal(dgBoundCrit),crit:dgBoundCrit,
     th:`${USE_L[use]} — ${dgSrc}`,
     rq:dgBound,
     lg:['건축법 제58조','건축법 시행령 제80조의2',dgSrc],
@@ -1530,7 +1554,31 @@ function buildItems(I){
   const pkUseHousing = isHousing || isOffi;   // 공동주택·준주택(오피스텔) → 주택건설기준 제27조/조례 공동주택 항목
   const nrLegend = '위락 100 · 문화집회·종교·판매·운수·의료·운동·업무·방송국·장례 150 · 1·2종근생·숙박 200 · 수련·공장·발전 350 · 창고 400 · 그 밖 300㎡당 1대';
   const pknrTxt = (ord&&ord.pknr)?`위락 ${ord.pknr.amuse} · 문화 ${ord.pknr.cult} · 근생 ${ord.pknr.nbr} · 수련공장 ${ord.pknr.train} · 창고 ${ord.pknr.ware} · 그밖 ${ord.pknr.etc}㎡당 1대`:'';
-  a({c:4,t:`주차대수 확보 기준 — ${USE_L[use]} (${cityRef} 조례)`,s:'A',
+  var pkVal=null, pkCrit=null;
+  if(pkUseHousing){
+    var rt=(ord&&ord.ratios)?ord.ratios:[0.7,1.0,1.0,1.0];
+    var rs=[rt[1]||0,rt[2]||0,rt[3]||0].filter(function(x){return x>0;}); if(!rs.length) rs=[1];
+    var pkLo=Math.min.apply(null,rs), pkHi=Math.max.apply(null,rs);
+    pkVal='약 '+Math.ceil(u*pkLo)+'~'+Math.ceil(u*pkHi)+'대 (세대당 '+pkLo+'~'+pkHi+'대)';
+    pkCrit=[
+      {n:'전용 60㎡ 이하: 세대당 '+(rt[1]||rt[0])+'대 → 약 '+Math.ceil(u*(rt[1]||rt[0]))+'대 (현재 '+u+'세대)', m:false},
+      {n:'전용 60~85㎡: 세대당 '+rt[2]+'대 → 약 '+Math.ceil(u*rt[2])+'대', m:false},
+      {n:'전용 85㎡ 초과: 세대당 '+rt[3]+'대 → 약 '+Math.ceil(u*rt[3])+'대', m:false},
+      {n:(ord&&ord.pkv)?('조례 검증값 적용 ['+(ord.pksrc||cityRef+' 주차 조례')+'] · 면적식과 큰 값 적용'):(cityRef+' 주차 조례 미수록 — 주택건설기준 제27조 기준'), m:(ord&&ord.pkv)?true:false},
+      {n:'전용면적 구간별 세대수 입력 시 정확 산정 — 「법정 주차대수 산출」 탭', m:false},
+    ];
+  } else {
+    var LEGAL={culture:150,sales:150,biz:150,medical:150,lodge:200,nbr:200,edu:300,welfare:300,factory:350,etc:300};
+    var PKK={culture:'cult',sales:'cult',biz:'cult',medical:'cult',lodge:'nbr',nbr:'nbr',edu:'etc',welfare:'etc',factory:'train',etc:'etc'};
+    var pkUnit=(ord&&ord.pknr&&ord.pknr[PKK[use]])?ord.pknr[PKK[use]]:(LEGAL[use]||300);
+    var pkSrc=(ord&&ord.pknr)?(ord.pknrsrc||cityRef+' 주차 조례'):'주차장법 시행령 별표1(법정)';
+    pkVal='약 '+Math.ceil(fa/pkUnit)+'대 ('+pkUnit+'㎡당 1대)';
+    pkCrit=[
+      {n:USE_L[use]+': '+pkUnit+'㎡당 1대 → 약 '+Math.ceil(fa/pkUnit)+'대 (연면적 '+fa.toLocaleString()+'㎡ 근사) ['+pkSrc+']', m:true},
+      {n:'실제 산정은 주차장·기계실 등 제외 시설면적 기준 — 「비주거 부설주차」 탭에서 정확 산정', m:false},
+    ];
+  }
+  a({c:4,t:`주차대수 확보 기준 — ${USE_L[use]} (${cityRef} 조례)`,s:'A',val:pkVal,crit:pkCrit,
     th: pkUseHousing
       ? `${isOffi?'오피스텔(준주택) — 조례 공동주택 항목 포함, ':''}주택건설기준 제27조 + ${cityRef} 주차장 조례 적용`
       : `${USE_L[use]} — 주차장법 시행령 별표1(용도별 설치기준) + ${cityRef} 주차장 조례 적용`,
