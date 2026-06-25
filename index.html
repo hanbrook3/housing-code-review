@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.26 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.27 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -4710,7 +4710,7 @@ const STORAGE_KEY = "bcc_state_v8";
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-    if (s && s.input) return s;
+    if (s && s.input) return Object.assign({}, s, { step: 0 });
   } catch (e) {}
   return {
     step: 0,
