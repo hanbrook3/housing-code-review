@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.21 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.22 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -4985,13 +4985,15 @@ function Field({
 function NumInput({
   value,
   onChange,
-  unit
+  unit,
+  placeholder
 }) {
   return /*#__PURE__*/React.createElement("div", {
     className: "unit-wrap"
   }, /*#__PURE__*/React.createElement("input", {
     type: "number",
     value: value,
+    placeholder: placeholder || undefined,
     onChange: e => onChange(e.target.value)
   }), unit && /*#__PURE__*/React.createElement("span", {
     className: "unit"
@@ -5133,13 +5135,15 @@ function Step1({
     }),
     unit: "㎡"
   })), /*#__PURE__*/React.createElement(Field, {
-    label: "건축면적"
+    label: "건축면적",
+    help: "비워두면 법정 건폐율 한도로 자동 계산"
   }, /*#__PURE__*/React.createElement(NumInput, {
     value: input.buildingArea,
     onChange: v => setInput({
       buildingArea: v
     }),
-    unit: "㎡"
+    unit: "㎡",
+    placeholder: "법정한도 자동"
   })), /*#__PURE__*/React.createElement(Field, {
     label: "전체연면적"
   }, /*#__PURE__*/React.createElement(NumInput, {
@@ -5149,13 +5153,15 @@ function Step1({
     }),
     unit: "㎡"
   })), /*#__PURE__*/React.createElement(Field, {
-    label: "용적률 산정용 연면적"
+    label: "용적률 산정용 연면적",
+    help: "비워두면 법정 용적률 한도로 자동 계산"
   }, /*#__PURE__*/React.createElement(NumInput, {
     value: input.farArea,
     onChange: v => setInput({
       farArea: v
     }),
-    unit: "㎡"
+    unit: "㎡",
+    placeholder: "법정한도 자동"
   })), /*#__PURE__*/React.createElement(Field, {
     label: "최고층수"
   }, /*#__PURE__*/React.createElement(NumInput, {
