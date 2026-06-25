@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.23 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.24 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -4375,7 +4375,13 @@ const {
   .check-row:last-child { border-bottom: none; }
   .ck-icon { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; }
   .ck-icon svg { width: 14px; height: 14px; }
-  .ck-name { font-size: 14px; font-weight: 600; }
+    .ck-name { font-size: 14px; font-weight: 600; }
+  .na-group { margin-top: 8px; border-top: 1px dashed var(--line); }
+  .na-group-head { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 11px 4px; background: none; border: none; cursor: pointer; font-size: 12.5px; color: var(--muted); font-family: var(--sans); }
+  .na-group-head:hover { color: var(--ink-2); }
+  .na-group-title b { color: var(--ink-2); margin: 0 1px; }
+  .na-caret { font-size: 11px; color: var(--muted); }
+  .na-group-body { opacity: .9; }
   .lawchg { display: inline-block; margin-left: 7px; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; vertical-align: middle; letter-spacing: -.2px; }
   .lawbanner { display: flex; align-items: flex-start; gap: 10px; background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #ea580c; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.5; color: #7c2d12; }
   .lawbanner b { color: #9a3412; }
@@ -5746,6 +5752,16 @@ function CheckRow({
   }, /*#__PURE__*/React.createElement("b", null, "법령시점"), " ", c.lawDiff ? "최신법령 기준 " + (SLAB[c.lawDiff] || c.lawDiff) + " → 구법 적용 시 " + (SLAB[c.status] || c.status) + "으로 변동" : "선택한 처분시점에 강화규정 미시행 — 당시(구법) 기준 적용")));
 }
 
+function NaGroup({ items }) {
+  const [open, setOpen] = useState(false);
+  if (!items.length) return null;
+  return /*#__PURE__*/React.createElement("div", { className: "na-group" }, /*#__PURE__*/React.createElement("button", { className: "na-group-head", onClick: () => setOpen(!open) }, /*#__PURE__*/React.createElement("span", { className: "na-group-title" }, "비대상 (해당 없음) ", /*#__PURE__*/React.createElement("b", null, items.length), "건"), /*#__PURE__*/React.createElement("span", { className: "na-caret" }, open ? "\u25B2 접기" : "\u25BC 펼쳐보기")), open && /*#__PURE__*/React.createElement("div", { className: "na-group-body" }, items.map(c => /*#__PURE__*/React.createElement(CheckRow, { key: c.id, c: c }))));
+}
+function ItemList({ items }) {
+  const main = items.filter(c => c.status !== "N");
+  const na = items.filter(c => c.status === "N");
+  return /*#__PURE__*/React.createElement(React.Fragment, null, main.map(c => /*#__PURE__*/React.createElement(CheckRow, { key: c.id, c: c })), /*#__PURE__*/React.createElement(NaGroup, { items: na }));
+}
 // ---------- STEP 4 : 법규 체크리스트 ----------
 function Ring({
   pct,
@@ -5917,10 +5933,7 @@ function Step4({
         paddingTop: 4,
         paddingBottom: 4
       }
-    }, items.map(c => /*#__PURE__*/React.createElement(CheckRow, {
-      key: c.id,
-      c: c
-    })))) : null;
+    }, /*#__PURE__*/React.createElement(ItemList, { items: items }))) : null;
   })()) : (() => {
     const items = checks.filter(c => c.cat === tab);
     return /*#__PURE__*/React.createElement("div", {
@@ -5937,10 +5950,7 @@ function Step4({
       }
     }, items.length === 0 ? /*#__PURE__*/React.createElement("div", {
       className: "empty"
-    }, "현재 용도·규모 기준 해당 항목이 없습니다.") : items.map(c => /*#__PURE__*/React.createElement(CheckRow, {
-      key: c.id,
-      c: c
-    }))));
+    }, "현재 용도·규모 기준 해당 항목이 없습니다.") : /*#__PURE__*/React.createElement(ItemList, { items: items })));
   })(), /*#__PURE__*/React.createElement("div", {
     className: "footer-nav"
   }, /*#__PURE__*/React.createElement("button", {
