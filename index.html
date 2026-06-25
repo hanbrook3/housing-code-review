@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.15 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.16 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -2081,18 +2081,6 @@ function buildItems(I){
     nt:['<b>자동개폐장치</b>: 화재 시 자동 잠김 해제 (소방시스템 연동)','<b>예외</b>: 대피공간 없는 옥상 출입문','<b>지상 출입문·지하주차장 출입문</b>: 전자출입시스템 (비밀번호·카드)']});
 
   /* ============ 10. 지자체 조례 ============ */
-  var _zl=getZoneLimit(r,c,z);
-  a({c:9,t:`건폐율·용적률 적용 근거 (${ZONE_L[z]||z})`,s:'A',
-    th:_zl.verified?(_zl.bcrJo===_zl.farJo?`${_zl.src} ${_zl.bcrJo}`:`${_zl.src} ${_zl.bcrJo}·${_zl.farJo}`):`${cityRef} 도시·군계획조례`,
-    rq:_zl.verified?`적용 건폐율 ${_zl.bcr}% / 용적률 ${_zl.far}% 이하 — ${_zl.src}(시행 ${_zl.ef}) 기준. 「건폐율·용적률」 항목에서 입력값 판정`:`${cityRef} 도시·군계획조례의 용도지역별 건폐율·용적률 적용 — 본 도구 미수록(법정 한도 표시), 조례 별표 실제값 확인 필요`,
-    lg:_zl.verified?[`${_zl.src} ${_zl.bcrJo}(건폐율)·${_zl.farJo}(용적률)`,'국토의 계획 및 이용에 관한 법률 제77조·제78조(위임근거)']:[`${cityRef} 도시·군계획조례`,'국토의 계획 및 이용에 관한 법률 제77조·제78조(위임근거)'],
-    nt:[
-      '<b>적용 법규</b>: 건폐율·용적률은 국토계획법이 아닌 <b>해당 시·군의 도시·군계획조례</b>가 정한 값을 적용(국계법·시행령은 조례가 정할 상한 범위만 규정).',
-      _zl.verified?`<b>${_zl.src}</b>: ${ZONE_L[z]||z} 건폐율 ${_zl.bcr}% / 용적률 ${_zl.far}% 이하 (${_zl.bcrJo}·${_zl.farJo}, 시행 ${_zl.ef})${_zl.note?' ※ '+_zl.note:''}`:`<b>미수록 지역</b>: 본 도구 조례 DB에 ${cityRef} 미수록 — 법정 한도 표시. elis.go.kr에서 조례 원문 확인`,
-      '<b>완화·강화</b>: 지구단위계획·방화지구·임대주택·기부채납 등 조례상 완화규정 별도 확인',
-      '⚠ 「건폐율·용적률」 항목에서 입력값 기준 적합/초과 판정',
-    ]});
-
   a({c:9,t:'층수·최고높이 제한',s:'V',
     th:`${cityRef} 조례 + 지구단위계획`,
     rq:`${cityRef} 건축조례 / 지구단위계획 최고높이 확인`,
