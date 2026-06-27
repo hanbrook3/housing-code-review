@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.31 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.32 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -6202,7 +6202,7 @@ function Step4({
     var cc = (typeof communityChecks === "function") ? communityChecks(input) : { total: 0, items: [] };
     var c3 = checks.filter(function (c) { return c.cat === "community"; });
     var allComm = cc.items.concat(c3);
-    return /*#__PURE__*/React.createElement("div", { className: "card" }, /*#__PURE__*/React.createElement("div", { className: "card-head" }, /*#__PURE__*/React.createElement("h3", null, "주민공동시설"), /*#__PURE__*/React.createElement("span", { className: "hint" }, "주택건설기준 제55조의2 · 부대복리 · 총량 ", /*#__PURE__*/React.createElement("b", { style: { color: "var(--ink)" } }, cc.total.toLocaleString("ko-KR"), "㎡"))), /*#__PURE__*/React.createElement("div", { className: "card-body", style: { paddingTop: 4, paddingBottom: 4 } }, allComm.length ? /*#__PURE__*/React.createElement(ItemList, { items: allComm }) : /*#__PURE__*/React.createElement("div", { className: "empty-tab" }, "해당 항목이 없습니다.")));
+    return /*#__PURE__*/React.createElement("div", { className: "card" }, /*#__PURE__*/React.createElement("div", { className: "card-head" }, /*#__PURE__*/React.createElement("h3", null, "주민공동시설"), /*#__PURE__*/React.createElement("span", { className: "hint" }, "주택건설기준 제55조의2 · 부대복리 · 총량 ", /*#__PURE__*/React.createElement("b", { style: { color: "var(--ink)" } }, cc.total.toLocaleString("ko-KR"), "㎡"))), /*#__PURE__*/React.createElement("div", { className: "card-body", style: { paddingTop: 4, paddingBottom: 4 } }, allComm.length ? /*#__PURE__*/React.createElement(ItemList, { items: allComm }) : /*#__PURE__*/React.createElement("div", { className: "empty" }, "현재 용도·규모 기준 해당 항목이 없습니다.")));
   })() : (() => {
     const items = checks.filter(c => c.cat === tab);
     return /*#__PURE__*/React.createElement("div", {
