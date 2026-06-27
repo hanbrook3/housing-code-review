@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.29 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.30 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -4748,11 +4748,11 @@ window.injectMobileStyles = function injectMobileStyles() {
   .m-seg button.on { background: #fff; color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.1); font-weight: 600; }
 
   /* 미니 미터바 */
-  .m-meter-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 13px 15px; margin-bottom: 14px; }
+  .m-meter-bar { display: grid; grid-template-columns: 1fr; gap: 13px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 13px 15px; margin-bottom: 14px; }
   .m-mini-meter { display: flex; flex-direction: column; gap: 7px; }
   .m-mm-top { display: flex; align-items: baseline; justify-content: space-between; }
   .m-mm-name { font-size: 12px; font-weight: 600; }
-  .m-mm-val { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+  .m-mm-val { font-family: var(--mono); font-size: 13px; font-weight: 600; white-space: nowrap; }
   .m-mm-val small { color: var(--muted); font-weight: 400; font-size: 10px; }
   .m-bar { height: 7px; background: #eef1f5; border-radius: 999px; position: relative; overflow: hidden; }
   .m-bar-fill { height: 100%; border-radius: 999px; transition: width .5s cubic-bezier(.2,.8,.2,1); }
