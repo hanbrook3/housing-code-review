@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.27 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.28 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -4501,6 +4501,78 @@ const {
   .rev-section-desc { font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
   .rev-section-count { font-size: 12px; color: var(--ink-2); white-space: nowrap; font-family: var(--mono); }
   .rev-section-count b { font-size: 15px; color: var(--warn); font-weight: 700; }
+
+  /* ================= 모바일 반응형 (v6.28) ================= */
+  @media (max-width: 760px) {
+    html, body { height: auto; }
+    #root { height: auto; min-height: 100vh; }
+    .app { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
+    .main { overflow: visible; }
+
+    /* 사이드바 → 상단 가로 스텝바 */
+    .sidebar { border-right: none; border-bottom: 1px solid #0a1018; position: sticky; top: 0; z-index: 40; }
+    .brand { padding: 11px 14px; }
+    .brand-mark { width: 28px; height: 28px; }
+    .brand-mark svg { width: 16px; height: 16px; }
+    .brand-name { font-size: 13.5px; }
+    .brand-sub { font-size: 10px; }
+    .nav { flex-direction: row; align-items: center; gap: 6px; padding: 9px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .nav::-webkit-scrollbar { height: 0; }
+    .nav-label { display: none; }
+    .step { flex: none; width: auto; padding: 8px 12px; gap: 8px; align-items: center; background: rgba(255,255,255,.05); white-space: nowrap; }
+    .step.active::before { display: none; }
+    .step-desc { display: none; }
+    .step-txt { padding-top: 0; }
+    .step-name { font-size: 12.5px; }
+    .step-num { width: 20px; height: 20px; font-size: 11px; }
+    .nav .substep { display: none; }
+    .side-foot { display: none; }
+
+    /* 탑바 */
+    .topbar { padding: 0 14px; height: 52px; }
+    .topbar h1 { font-size: 15px; }
+    .topbar-tag { display: none; }
+
+    /* 페이지 여백 */
+    .page, .page.wide { max-width: 100%; padding: 20px 14px 64px; }
+    .page-title { font-size: 22px; }
+    .page-lede { font-size: 13px; }
+
+    /* 다중 컬럼 → 1열 */
+    .grid2, .grid3, .grid4, .meters, .split, .dup-fields, .rev-summary { grid-template-columns: 1fr; }
+    .split .side-sticky { position: static; }
+
+    /* 카드 */
+    .card-head { padding: 14px 16px; }
+    .card-body { padding: 16px; }
+
+    /* STEP4 탭: 가로 스크롤 */
+    .step4-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .step4-tabs::-webkit-scrollbar { height: 0; }
+    .step4-tabs button { white-space: nowrap; flex: none; padding: 8px 13px; font-size: 12.5px; }
+
+    /* 체크행: 아이콘 1열, 나머지(본문·값·배지) 2열에 세로 적층 */
+    .check-row { grid-template-columns: 24px 1fr; gap: 5px 10px; align-items: start; padding: 14px 4px; }
+    .check-row > * { grid-column: 2; min-width: 0; }
+    .check-row > .ck-icon { grid-column: 1; grid-row: 1; }
+    .ck-vals { text-align: left; min-width: 0; }
+    .check-row > .badge { justify-self: start; }
+    .rev-row-detail { margin: 0 6px 10px 34px; padding: 12px 13px; }
+
+    /* 표: 작게 + 셀 줄바꿈 허용 */
+    .cf-table { font-size: 11.5px; }
+    .cf-item { width: auto; white-space: normal; }
+    .cf-status { width: auto; }
+
+    /* 입력 터치영역 (iOS 자동 줌 방지 16px) */
+    .field input, .field select { padding: 11px 12px; font-size: 16px; }
+  }
+  @media (max-width: 420px) {
+    .page, .page.wide { padding: 16px 11px 52px; }
+    .page-title { font-size: 20px; }
+    .step-name { font-size: 12px; }
+    .card-body { padding: 14px; }
+  }
   `;
   const tag = document.createElement("style");
   tag.textContent = css;
