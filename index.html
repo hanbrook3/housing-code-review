@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.30 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.31 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -1614,12 +1614,12 @@ function buildItems(I){
       '⚠ 「비주거 부설주차」 탭에서 용도·시설면적 입력 시 자동 산정',
     ].filter(Boolean)});
 
-  a({c:4,t:'노인복지주택 주차 기준 (제27조제4항)',s:'V',na:!isHousing,
+  a({c:4,t:'노인복지주택 주차 기준 (제27조제4항)',s:'N',na:!isHousing,
     th:'「노인복지법」 노인복지주택 — 적용 시 별도 기준',
     rq:'노인복지주택 — 주차대수 <b>0.3대/세대</b> (전용 60㎡ 이하 <b>0.2대/세대</b>) 이상',
     lg:['주택건설기준 제27조제4항','노인복지법'],
     nt:[
-      '<b>대상</b>: 노인복지법에 따른 노인복지주택 (실버타운·고령자주택 등)',
+      '<b>적용 대상</b>: 「노인복지법」상 노인복지주택(실버타운·고령자주택 등)에 한함 — 일반 공동주택은 비대상',
       '<b>주차 산정</b>: 일반 공동주택 기준(1대/세대 등)과 별도 — 0.3대/세대',
       '<b>전용 60㎡ 이하</b>: 0.2대/세대',
       '<b>철도부지 활용 공공주택 (제27조제8항)</b>: 역시설 반경 500m 이내 공공주택 — 주차기준 1/2 범위 완화 가능',
@@ -3974,7 +3974,7 @@ function scheduleStepNavUpdate(){
       var t=String(it.t).replace(' ⚠ 구법',''); var hit=it.hit||''; var legacy=old&&/⚠ 구법/.test(it.t);
       var ls=lm[it.c+'|'+t]; var lawDiff=(old&&ls!=null&&ls!==it.s)?ls:null;
       return {id:'r'+it.c+'_'+idx, cat: it.c===7?'assess':'council', label:t,
-        required: it.s==='A', vars: stripHtml(it.th).slice(0,70), desc: stripHtml(it.rq),
+        required: it.s==='A', status: it.s, vars: stripHtml(it.th).slice(0,70), desc: stripHtml(it.rq),
         laws: (it.lg||[]).map(function(n){return {name:n};}),
         detail: detailsFrom(it), matched: (it.s==='A'&&hit)?[{name:hit,value:''}]:[],
         procedure: stripHtml(it.rq), note:'참고용 사전검토 — 최종 대상 여부는 허가권자·법제처 원문 확인',
@@ -4040,6 +4040,17 @@ function scheduleStepNavUpdate(){
       R('관리사무소 등', '50세대 이상: 10㎡ + 50세대 초과 세대당 500㎠ (최대 100㎡)', t11[0],t11[1], (isHousing&&u>=50)?('법정 '+Math.min(100,10+(u-50)*0.05).toFixed(1)+'㎡ 이상'):(u+'세대'), '경비원 휴게시설(산업안전보건법) / 관리사무소 접근성 (주택건설기준 제28조)')
     ];
     return {total:total, rows:rows};
+  }
+  // 주민공동시설 표를 체크형(다른 체크리스트와 동일 형식)으로 변환: kind req→A(대상)/info→V(검토)/no→N(비대상)
+  function communityChecks(input){
+    var cf=communityFacilities(input);
+    var K={req:'A',info:'V',no:'N'};
+    var items=cf.rows.map(function(r,i){
+      return {id:'cf'+i, cat:'community', status:(K[r.kind]||'V'), label:r.item,
+        basis:'주택건설기준 제55조의2', limit:(r.std||'-'), actual:(r.value||'-'), pass:true,
+        detail:(r.point||''), legacy:false, lawDiff:null, na:false, crit:null, val:(r.value||null)};
+    });
+    return {total:cf.total, items:items};
   }
   // 사업방식별 인허가 타임라인 + 단계별 병행 심의·영향평가 태그(검증 엔진 c7/c10 대상 판정)
   function permitTimeline(input){
@@ -4187,7 +4198,7 @@ function scheduleStepNavUpdate(){
     return H.join('');
   }
 
-  window.APP_DATA={ZONES:ZONES,BUILDING_USES:BUILDING_USES,REGIONS:REGIONS,BIZ_TYPES:BIZ_TYPES,PERMIT_STEPS:[],assessReviews:assessReviews,communityFacilities:communityFacilities,evaluate:evaluate,permitTimeline:permitTimeline,buildReportHTML:buildReportHTML,LAW_BASE:LAW_BASE,DEV:DEV};
+  window.APP_DATA={ZONES:ZONES,BUILDING_USES:BUILDING_USES,REGIONS:REGIONS,BIZ_TYPES:BIZ_TYPES,PERMIT_STEPS:[],assessReviews:assessReviews,communityFacilities:communityFacilities,communityChecks:communityChecks,evaluate:evaluate,permitTimeline:permitTimeline,buildReportHTML:buildReportHTML,LAW_BASE:LAW_BASE,DEV:DEV};
 })();
 </script>
 <script>// 건축법규콘솔 - 공유 UI 컴포넌트 + 스타일 주입
@@ -4874,6 +4885,7 @@ const {
   BIZ_TYPES,
   assessReviews,
   communityFacilities,
+  communityChecks,
   evaluate,
   permitTimeline,
   LAW_BASE,
@@ -5757,6 +5769,7 @@ function ReviewRow({
 }) {
   const [open, setOpen] = useState(false);
   const matched = r.matched && r.matched.length ? r.matched[0] : null;
+  const _req = r.status === "A", _ver = r.status === "V";
   const lawQuery = encodeURIComponent((r.laws && r.laws[0] ? r.laws[0].name : r.label).replace(/\s+제.*$/, ""));
   return /*#__PURE__*/React.createElement("div", {
     className: "rev-row"
@@ -5766,10 +5779,10 @@ function ReviewRow({
   }, /*#__PURE__*/React.createElement("div", {
     className: "ck-icon",
     style: {
-      background: r.required ? "var(--warn-soft)" : "#eef1f5",
-      color: r.required ? "var(--warn)" : "var(--muted)"
+      background: _req ? "var(--warn-soft)" : (_ver ? "var(--accent-soft)" : "#eef1f5"),
+      color: _req ? "var(--warn)" : (_ver ? "var(--accent)" : "var(--muted)")
     }
-  }, r.required ? /*#__PURE__*/React.createElement(Icon.alert, null) : /*#__PURE__*/React.createElement(Icon.doc, null)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, _req ? /*#__PURE__*/React.createElement(Icon.alert, null) : /*#__PURE__*/React.createElement(Icon.doc, null)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "ck-name"
   }, r.label, (r.lawDiff || r.legacy) && /*#__PURE__*/React.createElement("span", {
     className: "lawchg",
@@ -5785,8 +5798,8 @@ function ReviewRow({
   }, "▶ 사업정보 : ", matched.value) : /*#__PURE__*/React.createElement("span", {
     className: "info-none"
   }, "판정 —")), /*#__PURE__*/React.createElement("span", {
-    className: "badge " + (r.required ? "req" : "notreq")
-  }, r.required ? "대상" : "비대상", /*#__PURE__*/React.createElement("span", {
+    className: "badge " + (_req ? "req" : _ver ? "ver" : "notreq")
+  }, _req ? "대상" : _ver ? "검토" : "비대상", /*#__PURE__*/React.createElement("span", {
     className: "ck-caret"
   }, open ? "▲" : "▼"))), open && /*#__PURE__*/React.createElement("div", {
     className: "rev-row-detail"
@@ -6044,8 +6057,8 @@ function ReviewNaGroup({ items }) {
   return /*#__PURE__*/React.createElement("div", { className: "na-group" }, /*#__PURE__*/React.createElement("button", { className: "na-group-head", onClick: () => setOpen(!open) }, /*#__PURE__*/React.createElement("span", { className: "na-group-title" }, "비대상 (해당 없음) ", /*#__PURE__*/React.createElement("b", null, items.length), "건"), /*#__PURE__*/React.createElement("span", { className: "na-caret" }, open ? "\u25B2 접기" : "\u25BC 펼쳐보기")), open && /*#__PURE__*/React.createElement("div", { className: "na-group-body" }, items.map(r => /*#__PURE__*/React.createElement(ReviewRow, { key: r.id, r: r }))));
 }
 function ReviewList({ items }) {
-  const main = items.filter(r => r.required);
-  const na = items.filter(r => !r.required);
+  const main = items.filter(r => r.status !== "N").slice().sort((a, b) => ordStatus(a.status) - ordStatus(b.status));
+  const na = items.filter(r => r.status === "N");
   return /*#__PURE__*/React.createElement(React.Fragment, null, main.map(r => /*#__PURE__*/React.createElement(ReviewRow, { key: r.id, r: r })), /*#__PURE__*/React.createElement(ReviewNaGroup, { items: na }));
 }
 function NaGroup({ items }) {
@@ -6053,8 +6066,9 @@ function NaGroup({ items }) {
   if (!items.length) return null;
   return /*#__PURE__*/React.createElement("div", { className: "na-group" }, /*#__PURE__*/React.createElement("button", { className: "na-group-head", onClick: () => setOpen(!open) }, /*#__PURE__*/React.createElement("span", { className: "na-group-title" }, "비대상 (해당 없음) ", /*#__PURE__*/React.createElement("b", null, items.length), "건"), /*#__PURE__*/React.createElement("span", { className: "na-caret" }, open ? "\u25B2 접기" : "\u25BC 펼쳐보기")), open && /*#__PURE__*/React.createElement("div", { className: "na-group-body" }, items.map(c => /*#__PURE__*/React.createElement(CheckRow, { key: c.id, c: c }))));
 }
+function ordStatus(s) { return (s === "judge" || s === "A") ? 0 : s === "V" ? 1 : s === "R" ? 2 : 1; }
 function ItemList({ items }) {
-  const main = items.filter(c => c.status !== "N");
+  const main = items.filter(c => c.status !== "N").slice().sort((a, b) => ordStatus(a.status) - ordStatus(b.status));
   const na = items.filter(c => c.status === "N");
   return /*#__PURE__*/React.createElement(React.Fragment, null, main.map(c => /*#__PURE__*/React.createElement(CheckRow, { key: c.id, c: c })), /*#__PURE__*/React.createElement(NaGroup, { items: na }));
 }
@@ -6184,53 +6198,12 @@ function Step4({
     key: t.key,
     className: tab === t.key ? "on" : "",
     onClick: () => setTab(t.key)
-  }, t.name))), tab === "community" ? /*#__PURE__*/React.createElement(React.Fragment, null, isApt && cf && /*#__PURE__*/React.createElement("div", {
-    className: "card"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "card-head"
-  }, /*#__PURE__*/React.createElement("h3", null, "주민공동시설 세부설치기준"), /*#__PURE__*/React.createElement("span", {
-    className: "hint"
-  }, "공동주택 전용 · 주택건설기준 제55조의2 · 총량 ", /*#__PURE__*/React.createElement("b", {
-    style: {
-      color: "var(--ink)"
-    }
-  }, cf.total.toLocaleString("ko-KR"), "㎡"))), /*#__PURE__*/React.createElement("div", {
-    className: "card-body",
-    style: {
-      padding: 0
-    }
-  }, /*#__PURE__*/React.createElement("table", {
-    className: "cf-table"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "항목"), /*#__PURE__*/React.createElement("th", null, "기준"), /*#__PURE__*/React.createElement("th", null, "현재 입력"), /*#__PURE__*/React.createElement("th", null, "확인 포인트"))), /*#__PURE__*/React.createElement("tbody", null, cf.rows.map((row, i) => /*#__PURE__*/React.createElement("tr", {
-    key: i
-  }, /*#__PURE__*/React.createElement("td", {
-    className: "cf-item"
-  }, row.item), /*#__PURE__*/React.createElement("td", {
-    className: "cf-std"
-  }, row.std), /*#__PURE__*/React.createElement("td", {
-    className: "cf-status"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "cf-badge " + row.kind
-  }, row.status), row.value && /*#__PURE__*/React.createElement("div", {
-    className: "cf-value"
-  }, row.value)), /*#__PURE__*/React.createElement("td", {
-    className: "cf-point"
-  }, row.point))))))), (() => {
-    const items = checks.filter(c => c.cat === "community");
-    return items.length ? /*#__PURE__*/React.createElement("div", {
-      className: "card"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "card-head"
-    }, /*#__PURE__*/React.createElement("h3", null, "부대복리시설"), /*#__PURE__*/React.createElement("span", {
-      className: "hint"
-    }, "미술작품·범죄예방(CPTED)·자전거주차·관리사무소·의무관리 등")), /*#__PURE__*/React.createElement("div", {
-      className: "card-body",
-      style: {
-        paddingTop: 4,
-        paddingBottom: 4
-      }
-    }, /*#__PURE__*/React.createElement(ItemList, { items: items }))) : null;
-  })()) : (() => {
+  }, t.name))), tab === "community" ? (function () {
+    var cc = (typeof communityChecks === "function") ? communityChecks(input) : { total: 0, items: [] };
+    var c3 = checks.filter(function (c) { return c.cat === "community"; });
+    var allComm = cc.items.concat(c3);
+    return /*#__PURE__*/React.createElement("div", { className: "card" }, /*#__PURE__*/React.createElement("div", { className: "card-head" }, /*#__PURE__*/React.createElement("h3", null, "주민공동시설"), /*#__PURE__*/React.createElement("span", { className: "hint" }, "주택건설기준 제55조의2 · 부대복리 · 총량 ", /*#__PURE__*/React.createElement("b", { style: { color: "var(--ink)" } }, cc.total.toLocaleString("ko-KR"), "㎡"))), /*#__PURE__*/React.createElement("div", { className: "card-body", style: { paddingTop: 4, paddingBottom: 4 } }, allComm.length ? /*#__PURE__*/React.createElement(ItemList, { items: allComm }) : /*#__PURE__*/React.createElement("div", { className: "empty-tab" }, "해당 항목이 없습니다.")));
+  })() : (() => {
     const items = checks.filter(c => c.cat === tab);
     return /*#__PURE__*/React.createElement("div", {
       className: "card"
@@ -6292,6 +6265,7 @@ window.MobileApp = function () {
     REGIONS,
     assessReviews,
     communityFacilities,
+    communityChecks,
     evaluate,
     permitTimeline
   } = D;
@@ -6483,6 +6457,9 @@ window.MobileApp = function () {
   };
   if (typeof injectMobileStyles === "function") injectMobileStyles();
   const PLATFORM = window.MOBILE_PLATFORM || (/android/i.test(navigator.userAgent) ? "android" : /iphone|ipad|ipod/i.test(navigator.userAgent) ? "ios" : "ios");
+  function ordStatus(s) {
+    return s === "judge" || s === "A" ? 0 : s === "V" ? 1 : s === "R" ? 2 : 1;
+  }
   function lawLink(q) {
     return "https://www.law.go.kr/LSW/lsSc.do?menuId=1&query=" + encodeURIComponent(String(q || "").replace(/\s+제.*$/, "").trim());
   }
@@ -7055,8 +7032,10 @@ window.MobileApp = function () {
   }) {
     const matched = r.matched && r.matched.length ? r.matched[0] : null;
     const lawTag = r.legacy ? "구법" : r.lawDiff ? "구법 변동" : null;
+    const _req = r.status === "A",
+      _ver = r.status === "V";
     return /*#__PURE__*/React.createElement(RowShell, {
-      icon: r.required ? /*#__PURE__*/React.createElement(Icon.alert, {
+      icon: _req ? /*#__PURE__*/React.createElement(Icon.alert, {
         style: {
           width: 17,
           height: 17
@@ -7067,15 +7046,15 @@ window.MobileApp = function () {
           height: 17
         }
       }),
-      iconBg: r.required ? "var(--warn-soft)" : "#eef1f5",
-      iconCol: r.required ? "var(--warn)" : "var(--muted)",
+      iconBg: _req ? "var(--warn-soft)" : _ver ? "var(--accent-soft)" : "#eef1f5",
+      iconCol: _req ? "var(--warn)" : _ver ? "var(--accent)" : "var(--muted)",
       name: r.label,
       basis: (r.laws || []).map(l => l.name).join(" / "),
       lawTag: lawTag,
       detail: r.required && matched ? matched.name : "기준변수 · " + (r.vars || ""),
       pill: r.required && matched && matched.value ? "▶ 사업정보 : " + matched.value : null,
-      badge: r.required ? "대상" : "비대상",
-      badgeClass: r.required ? "req" : "notreq"
+      badge: _req ? "대상" : _ver ? "검토" : "비대상",
+      badgeClass: _req ? "req" : _ver ? "ver" : "notreq"
     }, /*#__PURE__*/React.createElement("div", {
       className: "m-detail-meta"
     }, /*#__PURE__*/React.createElement("span", {
@@ -7224,11 +7203,11 @@ window.MobileApp = function () {
     }];
     const activeCat = cats.find(c => c.key === tab) || cats[0];
     const items = reviews.filter(r => r.cat === activeCat.key);
-    const main = items.filter(r => r.required);
-    const na = items.filter(r => !r.required);
+    const main = items.filter(r => r.status !== "N").slice().sort((a, b) => ordStatus(a.status) - ordStatus(b.status));
+    const na = items.filter(r => r.status === "N");
     const counts = {};
     cats.forEach(cat => {
-      counts[cat.key] = reviews.filter(r => r.cat === cat.key && r.required).length;
+      counts[cat.key] = reviews.filter(r => r.cat === cat.key && r.status === "A").length;
     });
     return /*#__PURE__*/React.createElement("div", {
       className: "m-page"
@@ -7376,9 +7355,13 @@ window.MobileApp = function () {
     let tabs = CAT_DEF.filter(t => (counts[t.key] || 0) > 0 || t.key === "community" && isApt);
     const activeTab = tabs.find(t => t.key === tab) || tabs[0];
     const curKey = activeTab ? activeTab.key : "zone";
-    const cf = curKey === "community" ? communityFacilities(input) : null;
-    const items = checks.filter(c => c.cat === curKey);
-    const main = items.filter(c => c.status !== "N");
+    const cc = typeof communityChecks === "function" ? communityChecks(input) : {
+      total: 0,
+      items: []
+    };
+    let items = checks.filter(c => c.cat === curKey);
+    if (curKey === "community") items = cc.items.concat(items);
+    const main = items.filter(c => c.status !== "N").slice().sort((a, b) => ordStatus(a.status) - ordStatus(b.status));
     const na = items.filter(c => c.status === "N");
     return /*#__PURE__*/React.createElement("div", {
       className: "m-page"
@@ -7411,30 +7394,9 @@ window.MobileApp = function () {
       active: curKey,
       onSelect: setTab,
       counts: counts
-    }), curKey === "community" && cf ? /*#__PURE__*/React.createElement(Card, {
-      title: "주민공동시설 세부설치기준",
-      hint: "총량 " + (cf.total || 0).toLocaleString("ko-KR") + "㎡",
-      pad: false
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "m-cf-list"
-    }, cf.rows.map((row, i) => /*#__PURE__*/React.createElement("div", {
-      key: i,
-      className: "m-cf-item"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "m-cf-top"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "m-cf-name"
-    }, row.item), /*#__PURE__*/React.createElement("span", {
-      className: "m-cf-badge " + row.kind
-    }, row.status)), /*#__PURE__*/React.createElement("div", {
-      className: "m-cf-std"
-    }, row.std), row.value && /*#__PURE__*/React.createElement("div", {
-      className: "m-cf-value"
-    }, "현재 입력 · ", row.value), /*#__PURE__*/React.createElement("div", {
-      className: "m-cf-point"
-    }, row.point))))) : /*#__PURE__*/React.createElement(Card, {
-      title: activeTab ? activeTab.name : "",
-      hint: activeTab ? activeTab.desc : "",
+    }), /*#__PURE__*/React.createElement(Card, {
+      title: curKey === "community" ? "주민공동시설" : activeTab ? activeTab.name : "",
+      hint: curKey === "community" ? "주택건설기준 제55조의2 · 부대복리 · 총량 " + (cc.total || 0).toLocaleString("ko-KR") + "㎡" : activeTab ? activeTab.desc : "",
       pad: false
     }, items.length === 0 ? /*#__PURE__*/React.createElement("div", {
       className: "m-empty"
