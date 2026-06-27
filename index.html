@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>건축 사업 법규검토 콘솔 v6.28 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.29 · 개발자 최감용</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -4679,6 +4679,193 @@ Object.assign(window, {
   useMemo,
   useRef
 });</script>
+<script>// 건축법규콘솔 — 모바일 스타일 주입
+window.injectMobileStyles = function injectMobileStyles() {
+  if (document.getElementById("m-styles")) return;
+  const css = `
+  .m-app { height: 100%; display: flex; flex-direction: column; background: #eef1f5; font-family: var(--sans); color: var(--ink); }
+
+  /* 헤더 */
+  .m-head { flex: none; background: linear-gradient(180deg,#101a27,#0d1521); padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 0; color: #cdd8e6; }
+  .m-app.android .m-head { padding-top: 14px; }
+  .m-head-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; }
+  .m-brand { display: flex; align-items: center; gap: 9px; }
+  .m-brand-mark { width: 28px; height: 28px; border-radius: 7px; background: var(--accent-2); display: grid; place-items: center; box-shadow: 0 3px 10px rgba(37,99,235,.45); }
+  .m-brand-name { font-size: 15px; font-weight: 600; color: #fff; letter-spacing: -.01em; }
+  .m-region { font-size: 11.5px; color: #9fb0c4; background: rgba(255,255,255,.07); padding: 5px 10px; border-radius: 999px; font-family: var(--mono); }
+
+  /* 스텝퍼 */
+  .m-stepper { display: flex; gap: 4px; padding-bottom: 12px; }
+  .m-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 2px 9px; background: transparent; border: none; border-radius: 9px; color: #6f8198; transition: color .15s; position: relative; }
+  .m-step.active { background: rgba(37,99,235,.18); color: #fff; }
+  .m-step.active::after { content: ""; position: absolute; left: 18%; right: 18%; bottom: 3px; height: 2.5px; border-radius: 2px; background: var(--accent-2); }
+  .m-step-num { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid currentColor; display: grid; place-items: center; font-size: 11px; font-weight: 600; font-family: var(--mono); opacity: .75; }
+  .m-step.active .m-step-num { background: var(--accent-2); border-color: var(--accent-2); color: #fff; opacity: 1; }
+  .m-step.done .m-step-num { background: var(--ok); border-color: var(--ok); color: #fff; opacity: 1; }
+  .m-step-name { font-size: 11px; font-weight: 500; letter-spacing: -.02em; }
+
+  /* 스크롤 영역 */
+  .m-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .m-page { padding: 18px 16px 24px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .m-page { animation: mfade .3s ease; }
+  }
+  @keyframes mfade { from { transform: translateY(8px); } to { transform: none; } }
+
+  .m-page-head { margin-bottom: 16px; }
+  .m-eyebrow { font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: .04em; font-family: var(--mono); }
+  .m-page-title { font-size: 21px; font-weight: 600; margin: 5px 0 6px; letter-spacing: -.02em; }
+  .m-page-lede { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  .m-page-lede b { color: var(--ink); font-weight: 600; }
+
+  /* 카드 */
+  .m-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 1px 2px rgba(15,27,45,.04); margin-bottom: 14px; overflow: hidden; }
+  .m-card-head { padding: 13px 15px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .m-card-head h3 { margin: 0; font-size: 14px; font-weight: 600; }
+  .m-hint { font-size: 11px; color: var(--muted); text-align: right; flex: none; }
+  .m-hint b { color: var(--ink); }
+  .m-card-body { padding: 15px; display: flex; flex-direction: column; gap: 13px; }
+  .m-card-body.nopad { padding: 0; gap: 0; }
+
+  /* 폼 */
+  .m-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+  .m-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .m-field label { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+  .m-field select, .m-field input { width: 100%; padding: 11px 12px; font-size: 14px; border: 1px solid var(--line-strong); border-radius: 9px; background: #fff; color: var(--ink); appearance: none; -webkit-appearance: none; }
+  .m-field select { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238294a8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 32px; }
+  .m-field select:focus, .m-field input:focus { outline: none; border-color: var(--accent-2); box-shadow: 0 0 0 3px rgba(37,99,235,.13); }
+  .m-unit-wrap { position: relative; display: flex; align-items: center; }
+  .m-unit-wrap input { padding-right: 46px; }
+  .m-unit { position: absolute; right: 12px; font-size: 12px; color: var(--muted); font-family: var(--mono); pointer-events: none; }
+  .m-help { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+
+  .m-dup-check { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 500; color: var(--ink); padding: 3px 0; }
+  .m-dup-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+  /* 세그먼트 */
+  .m-seg { display: flex; gap: 4px; background: #eef1f5; padding: 4px; border-radius: 9px; }
+  .m-seg button { flex: 1; padding: 9px; border: none; background: transparent; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+  .m-seg button.on { background: #fff; color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.1); font-weight: 600; }
+
+  /* 미니 미터바 */
+  .m-meter-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 13px 15px; margin-bottom: 14px; }
+  .m-mini-meter { display: flex; flex-direction: column; gap: 7px; }
+  .m-mm-top { display: flex; align-items: baseline; justify-content: space-between; }
+  .m-mm-name { font-size: 12px; font-weight: 600; }
+  .m-mm-val { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+  .m-mm-val small { color: var(--muted); font-weight: 400; font-size: 10px; }
+  .m-bar { height: 7px; background: #eef1f5; border-radius: 999px; position: relative; overflow: hidden; }
+  .m-bar-fill { height: 100%; border-radius: 999px; transition: width .5s cubic-bezier(.2,.8,.2,1); }
+  .m-bar-limit { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); opacity: .5; }
+
+  /* 타임라인 */
+  .m-timeline { display: flex; flex-direction: column; }
+  .m-tl-item { display: flex; gap: 12px; }
+  .m-tl-rail { display: flex; flex-direction: column; align-items: center; flex: none; }
+  .m-tl-dot { width: 27px; height: 27px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; font-family: var(--mono); border: 2px solid var(--line-strong); background: #fff; color: var(--muted); flex: none; }
+  .m-tl-item.active .m-tl-dot { border-color: var(--accent); background: var(--accent); color: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+  .m-tl-item.done .m-tl-dot { border-color: var(--ok); background: var(--ok); color: #fff; }
+  .m-tl-line { width: 2px; flex: 1; background: var(--line); margin: 3px 0; min-height: 14px; }
+  .m-tl-item.done .m-tl-line { background: var(--ok); }
+  .m-tl-card { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; margin-bottom: 12px; background: #fff; }
+  .m-tl-item.active .m-tl-card { border-color: var(--accent); background: var(--accent-soft); }
+  .m-tl-name { font-size: 13.5px; font-weight: 600; }
+  .m-tl-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; font-size: 11.5px; color: var(--ink-2); gap: 10px; }
+  .m-tl-meta b { color: var(--ink); font-weight: 600; font-family: var(--mono); }
+  .m-tl-desc { font-size: 12px; color: var(--ink-2); margin-top: 7px; line-height: 1.5; }
+
+  /* 탭 (가로 스크롤) */
+  .m-tabs { display: flex; gap: 7px; overflow-x: auto; padding: 2px 0 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .m-tabs::-webkit-scrollbar { display: none; }
+  .m-tabs button { flex: none; padding: 8px 14px; border: 1px solid var(--line-strong); background: #fff; border-radius: 999px; font-size: 12.5px; font-weight: 500; color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .m-tabs button.on { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(29,78,216,.25); }
+  .m-tab-count { font-size: 10.5px; font-weight: 700; background: rgba(0,0,0,.08); padding: 1px 6px; border-radius: 999px; }
+  .m-tabs button.on .m-tab-count { background: rgba(255,255,255,.25); }
+
+  /* 행 (심의 + 체크리스트) */
+  .m-row { border-bottom: 1px solid var(--line); }
+  .m-row:last-child { border-bottom: none; }
+  .m-row-head { display: flex; gap: 11px; align-items: flex-start; width: 100%; text-align: left; background: transparent; border: none; padding: 13px 15px; }
+  .m-row-icon { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; flex: none; margin-top: 1px; }
+  .m-row-main { flex: 1; min-width: 0; }
+  .m-row-name { font-size: 13.5px; font-weight: 600; line-height: 1.35; }
+  .m-row-basis { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 2px; line-height: 1.35; word-break: keep-all; }
+  .m-row-detail-line { font-size: 11.5px; color: var(--ink-2); margin-top: 4px; line-height: 1.4; }
+  .m-info-pill { display: inline-block; margin-top: 7px; font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border: 1px solid #d6e2ff; padding: 3px 9px; border-radius: 7px; line-height: 1.3; }
+  .m-row-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: none; }
+  .m-badge { font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
+  .m-badge.req { background: var(--warn-soft); color: var(--warn); }
+  .m-badge.notreq { background: #eef1f5; color: var(--ink-2); }
+  .m-badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .m-badge.bad { background: var(--bad-soft); color: var(--bad); }
+  .m-caret { font-size: 9px; color: var(--muted); }
+
+  .m-row-body { padding: 0 15px 15px 58px; background: #f7f9fc; }
+  .m-detail-meta { display: flex; align-items: center; justify-content: space-between; padding: 11px 0 9px; }
+  .m-detail-label { font-size: 11px; font-weight: 600; color: var(--ink-3); letter-spacing: .03em; }
+  .m-law-link { font-size: 11.5px; color: var(--accent); font-weight: 600; text-decoration: none; border-bottom: 1px solid rgba(29,78,216,.3); }
+  .m-crit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .m-crit { font-size: 12px; color: var(--ink-2); line-height: 1.45; padding: 8px 10px; border-radius: 7px; background: #fff; border: 1px solid var(--line); display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .m-crit.met { background: #fff7ee; border-color: #f3d9b8; color: var(--ink); font-weight: 500; }
+  .m-crit-mini { flex: none; font-size: 10.5px; font-weight: 700; color: var(--warn); background: var(--warn-soft); padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .m-crit-text { font-size: 12px; color: var(--ink-2); line-height: 1.5; padding: 2px 0 4px; }
+  .m-row-foot { font-size: 11.5px; color: var(--ink-2); margin-top: 9px; line-height: 1.45; }
+  .m-row-foot b { color: var(--ink); font-weight: 600; }
+  .m-row-foot.note { display: flex; align-items: flex-start; gap: 5px; color: var(--warn); margin-top: 6px; }
+
+  /* 요약 배너 */
+  .m-summary { border-radius: 14px; padding: 16px 17px; display: flex; align-items: center; gap: 14px; margin-bottom: 14px; color: #fff; }
+  .m-summary.ok { background: linear-gradient(135deg,#047857,#0f9b6c); }
+  .m-summary.bad { background: linear-gradient(135deg,#b91c1c,#dc4444); }
+  .m-summary-txt { flex: 1; min-width: 0; }
+  .m-summary-txt h2 { margin: 0 0 3px; font-size: 16px; font-weight: 600; line-height: 1.2; }
+  .m-summary-txt p { margin: 0; font-size: 11.5px; opacity: .92; line-height: 1.4; }
+  .m-summary-stats { display: flex; gap: 13px; text-align: center; flex: none; }
+  .m-summary-stats .n { font-size: 20px; font-weight: 700; font-family: var(--mono); line-height: 1; }
+  .m-summary-stats .l { font-size: 10px; opacity: .85; margin-top: 4px; }
+
+  /* 주민공동시설 리스트 */
+  .m-cf-list { display: flex; flex-direction: column; }
+  .m-cf-item { padding: 13px 15px; border-bottom: 1px solid var(--line); }
+  .m-cf-item:last-child { border-bottom: none; }
+  .m-cf-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .m-cf-name { font-size: 13.5px; font-weight: 600; }
+  .m-cf-badge { font-size: 10.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; flex: none; }
+  .m-cf-badge.req { background: var(--accent-soft); color: var(--accent); }
+  .m-cf-badge.no { background: #eef1f5; color: var(--ink-2); }
+  .m-cf-badge.info { background: var(--warn-soft); color: var(--warn); }
+  .m-cf-badge.link { background: var(--ok-soft); color: var(--ok); }
+  .m-cf-std { font-size: 12px; color: var(--ink-2); margin-top: 5px; line-height: 1.45; }
+  .m-cf-value { font-size: 11.5px; color: var(--accent); font-weight: 600; margin-top: 5px; font-family: var(--mono); }
+  .m-cf-point { font-size: 11.5px; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+
+  .m-empty { padding: 30px 16px; text-align: center; color: var(--muted); font-size: 12.5px; }
+
+  /* 하단 네비 */
+  .m-foot { flex: none; display: flex; gap: 10px; padding: 11px 16px calc(11px + env(safe-area-inset-bottom, 24px)); background: #fff; border-top: 1px solid var(--line); }
+  .m-app.android .m-foot { padding-bottom: 12px; }
+  .m-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 13px; border-radius: 11px; border: 1px solid transparent; font-size: 14px; font-weight: 600; }
+  .m-btn.primary { background: var(--accent); color: #fff; box-shadow: 0 3px 12px rgba(29,78,216,.28); }
+  .m-btn.primary:active { background: #1a44c4; }
+  .m-btn.ghost { flex: 0 0 auto; padding: 13px 16px; background: #fff; color: var(--ink-2); border-color: var(--line-strong); }
+
+  .m-tl-side { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .m-tl-tag { font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+  .m-tl-tag.req { background: var(--bad-soft); color: var(--bad); }
+  .m-tl-tag.ver { background: var(--warn-soft); color: var(--warn); }
+  .m-law-chg { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 700; color: var(--warn); background: var(--warn-soft); border: 1px solid #f3d9b8; padding: 1px 6px; border-radius: 6px; vertical-align: middle; }
+  .m-na-group { border-top: 1px dashed var(--line); }
+  .m-na-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; background: none; border: none; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .m-na-title b { color: var(--accent); margin: 0 3px; font-size: 14px; }
+  .m-na-caret { color: var(--accent); font-size: 12px; }
+  .m-na-body { background: #fbfcfe; }
+  `;
+  const tag = document.createElement("style");
+  tag.id = "m-styles";
+  tag.textContent = css;
+  document.head.appendChild(tag);
+};
+</script>
 <script>// 건축법규콘솔 - 메인 앱
 const {
   ZONES,
@@ -6089,5 +6276,1196 @@ function Step4({
     }
   }))));
 }
-ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));</script>
+/* 루트 렌더는 rootrender.js에서 모바일/데스크톱 분기 처리 */</script>
+<script>/* 건축법규콘솔 — 모바일 레이아웃 (실제 엔진 window.APP_DATA 연결) */
+window.MobileApp = function () {
+  const {
+    useState,
+    useEffect,
+    useMemo,
+    useRef
+  } = React;
+  const D = window.APP_DATA;
+  const {
+    ZONES,
+    BUILDING_USES,
+    REGIONS,
+    assessReviews,
+    communityFacilities,
+    evaluate,
+    permitTimeline
+  } = D;
+  const LAW_BASE = D.LAW_BASE,
+    DEV = D.DEV;
+  const SIDO_LIST = Object.keys(REGIONS);
+  const BIZ_TYPES = D.BIZ_TYPES && D.BIZ_TYPES.length ? D.BIZ_TYPES : ["민간분양", "민간임대", "재개발사업", "재건축사업", "재정비촉진구역", "공공분양", "공공지원민간임대", "도시개발사업", "지역주택조합"];
+  const NOW_YEAR = new Date().getFullYear();
+  const LAW_YEARS = Array.from({
+    length: 5
+  }, (_, i) => NOW_YEAR - i);
+  const LAW_MONTHS = Array.from({
+    length: 12
+  }, (_, i) => i + 1);
+  const REVIEW_INPUTS = [{
+    key: "trafficZone",
+    label: "도시교통정비지역 구분",
+    options: ["도시교통정비지역", "교통권역", "해당 없음"]
+  }, {
+    key: "digDepth",
+    label: "지하 굴착깊이",
+    options: ["10m 미만", "10m~20m", "20m 이상"]
+  }, {
+    key: "landscapeZone",
+    label: "경관지구·중점경관관리구역",
+    options: ["해당 없음", "경관지구", "중점경관관리구역"]
+  }, {
+    key: "eduZone",
+    label: "교육환경보호구역(학교 200m)",
+    options: ["해당 없음", "상대보호구역", "절대보호구역"]
+  }, {
+    key: "heritageZone",
+    label: "매장유산 유존지역·고시구역",
+    options: ["해당 없음", "매장유산 유존지역", "역사문화환경 보존지역"]
+  }, {
+    key: "disasterZone",
+    label: "자연재해위험개선지구·해일위험지구",
+    options: ["해당 없음", "자연재해위험개선지구", "해일위험지구"]
+  }, {
+    key: "envLocation",
+    label: "소규모 환경평가 입지(용도지역)",
+    options: ["도시지역(주거·상업·공업)", "관리지역", "농림지역", "자연환경보전지역", "해당 없음"]
+  }, {
+    key: "districtPlan",
+    label: "지구단위계획에 따른 사업",
+    options: ["해당 없음", "해당(지구단위계획 시행)"]
+  }];
+  const STEPS = [{
+    id: 0,
+    name: "기본정보",
+    full: "기본정보 입력"
+  }, {
+    id: 1,
+    name: "인허가",
+    full: "인허가 절차"
+  }, {
+    id: 2,
+    name: "심의·평가",
+    full: "심의·영향평가"
+  }, {
+    id: 3,
+    name: "체크리스트",
+    full: "법규 체크리스트"
+  }];
+  const DEFAULT_INPUT = {
+    sido: "경기도",
+    sigungu: "과천시",
+    zone: "zone4",
+    useType: "공동주택 (아파트)",
+    siteArea: 30000,
+    buildingArea: "",
+    totalArea: 62000,
+    farArea: "",
+    floors: 18,
+    units: 280,
+    bizType: "민간분양",
+    dupZone: false,
+    dupBCR: "",
+    dupFAR: "",
+    lawMode: "latest",
+    lawYear: 2024,
+    lawMonth: 1,
+    trafficZone: "도시교통정비지역",
+    digDepth: "10m~20m",
+    landscapeZone: "해당 없음",
+    eduZone: "해당 없음",
+    heritageZone: "해당 없음",
+    disasterZone: "해당 없음",
+    envLocation: "도시지역(주거·상업·공업)",
+    districtPlan: "해당(지구단위계획 시행)",
+    sunlight: true,
+    evac: true,
+    bf: true
+  };
+  const STORAGE_KEY = "bcc_state_v8";
+  function load() {
+    try {
+      const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      if (s && s.input) return Object.assign({}, s, {
+        step: 0
+      });
+    } catch (e) {}
+    return {
+      step: 0,
+      input: DEFAULT_INPUT,
+      done: []
+    };
+  }
+  const Icon = {
+    building: p => /*#__PURE__*/React.createElement("svg", {
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...p
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01M9 17h6"
+    })),
+    check: p => /*#__PURE__*/React.createElement("svg", {
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2.6",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...p
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M20 6 9 17l-5-5"
+    })),
+    x: p => /*#__PURE__*/React.createElement("svg", {
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2.6",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...p
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M18 6 6 18M6 6l12 12"
+    })),
+    arrow: p => /*#__PURE__*/React.createElement("svg", {
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2.2",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...p
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M5 12h14M12 5l7 7-7 7"
+    })),
+    back: p => /*#__PURE__*/React.createElement("svg", {
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2.2",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...p
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M19 12H5M12 19l-7-7 7-7"
+    })),
+    doc: p => /*#__PURE__*/React.createElement("svg", {
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...p
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M14 2v6h6M9 13h6M9 17h4"
+    })),
+    alert: p => /*#__PURE__*/React.createElement("svg", {
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...p
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"
+    }))
+  };
+  if (typeof injectMobileStyles === "function") injectMobileStyles();
+  const PLATFORM = window.MOBILE_PLATFORM || (/android/i.test(navigator.userAgent) ? "android" : /iphone|ipad|ipod/i.test(navigator.userAgent) ? "ios" : "ios");
+  function lawLink(q) {
+    return "https://www.law.go.kr/LSW/lsSc.do?menuId=1&query=" + encodeURIComponent(String(q || "").replace(/\s+제.*$/, "").trim());
+  }
+  function App() {
+    const [state, setState] = useState(load);
+    const [step3Tab, setStep3Tab] = useState("assess");
+    const [step4Tab, setStep4Tab] = useState("zone");
+    const {
+      step,
+      input,
+      done
+    } = state;
+    const scrollRef = useRef(null);
+    useEffect(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }, [state]);
+    useEffect(() => {
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
+      window.scrollTo(0, 0);
+    }, [step]);
+    const setStep = s => setState(p => ({
+      ...p,
+      step: s
+    }));
+    const setInput = patch => setState(p => ({
+      ...p,
+      input: {
+        ...p.input,
+        ...patch
+      }
+    }));
+    const markDone = s => setState(p => ({
+      ...p,
+      done: p.done.includes(s) ? p.done : [...p.done, s]
+    }));
+    const next = () => {
+      markDone(step);
+      if (step < 3) setStep(step + 1);
+    };
+    const prev = () => {
+      if (step > 0) setStep(step - 1);
+    };
+    const result = useMemo(() => {
+      const r = evaluate(input);
+      return Object.assign({}, r, {
+        checks: r.checks.filter(c => !c.na)
+      });
+    }, [input]);
+    const reviews = useMemo(() => assessReviews(input).filter(r => !r.na), [input]);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-app " + PLATFORM
+    }, /*#__PURE__*/React.createElement("header", {
+      className: "m-head"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-head-top"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-brand"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-brand-mark"
+    }, /*#__PURE__*/React.createElement(Icon.building, {
+      style: {
+        width: 16,
+        height: 16,
+        color: "#fff"
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "m-brand-name"
+    }, "건축법규콘솔")), /*#__PURE__*/React.createElement("div", {
+      className: "m-region"
+    }, input.sido, " ", input.sigungu)), /*#__PURE__*/React.createElement("div", {
+      className: "m-stepper"
+    }, STEPS.map(s => /*#__PURE__*/React.createElement("button", {
+      key: s.id,
+      className: "m-step" + (s.id === step ? " active" : "") + (done.includes(s.id) ? " done" : ""),
+      onClick: () => setStep(s.id)
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "m-step-num"
+    }, done.includes(s.id) && s.id !== step ? /*#__PURE__*/React.createElement(Icon.check, {
+      style: {
+        width: 11,
+        height: 11
+      }
+    }) : s.id + 1), /*#__PURE__*/React.createElement("span", {
+      className: "m-step-name"
+    }, s.name))))), /*#__PURE__*/React.createElement("div", {
+      className: "m-scroll",
+      ref: scrollRef
+    }, step === 0 && /*#__PURE__*/React.createElement(Step1, {
+      input: input,
+      setInput: setInput
+    }), step === 1 && /*#__PURE__*/React.createElement(Step2, {
+      input: input
+    }), step === 2 && /*#__PURE__*/React.createElement(Step3, {
+      reviews: reviews,
+      input: input,
+      setInput: setInput,
+      tab: step3Tab,
+      setTab: setStep3Tab
+    }), step === 3 && /*#__PURE__*/React.createElement(Step4, {
+      result: result,
+      input: input,
+      tab: step4Tab,
+      setTab: setStep4Tab
+    })), /*#__PURE__*/React.createElement("footer", {
+      className: "m-foot"
+    }, step > 0 ? /*#__PURE__*/React.createElement("button", {
+      className: "m-btn ghost",
+      onClick: prev
+    }, /*#__PURE__*/React.createElement(Icon.back, {
+      style: {
+        width: 16,
+        height: 16
+      }
+    }), " 이전") : /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1
+      }
+    }), step < 3 ? /*#__PURE__*/React.createElement("button", {
+      className: "m-btn primary",
+      onClick: next
+    }, STEPS[step + 1].full, " ", /*#__PURE__*/React.createElement(Icon.arrow, {
+      style: {
+        width: 16,
+        height: 16
+      }
+    })) : /*#__PURE__*/React.createElement("button", {
+      className: "m-btn primary",
+      onClick: () => {
+        if (scrollRef.current) scrollRef.current.scrollTop = 0;
+      }
+    }, "검토 완료 ", /*#__PURE__*/React.createElement(Icon.check, {
+      style: {
+        width: 15,
+        height: 15
+      }
+    }))));
+  }
+  function Field({
+    label,
+    help,
+    children
+  }) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-field"
+    }, /*#__PURE__*/React.createElement("label", null, label), children, help && /*#__PURE__*/React.createElement("span", {
+      className: "m-help"
+    }, help));
+  }
+  function NumInput({
+    value,
+    onChange,
+    unit,
+    placeholder
+  }) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-unit-wrap"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "number",
+      inputMode: "numeric",
+      value: value,
+      placeholder: placeholder || "",
+      onChange: e => onChange(e.target.value)
+    }), unit && /*#__PURE__*/React.createElement("span", {
+      className: "m-unit"
+    }, unit));
+  }
+  function Card({
+    title,
+    hint,
+    children,
+    pad = true
+  }) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-card-head"
+    }, /*#__PURE__*/React.createElement("h3", null, title), hint && /*#__PURE__*/React.createElement("span", {
+      className: "m-hint"
+    }, hint)), /*#__PURE__*/React.createElement("div", {
+      className: "m-card-body" + (pad ? "" : " nopad")
+    }, children));
+  }
+  function PageHead({
+    eyebrow,
+    title,
+    lede
+  }) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-page-head"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-eyebrow"
+    }, eyebrow), /*#__PURE__*/React.createElement("div", {
+      className: "m-page-title"
+    }, title), /*#__PURE__*/React.createElement("div", {
+      className: "m-page-lede"
+    }, lede));
+  }
+  function PillTabs({
+    tabs,
+    active,
+    onSelect,
+    counts
+  }) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-tabs"
+    }, tabs.map(t => /*#__PURE__*/React.createElement("button", {
+      key: t.key,
+      className: active === t.key ? "on" : "",
+      onClick: () => onSelect(t.key)
+    }, t.name, counts && counts[t.key] != null && /*#__PURE__*/React.createElement("span", {
+      className: "m-tab-count"
+    }, counts[t.key]))));
+  }
+
+  // ---------- STEP 1 ----------
+  function MiniMeter({
+    name,
+    value,
+    limit,
+    emptyText
+  }) {
+    const pass = value <= limit;
+    const pct = emptyText ? limit / (limit * 1.2) * 100 : Math.min(value / (limit * 1.2) * 100, 100);
+    const limitPct = limit / (limit * 1.2) * 100;
+    const col = emptyText ? "var(--accent)" : pass ? "var(--ok)" : "var(--bad)";
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-mini-meter"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-mm-top"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "m-mm-name"
+    }, name), /*#__PURE__*/React.createElement("span", {
+      className: "m-mm-val",
+      style: {
+        color: col
+      }
+    }, emptyText ? emptyText : value.toFixed(1) + "%", /*#__PURE__*/React.createElement("small", null, "/", emptyText ? "법정 " : "", limit, "%"))), /*#__PURE__*/React.createElement("div", {
+      className: "m-bar"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-bar-fill",
+      style: {
+        width: pct + "%",
+        background: col
+      }
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "m-bar-limit",
+      style: {
+        left: limitPct + "%"
+      }
+    })));
+  }
+  function Step1({
+    input,
+    setInput
+  }) {
+    const zone = ZONES.find(z => z.id === input.zone) || ZONES[0];
+    const _zl = typeof getZoneLimit === "function" ? getZoneLimit(input.sido, input.sigungu, input.zone) : {
+      bcr: zone.bcr,
+      far: zone.far
+    };
+    const limitBCR = input.dupZone && input.dupBCR !== "" ? Number(input.dupBCR) : _zl.bcr;
+    const limitFAR = input.dupZone && input.dupFAR !== "" ? Number(input.dupFAR) : _zl.far;
+    const bcrEmpty = !(Number(input.buildingArea) > 0);
+    const farEmpty = !(Number(input.farArea) > 0);
+    const bcr = bcrEmpty || !(input.siteArea > 0) ? 0 : Number(input.buildingArea) / input.siteArea * 100;
+    const far = farEmpty || !(input.siteArea > 0) ? 0 : Number(input.farArea) / input.siteArea * 100;
+    const bcrMaxArea = Math.round((Number(input.siteArea) || 0) * limitBCR / 100);
+    const farMaxArea = Math.round((Number(input.siteArea) || 0) * limitFAR / 100);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-page"
+    }, /*#__PURE__*/React.createElement(PageHead, {
+      eyebrow: "STEP 01 — INPUT",
+      title: "기본정보 입력",
+      lede: "대지·용도·사업 정보를 입력하면 건폐율·용적률이 실시간 계산됩니다. 비워두면 법정 한도 기준으로 허용 면적을 역산합니다."
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "m-meter-bar"
+    }, /*#__PURE__*/React.createElement(MiniMeter, {
+      name: "건폐율",
+      value: bcr,
+      limit: limitBCR,
+      emptyText: bcrEmpty ? "법정 허용 " + bcrMaxArea.toLocaleString() + "㎡" : null
+    }), /*#__PURE__*/React.createElement(MiniMeter, {
+      name: "용적률",
+      value: far,
+      limit: limitFAR,
+      emptyText: farEmpty ? "법정 허용 " + farMaxArea.toLocaleString() + "㎡" : null
+    })), /*#__PURE__*/React.createElement(Card, {
+      title: "대지 위치 · 용도"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-grid2"
+    }, /*#__PURE__*/React.createElement(Field, {
+      label: "광역시·도"
+    }, /*#__PURE__*/React.createElement("select", {
+      value: input.sido,
+      onChange: e => setInput({
+        sido: e.target.value,
+        sigungu: REGIONS[e.target.value][0]
+      })
+    }, SIDO_LIST.map(s => /*#__PURE__*/React.createElement("option", {
+      key: s,
+      value: s
+    }, s)))), /*#__PURE__*/React.createElement(Field, {
+      label: "시·군·구"
+    }, /*#__PURE__*/React.createElement("select", {
+      value: input.sigungu,
+      onChange: e => setInput({
+        sigungu: e.target.value
+      })
+    }, (REGIONS[input.sido] || []).map(g => /*#__PURE__*/React.createElement("option", {
+      key: g,
+      value: g
+    }, g))))), /*#__PURE__*/React.createElement(Field, {
+      label: "용도지역"
+    }, /*#__PURE__*/React.createElement("select", {
+      value: input.zone,
+      onChange: e => setInput({
+        zone: e.target.value
+      })
+    }, ZONES.map(z => /*#__PURE__*/React.createElement("option", {
+      key: z.id,
+      value: z.id
+    }, z.label)))), /*#__PURE__*/React.createElement(Field, {
+      label: "주용도",
+      help: "건축법 시행령 별표1"
+    }, /*#__PURE__*/React.createElement("select", {
+      value: input.useType,
+      onChange: e => setInput({
+        useType: e.target.value
+      })
+    }, BUILDING_USES.map(u => /*#__PURE__*/React.createElement("option", {
+      key: u,
+      value: u
+    }, u)))), /*#__PURE__*/React.createElement("label", {
+      className: "m-dup-check"
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: input.dupZone,
+      onChange: e => setInput({
+        dupZone: e.target.checked
+      })
+    }), /*#__PURE__*/React.createElement("span", null, "지구단위계획구역")), input.dupZone && /*#__PURE__*/React.createElement("div", {
+      className: "m-grid2"
+    }, /*#__PURE__*/React.createElement(Field, {
+      label: "건폐율 보정한도"
+    }, /*#__PURE__*/React.createElement(NumInput, {
+      value: input.dupBCR,
+      onChange: v => setInput({
+        dupBCR: v
+      }),
+      unit: "%"
+    })), /*#__PURE__*/React.createElement(Field, {
+      label: "용적률 보정한도"
+    }, /*#__PURE__*/React.createElement(NumInput, {
+      value: input.dupFAR,
+      onChange: v => setInput({
+        dupFAR: v
+      }),
+      unit: "%"
+    })))), /*#__PURE__*/React.createElement(Card, {
+      title: "사업정보",
+      hint: "㎡ · 층 · 세대/실"
+    }, /*#__PURE__*/React.createElement(Field, {
+      label: "사업방식"
+    }, /*#__PURE__*/React.createElement("select", {
+      value: input.bizType,
+      onChange: e => setInput({
+        bizType: e.target.value
+      })
+    }, BIZ_TYPES.map(b => /*#__PURE__*/React.createElement("option", {
+      key: b,
+      value: b
+    }, b)))), /*#__PURE__*/React.createElement("div", {
+      className: "m-grid2"
+    }, /*#__PURE__*/React.createElement(Field, {
+      label: "대지면적"
+    }, /*#__PURE__*/React.createElement(NumInput, {
+      value: input.siteArea,
+      onChange: v => setInput({
+        siteArea: v
+      }),
+      unit: "㎡"
+    })), /*#__PURE__*/React.createElement(Field, {
+      label: "건축면적",
+      help: "비우면 법정한도 자동"
+    }, /*#__PURE__*/React.createElement(NumInput, {
+      value: input.buildingArea,
+      onChange: v => setInput({
+        buildingArea: v
+      }),
+      unit: "㎡",
+      placeholder: "법정한도 자동"
+    })), /*#__PURE__*/React.createElement(Field, {
+      label: "전체연면적"
+    }, /*#__PURE__*/React.createElement(NumInput, {
+      value: input.totalArea,
+      onChange: v => setInput({
+        totalArea: v
+      }),
+      unit: "㎡"
+    })), /*#__PURE__*/React.createElement(Field, {
+      label: "용적률산정용 연면적",
+      help: "비우면 법정한도 자동"
+    }, /*#__PURE__*/React.createElement(NumInput, {
+      value: input.farArea,
+      onChange: v => setInput({
+        farArea: v
+      }),
+      unit: "㎡",
+      placeholder: "법정한도 자동"
+    }))), /*#__PURE__*/React.createElement("div", {
+      className: "m-grid2"
+    }, /*#__PURE__*/React.createElement(Field, {
+      label: "최고층수"
+    }, /*#__PURE__*/React.createElement(NumInput, {
+      value: input.floors,
+      onChange: v => setInput({
+        floors: v
+      }),
+      unit: "층"
+    })), /*#__PURE__*/React.createElement(Field, {
+      label: "세대수/객실수"
+    }, /*#__PURE__*/React.createElement(NumInput, {
+      value: input.units,
+      onChange: v => setInput({
+        units: v
+      }),
+      unit: "세대/실"
+    })))), /*#__PURE__*/React.createElement(Card, {
+      title: "법령 적용시점"
+    }, /*#__PURE__*/React.createElement(Field, {
+      label: "적용 기준"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-seg"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: input.lawMode === "latest" ? "on" : "",
+      onClick: () => setInput({
+        lawMode: "latest"
+      })
+    }, "최신법령"), /*#__PURE__*/React.createElement("button", {
+      className: input.lawMode === "old" ? "on" : "",
+      onClick: () => setInput({
+        lawMode: "old"
+      })
+    }, "구법"))), input.lawMode === "old" ? /*#__PURE__*/React.createElement(Field, {
+      label: "시행 시점 (최근 5년)"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-grid2"
+    }, /*#__PURE__*/React.createElement("select", {
+      value: input.lawYear,
+      onChange: e => setInput({
+        lawYear: Number(e.target.value)
+      })
+    }, LAW_YEARS.map(y => /*#__PURE__*/React.createElement("option", {
+      key: y,
+      value: y
+    }, y, "년"))), /*#__PURE__*/React.createElement("select", {
+      value: input.lawMonth,
+      onChange: e => setInput({
+        lawMonth: Number(e.target.value)
+      })
+    }, LAW_MONTHS.map(m => /*#__PURE__*/React.createElement("option", {
+      key: m,
+      value: m
+    }, m, "월"))))) : /*#__PURE__*/React.createElement("div", {
+      className: "m-help"
+    }, "법령 검토 기준일 ", LAW_BASE, " — 이후 시행·개정 법령은 미반영.")));
+  }
+
+  // ---------- STEP 2 ----------
+  function Step2({
+    input
+  }) {
+    const [active, setActive] = useState(1);
+    const tl = useMemo(() => permitTimeline(input), [input]);
+    const steps = tl.steps || [];
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-page"
+    }, /*#__PURE__*/React.createElement(PageHead, {
+      eyebrow: "STEP 02 — PERMIT",
+      title: "인허가 절차",
+      lede: /*#__PURE__*/React.createElement(React.Fragment, null, tl.route, " 기준 절차 흐름입니다. 단계 클릭 시 근거·병행 심의를 확인합니다.")
+    }), /*#__PURE__*/React.createElement(Card, {
+      title: "허가 절차 흐름",
+      hint: tl.route
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-timeline"
+    }, steps.map((s, i) => /*#__PURE__*/React.createElement("div", {
+      key: s.id,
+      className: "m-tl-item" + (i === active ? " active" : i < active ? " done" : "")
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-tl-rail"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-tl-dot"
+    }, i < active ? /*#__PURE__*/React.createElement(Icon.check, {
+      style: {
+        width: 12,
+        height: 12
+      }
+    }) : i + 1), i < steps.length - 1 && /*#__PURE__*/React.createElement("div", {
+      className: "m-tl-line"
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "m-tl-card",
+      onClick: () => setActive(i)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-tl-name"
+    }, s.label), /*#__PURE__*/React.createElement("div", {
+      className: "m-tl-meta"
+    }, /*#__PURE__*/React.createElement("span", null, s.org)), i === active && /*#__PURE__*/React.createElement("div", {
+      className: "m-tl-desc"
+    }, s.desc), i === active && s.side && s.side.length > 0 && /*#__PURE__*/React.createElement("div", {
+      className: "m-tl-side"
+    }, s.side.map((x, j) => /*#__PURE__*/React.createElement("span", {
+      key: j,
+      className: "m-tl-tag " + x.k
+    }, x.t)))))))));
+  }
+
+  // ---------- 공통 행 ----------
+  function RowShell({
+    icon,
+    iconBg,
+    iconCol,
+    name,
+    basis,
+    detail,
+    pill,
+    pillStyle,
+    badge,
+    badgeClass,
+    lawTag,
+    children
+  }) {
+    const [open, setOpen] = useState(false);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-row"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "m-row-head",
+      onClick: () => setOpen(!open)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-row-icon",
+      style: {
+        background: iconBg,
+        color: iconCol
+      }
+    }, icon), /*#__PURE__*/React.createElement("div", {
+      className: "m-row-main"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-row-name"
+    }, name, lawTag && /*#__PURE__*/React.createElement("span", {
+      className: "m-law-chg"
+    }, lawTag)), /*#__PURE__*/React.createElement("div", {
+      className: "m-row-basis"
+    }, basis), detail && /*#__PURE__*/React.createElement("div", {
+      className: "m-row-detail-line"
+    }, detail), pill && /*#__PURE__*/React.createElement("span", {
+      className: "m-info-pill",
+      style: pillStyle
+    }, pill)), /*#__PURE__*/React.createElement("div", {
+      className: "m-row-right"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "m-badge " + badgeClass
+    }, badge), /*#__PURE__*/React.createElement("span", {
+      className: "m-caret"
+    }, open ? "▲" : "▼"))), open && /*#__PURE__*/React.createElement("div", {
+      className: "m-row-body"
+    }, children));
+  }
+  function ReviewRow({
+    r
+  }) {
+    const matched = r.matched && r.matched.length ? r.matched[0] : null;
+    const lawTag = r.legacy ? "구법" : r.lawDiff ? "구법 변동" : null;
+    return /*#__PURE__*/React.createElement(RowShell, {
+      icon: r.required ? /*#__PURE__*/React.createElement(Icon.alert, {
+        style: {
+          width: 17,
+          height: 17
+        }
+      }) : /*#__PURE__*/React.createElement(Icon.doc, {
+        style: {
+          width: 17,
+          height: 17
+        }
+      }),
+      iconBg: r.required ? "var(--warn-soft)" : "#eef1f5",
+      iconCol: r.required ? "var(--warn)" : "var(--muted)",
+      name: r.label,
+      basis: (r.laws || []).map(l => l.name).join(" / "),
+      lawTag: lawTag,
+      detail: r.required && matched ? matched.name : "기준변수 · " + (r.vars || ""),
+      pill: r.required && matched && matched.value ? "▶ 사업정보 : " + matched.value : null,
+      badge: r.required ? "대상" : "비대상",
+      badgeClass: r.required ? "req" : "notreq"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-detail-meta"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "m-detail-label"
+    }, "세부기준"), /*#__PURE__*/React.createElement("a", {
+      className: "m-law-link",
+      href: lawLink(r.laws && r.laws[0] ? r.laws[0].name : r.label),
+      target: "_blank",
+      rel: "noreferrer"
+    }, "법제처 원문확인")), /*#__PURE__*/React.createElement("ul", {
+      className: "m-crit-list"
+    }, (r.detail || []).filter(c => c.name).map((c, i) => /*#__PURE__*/React.createElement("li", {
+      key: i,
+      className: "m-crit" + (c.met ? " met" : "")
+    }, /*#__PURE__*/React.createElement("span", null, c.name), c.met && /*#__PURE__*/React.createElement("span", {
+      className: "m-crit-mini"
+    }, "해당", c.value ? " · " + c.value : "")))), /*#__PURE__*/React.createElement("div", {
+      className: "m-row-foot"
+    }, /*#__PURE__*/React.createElement("b", null, "절차"), " ", r.procedure), lawTag && /*#__PURE__*/React.createElement("div", {
+      className: "m-row-foot"
+    }, /*#__PURE__*/React.createElement("b", null, "법령시점"), " ", r.lawDiff ? "최신 기준 " + (r.lawDiff === "A" ? "대상" : "비대상") + " → 구법 적용 시 " + (r.required ? "대상" : "비대상") : "선택 처분시점에 미시행 — 당시(구법) 기준 적용"), /*#__PURE__*/React.createElement("div", {
+      className: "m-row-foot note"
+    }, /*#__PURE__*/React.createElement(Icon.alert, {
+      style: {
+        width: 12,
+        height: 12
+      }
+    }), " ", r.note));
+  }
+  function CheckRow({
+    c
+  }) {
+    const judge = c.status === "judge";
+    const ok = c.pass;
+    const STAT = {
+      A: ["대상", "req"],
+      V: ["검토", "ver"],
+      N: ["비대상", "notreq"],
+      R: ["권장", "ver"]
+    };
+    const sta = judge ? null : STAT[c.status] || ["의무·산정", "notreq"];
+    const iconBg = judge ? c.infoOnly ? "var(--accent-soft)" : ok ? "var(--ok-soft)" : "var(--bad-soft)" : c.status === "A" ? "var(--warn-soft)" : "var(--accent-soft)";
+    const iconCol = judge ? c.infoOnly ? "var(--accent)" : ok ? "var(--ok)" : "var(--bad)" : c.status === "A" ? "var(--warn)" : "var(--accent)";
+    const icon = judge ? c.infoOnly ? /*#__PURE__*/React.createElement(Icon.doc, {
+      style: {
+        width: 16,
+        height: 16
+      }
+    }) : ok ? /*#__PURE__*/React.createElement(Icon.check, {
+      style: {
+        width: 15,
+        height: 15
+      }
+    }) : /*#__PURE__*/React.createElement(Icon.x, {
+      style: {
+        width: 15,
+        height: 15
+      }
+    }) : c.status === "A" ? /*#__PURE__*/React.createElement(Icon.alert, {
+      style: {
+        width: 16,
+        height: 16
+      }
+    }) : /*#__PURE__*/React.createElement(Icon.doc, {
+      style: {
+        width: 16,
+        height: 16
+      }
+    });
+    const badge = judge ? c.infoOnly ? "법정 한도" : ok ? "적합" : "초과" : sta[0];
+    const badgeClass = judge ? c.infoOnly ? "ver" : ok ? "ok" : "bad" : sta[1];
+    const lawTag = c.legacy ? "구법" : c.lawDiff ? "구법 변동" : null;
+    return /*#__PURE__*/React.createElement(RowShell, {
+      icon: icon,
+      iconBg: iconBg,
+      iconCol: iconCol,
+      name: c.label,
+      basis: c.basis,
+      lawTag: lawTag,
+      detail: "기준 " + c.limit,
+      pill: c.val ? "▶ 법정 산정 : " + c.val : judge ? "▶ 사업정보 : " + c.actual : null,
+      pillStyle: judge && !ok && !c.infoOnly ? {
+        background: "var(--bad-soft)",
+        color: "var(--bad)",
+        borderColor: "#f0b3b3"
+      } : null,
+      badge: badge,
+      badgeClass: badgeClass
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-detail-meta"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "m-detail-label"
+    }, "세부기준"), /*#__PURE__*/React.createElement("a", {
+      className: "m-law-link",
+      href: lawLink((c.basis || "").split("/")[0] || c.label),
+      target: "_blank",
+      rel: "noreferrer"
+    }, "법제처 원문확인")), c.crit && c.crit.length > 0 && /*#__PURE__*/React.createElement("ul", {
+      className: "m-crit-list"
+    }, c.crit.map((x, i) => /*#__PURE__*/React.createElement("li", {
+      key: i,
+      className: "m-crit" + (x.m ? " met" : "")
+    }, /*#__PURE__*/React.createElement("span", null, x.n), x.m && /*#__PURE__*/React.createElement("span", {
+      className: "m-crit-mini"
+    }, "해당")))), c.detail && /*#__PURE__*/React.createElement("div", {
+      className: "m-crit-text"
+    }, c.detail), /*#__PURE__*/React.createElement("div", {
+      className: "m-row-foot"
+    }, /*#__PURE__*/React.createElement("b", null, "기준"), " ", c.limit, " \xA0 ", /*#__PURE__*/React.createElement("b", null, "계획/산정"), " ", c.val ? c.val : c.actual));
+  }
+  function NaGroup({
+    items,
+    render
+  }) {
+    const [open, setOpen] = useState(false);
+    if (!items.length) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-na-group"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "m-na-head",
+      onClick: () => setOpen(!open)
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "m-na-title"
+    }, "비대상 (해당 없음) ", /*#__PURE__*/React.createElement("b", null, items.length), "건"), /*#__PURE__*/React.createElement("span", {
+      className: "m-na-caret"
+    }, open ? "▲ 접기" : "▼ 펼쳐보기")), open && /*#__PURE__*/React.createElement("div", {
+      className: "m-na-body"
+    }, items.map(render)));
+  }
+
+  // ---------- STEP 3 ----------
+  function Step3({
+    reviews,
+    input,
+    setInput,
+    tab,
+    setTab
+  }) {
+    const reqCount = reviews.filter(r => r.required).length;
+    const cats = [{
+      key: "assess",
+      name: "영향평가·사전검토"
+    }, {
+      key: "council",
+      name: "지자체 심의"
+    }];
+    const activeCat = cats.find(c => c.key === tab) || cats[0];
+    const items = reviews.filter(r => r.cat === activeCat.key);
+    const main = items.filter(r => r.required);
+    const na = items.filter(r => !r.required);
+    const counts = {};
+    cats.forEach(cat => {
+      counts[cat.key] = reviews.filter(r => r.cat === cat.key && r.required).length;
+    });
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-page"
+    }, /*#__PURE__*/React.createElement(PageHead, {
+      eyebrow: "STEP 03 — REVIEW",
+      title: "심의 및 영향평가",
+      lede: /*#__PURE__*/React.createElement(React.Fragment, null, "입력 규모·입지조건 기준 대상 여부를 자동 판정합니다. 현재 ", /*#__PURE__*/React.createElement("b", null, reqCount, "개"), " 항목 대상.")
+    }), /*#__PURE__*/React.createElement(Card, {
+      title: "입지·여건 입력",
+      hint: "상세 판정용"
+    }, REVIEW_INPUTS.map(f => /*#__PURE__*/React.createElement(Field, {
+      key: f.key,
+      label: f.label
+    }, /*#__PURE__*/React.createElement("select", {
+      value: input[f.key],
+      onChange: e => setInput({
+        [f.key]: e.target.value
+      })
+    }, f.options.map(o => /*#__PURE__*/React.createElement("option", {
+      key: o,
+      value: o
+    }, o)))))), /*#__PURE__*/React.createElement(PillTabs, {
+      tabs: cats,
+      active: tab,
+      onSelect: setTab,
+      counts: counts
+    }), /*#__PURE__*/React.createElement(Card, {
+      title: activeCat.name,
+      hint: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("b", {
+        style: {
+          color: "var(--warn)"
+        }
+      }, main.length), " / ", items.length, " 대상"),
+      pad: false
+    }, items.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      className: "m-empty"
+    }, "현재 조건 기준 해당 항목이 없습니다.") : /*#__PURE__*/React.createElement(React.Fragment, null, main.map(r => /*#__PURE__*/React.createElement(ReviewRow, {
+      key: r.id,
+      r: r
+    })), /*#__PURE__*/React.createElement(NaGroup, {
+      items: na,
+      render: r => /*#__PURE__*/React.createElement(ReviewRow, {
+        key: r.id,
+        r: r
+      })
+    }))));
+  }
+
+  // ---------- STEP 4 ----------
+  function Ring({
+    pct
+  }) {
+    const r = 26,
+      c = 2 * Math.PI * r;
+    return /*#__PURE__*/React.createElement("svg", {
+      width: "64",
+      height: "64",
+      viewBox: "0 0 64 64"
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: "32",
+      cy: "32",
+      r: r,
+      fill: "none",
+      stroke: "rgba(255,255,255,.25)",
+      strokeWidth: "6"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: "32",
+      cy: "32",
+      r: r,
+      fill: "none",
+      stroke: "#fff",
+      strokeWidth: "6",
+      strokeLinecap: "round",
+      strokeDasharray: c,
+      strokeDashoffset: c * (1 - pct / 100),
+      transform: "rotate(-90 32 32)",
+      style: {
+        transition: "stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1)"
+      }
+    }), /*#__PURE__*/React.createElement("text", {
+      x: "32",
+      y: "37",
+      textAnchor: "middle",
+      fill: "#fff",
+      fontSize: "15",
+      fontWeight: "700",
+      fontFamily: "var(--mono)"
+    }, Math.round(pct), "%"));
+  }
+  const CAT_DEF = [{
+    key: "zone",
+    name: "건폐율·용적률",
+    desc: "용도지역 법정상한 적합 판정"
+  }, {
+    key: "site",
+    name: "대지·건축",
+    desc: "대지안의 공지·조경·일조·피난"
+  }, {
+    key: "house",
+    name: "주택건설기준",
+    desc: "주택건설기준 의무시설·인증"
+  }, {
+    key: "community",
+    name: "주민공동시설",
+    desc: "주택건설기준 제55조의2"
+  }, {
+    key: "park",
+    name: "주차장",
+    desc: "법정 부설주차·의무 주차구획"
+  }, {
+    key: "fire",
+    name: "소방·피난",
+    desc: "소방시설·제연·피난안전구역"
+  }, {
+    key: "energy",
+    name: "에너지·친환경",
+    desc: "에너지절약·녹색건축·제로에너지"
+  }, {
+    key: "mech",
+    name: "기계설비",
+    desc: "기계설비법·환기·승강기"
+  }, {
+    key: "etc",
+    name: "인허가·특수",
+    desc: "용도별 등록·신고·특수기준"
+  }];
+  function Step4({
+    result,
+    input,
+    tab,
+    setTab
+  }) {
+    const checks = result.checks;
+    const judgeChecks = checks.filter(c => (c.id === "bcr" || c.id === "far") && !c.infoOnly);
+    const passed = judgeChecks.filter(c => c.pass).length;
+    const failed = judgeChecks.length - passed;
+    const infoCount = checks.filter(c => c.status !== "N" && c.id !== "bcr" && c.id !== "far").length;
+    const allPass = failed === 0;
+    const pct = judgeChecks.length ? passed / judgeChecks.length * 100 : 100;
+    const isApt = input.useType === "공동주택 (아파트)" || input.useType === "주상복합 (주거+상업)";
+    const counts = {};
+    checks.forEach(c => {
+      counts[c.cat] = (counts[c.cat] || 0) + 1;
+    });
+    let tabs = CAT_DEF.filter(t => (counts[t.key] || 0) > 0 || t.key === "community" && isApt);
+    const activeTab = tabs.find(t => t.key === tab) || tabs[0];
+    const curKey = activeTab ? activeTab.key : "zone";
+    const cf = curKey === "community" ? communityFacilities(input) : null;
+    const items = checks.filter(c => c.cat === curKey);
+    const main = items.filter(c => c.status !== "N");
+    const na = items.filter(c => c.status === "N");
+    return /*#__PURE__*/React.createElement("div", {
+      className: "m-page"
+    }, /*#__PURE__*/React.createElement(PageHead, {
+      eyebrow: "STEP 04 — RESULT",
+      title: "법규 체크리스트",
+      lede: "적용 법령별 검토 결과입니다. 건폐율·용적률은 적합 여부, 그 외는 의무·산정 기준을 안내합니다."
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "m-summary " + (allPass ? "ok" : "bad")
+    }, /*#__PURE__*/React.createElement(Ring, {
+      pct: pct
+    }), /*#__PURE__*/React.createElement("div", {
+      className: "m-summary-txt"
+    }, /*#__PURE__*/React.createElement("h2", null, allPass ? "지역·지구 기준 적합" : "법정상한 초과 있음"), /*#__PURE__*/React.createElement("p", null, allPass ? "건폐율·용적률이 법정상한 이내입니다." : failed + "개 항목이 법정상한을 초과합니다.")), /*#__PURE__*/React.createElement("div", {
+      className: "m-summary-stats"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "n"
+    }, passed), /*#__PURE__*/React.createElement("div", {
+      className: "l"
+    }, "적합")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "n"
+    }, failed), /*#__PURE__*/React.createElement("div", {
+      className: "l"
+    }, "초과")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "n"
+    }, infoCount), /*#__PURE__*/React.createElement("div", {
+      className: "l"
+    }, "의무")))), /*#__PURE__*/React.createElement(PillTabs, {
+      tabs: tabs,
+      active: curKey,
+      onSelect: setTab,
+      counts: counts
+    }), curKey === "community" && cf ? /*#__PURE__*/React.createElement(Card, {
+      title: "주민공동시설 세부설치기준",
+      hint: "총량 " + (cf.total || 0).toLocaleString("ko-KR") + "㎡",
+      pad: false
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-cf-list"
+    }, cf.rows.map((row, i) => /*#__PURE__*/React.createElement("div", {
+      key: i,
+      className: "m-cf-item"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "m-cf-top"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "m-cf-name"
+    }, row.item), /*#__PURE__*/React.createElement("span", {
+      className: "m-cf-badge " + row.kind
+    }, row.status)), /*#__PURE__*/React.createElement("div", {
+      className: "m-cf-std"
+    }, row.std), row.value && /*#__PURE__*/React.createElement("div", {
+      className: "m-cf-value"
+    }, "현재 입력 · ", row.value), /*#__PURE__*/React.createElement("div", {
+      className: "m-cf-point"
+    }, row.point))))) : /*#__PURE__*/React.createElement(Card, {
+      title: activeTab ? activeTab.name : "",
+      hint: activeTab ? activeTab.desc : "",
+      pad: false
+    }, items.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      className: "m-empty"
+    }, "현재 용도·규모 기준 해당 항목이 없습니다.") : /*#__PURE__*/React.createElement(React.Fragment, null, main.map(c => /*#__PURE__*/React.createElement(CheckRow, {
+      key: c.id,
+      c: c
+    })), /*#__PURE__*/React.createElement(NaGroup, {
+      items: na,
+      render: c => /*#__PURE__*/React.createElement(CheckRow, {
+        key: c.id,
+        c: c
+      })
+    }))));
+  }
+  return App;
+}();</script>
+<script>/* 루트: 뷰포트 폭으로 모바일(≤760px) / 데스크톱 분기. 데스크톱 App은 무변경 */
+(function () {
+  var BP = 760;
+  function Root() {
+    var st = React.useState(typeof window !== "undefined" && window.innerWidth <= BP);
+    var mobile = st[0], setMobile = st[1];
+    React.useEffect(function () {
+      var on = function () { setMobile(window.innerWidth <= BP); };
+      window.addEventListener("resize", on);
+      return function () { window.removeEventListener("resize", on); };
+    }, []);
+    var Comp = (mobile && window.MobileApp) ? window.MobileApp : App;
+    return React.createElement(Comp, null);
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(Root, null));
+})();
+</script>
 </body></html>
