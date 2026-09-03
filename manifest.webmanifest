@@ -1,0 +1,16 @@
+{
+  "name": "건축 사업 법규검토 콘솔",
+  "short_name": "법규검토",
+  "description": "건축 사업 인허가 절차·법규 적용 여부를 입력값 기준으로 자동 판정하는 사전검토 콘솔",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef1f5",
+  "theme_color": "#101a27",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
