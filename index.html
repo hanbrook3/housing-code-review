@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>건축 사업 법규검토 콘솔 v6.33 · 개발자 최감용</title>
+<title>건축 사업 법규검토 콘솔 v6.34 · 개발자 최감용</title>
 <!-- 홈 화면에 설치해 앱처럼 쓴다. 상단바 색은 모바일 헤더(.m-head)와 맞춘다. -->
 <link rel="manifest" href="manifest.webmanifest" />
 <meta name="theme-color" content="#101a27" />
@@ -4213,6 +4213,437 @@ function scheduleStepNavUpdate(){
   window.APP_DATA={ZONES:ZONES,BUILDING_USES:BUILDING_USES,REGIONS:REGIONS,BIZ_TYPES:BIZ_TYPES,PERMIT_STEPS:[],assessReviews:assessReviews,communityFacilities:communityFacilities,communityChecks:communityChecks,evaluate:evaluate,permitTimeline:permitTimeline,buildReportHTML:buildReportHTML,LAW_BASE:LAW_BASE,DEV:DEV};
 })();
 </script>
+<script id="archhub-autofill">
+/* 주소 자동채움 — 데스크톱·모바일 두 화면이 함께 쓴다.
+   키는 여기 없다. 카카오·건축HUB 는 archhub-api 서버가 대신 부른다(원본: tools/archhub-api/server.js).
+   STEP1 은 '계획 중인 사업'의 값을 받고, 대장은 '기존 건축물'의 기록이다.
+   그래서 대지 정보만 곧바로 채우고, 기존 건축물 값은 사용자가 눌러야 채운다.
+   법령 적용시점은 이번 사업의 처분일이 기준이라 여기서 바꾸지 않는다. */
+(function (root) {
+  'use strict';
+  var API = 'https://hanbrook3.duckdns.org/archhub';
+  var TIMEOUT_MS = 60000;   /* 서버가 건축HUB 장애 구간을 넘기려고 오퍼레이션마다 최대 25초 다시 묻는다(대장→인허가면 두 번) */
+
+  /* 카카오 region_1depth_name → 콘솔 시도 (2026-09-29, 17개 시도 청사 주소로 실측) */
+  var R1 = {
+    '서울': '서울특별시', '부산': '부산광역시', '대구': '대구광역시', '인천': '인천광역시',
+    '광주': '광주광역시', '대전': '대전광역시', '울산': '울산광역시', '세종특별자치시': '세종특별자치시',
+    '경기': '경기도', '강원특별자치도': '강원특별자치도', '충북': '충청북도', '충남': '충청남도',
+    '전북특별자치도': '전북특별자치도', '전남': '전라남도', '경북': '경상북도', '경남': '경상남도',
+    '제주특별자치도': '제주특별자치도'
+  };
+  /* 카카오는 광주·전남을 한데 묶어 준다. 콘솔은 둘을 따로 가지므로 시군구 소속으로 가른다(겹치는 이름 없음). */
+  var MERGED = { '전남광주통합특별시': ['광주광역시', '전라남도'] };
+
+  var MAIN_USE = {
+    '업무시설': 'biz', '판매시설': 'sales', '숙박시설': 'lodge', '의료시설': 'medical',
+    '교육연구시설': 'edu', '노유자시설': 'welfare', '문화및집회시설': 'culture',
+    '공장': 'factory', '창고시설': 'factory',
+    '제1종근린생활시설': 'nbr', '제2종근린생활시설': 'nbr'
+  };
+
+  function uniq(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
+  function text(v) { return String(v == null ? '' : v).trim(); }
+  /* 면적·세대·층수에서 0·공백·부재는 결측이다 — 값으로 쓰지 않는다 */
+  function num(v) { var n = Number(v); return isFinite(n) && n > 0 ? n : null; }
+  function day(v) { v = text(v); return /^\d{8}$/.test(v) ? v.slice(0, 4) + '-' + v.slice(4, 6) + '-' + v.slice(6) : null; }
+  /* 0 아닌 값이 정확히 한 종류일 때만 그 값 — 둘 이상이면 고를 근거가 없다 */
+  function single(rows, key) {
+    var u = uniq(rows.map(function (r) { return num(r[key]); }).filter(function (n) { return n !== null; }));
+    return u.length === 1 ? u[0] : null;
+  }
+
+  function pickSigungu(list, r2) {
+    if (!r2) return '';
+    if (list.indexOf(r2) >= 0) return r2;
+    var first = r2.split(' ')[0];            /* '성남시 중원구' → 콘솔은 '성남시' 만 갖고 있다 */
+    return list.indexOf(first) >= 0 ? first : '';
+  }
+
+  function mapRegion(r1, r2, CITIES) {
+    r2 = text(r2);
+    if (r1 === '세종특별자치시' && !r2) return { sido: '세종특별자치시', sigungu: '세종시' };
+    var sidos = MERGED[r1] || (R1[r1] ? [R1[r1]] : []);
+    for (var i = 0; i < sidos.length; i++) {
+      var g = pickSigungu(CITIES[sidos[i]] || [], r2);
+      if (g) return { sido: sidos[i], sigungu: g };
+    }
+    return { sido: sidos.length === 1 ? sidos[0] : '', sigungu: '' };
+  }
+
+  /* 상위 용도지역은 정보가 없다는 뜻이 아니라 중간 분류가 안 됐다는 뜻 — 후보에서 뺀다(중간 분류명은 남긴다) */
+  var ZONE_UMBRELLA = ['도시지역', '비도시지역', '주거지역', '상업지역', '공업지역', '녹지지역', '관리지역'];
+  function zoneOf(jijigu, fallbackNames, ZONE_L) {
+    var byLabel = {};
+    Object.keys(ZONE_L).forEach(function (id) { byLabel[ZONE_L[id]] = id; });
+    var rep = jijigu.filter(function (x) { return text(x.reprYn) === '1'; });
+    var names = uniq(rep.filter(function (x) { return x.jijiguGbCdNm === '용도지역코드'; })
+      .map(function (x) { return text(x.jijiguCdNm); }).filter(Boolean));
+    names = names.filter(function (n) { return ZONE_UMBRELLA.indexOf(n) < 0; });
+    /* 1차 기재가 상위 용도지역뿐이라 지운 뒤 하나도 안 남으면(=정보가 없던 것과 같다) 그때 인허가 지역지구로 폴백한다 */
+    if (!names.length) {
+      names = uniq(fallbackNames.map(text).filter(Boolean)).filter(function (n) { return ZONE_UMBRELLA.indexOf(n) < 0; });
+    }
+    return {
+      ids: uniq(names.map(function (n) { return byLabel[n]; }).filter(Boolean)),
+      names: names,
+      district: rep.some(function (x) { return x.jijiguGbCdNm === '용도구역코드' && /지구단위계획/.test(text(x.jijiguCdNm)); })
+    };
+  }
+
+  /* 총괄표제부의 etcPurps 는 모든 동을 요약한 것이라 동 하나가 아파트+상가라는 근거가 못 된다 — 동별 행(bldg)으로만 판단한다.
+     housing 판정은 mainPurpsCdNm 이 아니라 그 동의 etcPurps 문구만 본다 — 총괄이 '공동주택'이어도 그 동 자체가 상가일 수 있다. */
+  function useOf(bldg, mainRow, USE_L) {
+    function housingEtc(r) { return /아파트|연립주택|다세대주택/.test(text(r.etcPurps)); }
+    function commercial(r) { return /판매시설|업무시설/.test(text(r.etcPurps)) || /판매시설|업무시설/.test(text(r.mainPurpsCdNm)); }
+    var main = text(mainRow.mainPurpsCdNm);
+    if (bldg.some(function (r) { return housingEtc(r) && /판매시설|업무시설/.test(text(r.etcPurps)); })) return { value: USE_L.mixed };
+    if (bldg.some(function (r) { return /아파트/.test(text(r.etcPurps)); })) {
+      var otherCommercial = bldg.some(function (r) { return commercial(r) && !housingEtc(r); });
+      return otherCommercial ? { candidates: [USE_L.apt, USE_L.mixed] } : { value: USE_L.apt };
+    }
+    if (bldg.some(function (r) { return /연립주택|다세대주택/.test(text(r.etcPurps)); })) return { value: USE_L.row };
+    if (bldg.some(function (r) { return /오피스텔/.test(text(r.etcPurps)); })) return { value: USE_L.offi };
+    if (main === '공동주택') return { candidates: [USE_L.apt, USE_L.mixed, USE_L.row] };
+    if (MAIN_USE[main]) return { value: USE_L[MAIN_USE[main]] };
+    return {};
+  }
+
+  function normalize(data, addr, tables) {
+    var CITIES = tables.CITIES, ZONE_L = tables.ZONE_L, USE_L = tables.USE_L;
+    var ledger = data.source === 'ledger';
+    var recap = data.recapTitle || [], title = data.title || [], permits = data.apBasis || [];
+    var mains = title.filter(function (r) { return r.mainAtchGbCdNm === '주건축물'; });
+
+    /* ── 대지 정보: 즉시 반영 ── */
+    var site = { values: {}, missing: [], candidates: {}, notes: {} };
+    var region = mapRegion(addr.r1, addr.r2, CITIES);
+    if (region.sido) site.values.sido = region.sido; else site.missing.push('sido');
+    if (region.sigungu) site.values.sigungu = region.sigungu; else site.missing.push('sigungu');
+
+    var z = ledger ? zoneOf(data.jijigu || [], [], ZONE_L)
+                   : zoneOf(data.apJijigu || [], permits.map(function (r) { return r.jiyukCdNm; }), ZONE_L);
+    /* 이름이 둘 이상이면(중복 지정) 하나를 골라 채울 근거가 없다 — 이름이 정확히 하나일 때만 그 매핑을 쓴다 */
+    if (z.names.length === 1 && z.ids.length === 1) site.values.zone = z.ids[0];
+    else {
+      site.missing.push('zone');
+      if (z.names.length >= 2 && z.ids.length) site.candidates.zone = z.ids;
+      if (z.names.length) site.notes.zone = '대장 기재: ' + z.names.join(', ');
+    }
+    /* 지구단위계획구역은 있다는 기록이 있을 때만 켠다. 기록이 없다고 '아님'으로 끄지 않는다. */
+    if (z.district) site.values.dupZone = true;
+
+    var siteArea = ledger ? (single(recap, 'platArea') || single(title, 'platArea')) : single(permits, 'platArea');
+    if (siteArea !== null) site.values.siteArea = siteArea; else site.missing.push('siteArea');
+
+    /* ── 기존 건축물 정보: 버튼을 눌러야 반영 ── */
+    var existing = { canFill: false, reason: '', values: {}, missing: [], candidates: {} };
+    var basis = null;
+    if (data.source === 'permit') existing.reason = '인허가 기록은 여러 차례의 허가라 기존 건축물 값으로 고를 근거가 없습니다';
+    else if (data.source !== 'ledger') existing.reason = '등록된 건축물대장·인허가가 없습니다 — 신축 대지로 보입니다';
+    else if (recap.length > 1) existing.reason = '총괄표제부가 ' + recap.length + '건이라 하나를 고를 수 없습니다';
+    else if (recap.length === 1) basis = recap[0];
+    else if (mains.length === 1) basis = mains[0];
+    else if (mains.length > 1) existing.reason = '총괄표제부 없이 주건축물이 ' + mains.length + '동입니다 — 동별 값을 더해 대지 값으로 만들지 않습니다';
+    else existing.reason = '주건축물 대장이 없습니다';
+
+    if (basis) {
+      var fromRecap = recap.length === 1;
+      var put = function (k, v) { if (v !== null) existing.values[k] = v; else existing.missing.push(k); };
+      existing.canFill = true;
+      put('buildingArea', num(basis.archArea));
+      put('totalArea', num(basis.totArea));
+      put('farArea', num(basis.vlRatEstmTotArea));
+      put('units', fromRecap
+        ? (num(basis.hhldCnt) || num(mains.reduce(function (s, r) { return s + (Number(r.hhldCnt) || 0); }, 0)))
+        : num(basis.hhldCnt));
+      put('floors', fromRecap
+        ? num(Math.max.apply(null, [0].concat(mains.map(function (r) { return Number(r.grndFlrCnt) || 0; }))))
+        : num(basis.grndFlrCnt));
+      /* 주건축물 동이 하나도 없으면(총괄뿐) 동별 규칙(1~4)은 건너뛰고 총괄의 mainPurpsCdNm 으로만 판단한다 */
+      var u = useOf(mains, basis, USE_L);
+      if (u.value) existing.values.useType = u.value;
+      else { existing.missing.push('useType'); if (u.candidates) existing.candidates.useType = u.candidates; }
+    }
+
+    /* ── 참고로만 보여 줄 것 ── */
+    var row = basis || recap[0] || mains[0] || null;
+    var permitDays = uniq(permits.map(function (r) { return day(r.archPmsDay); }).filter(Boolean)).sort();
+    var info = {
+      source: data.source,
+      buildingName: row ? text(row.bldNm) : '',
+      useApprovalDay: row ? day(row.useAprDay) : null,
+      permitDay: row ? day(row.pmsDay) : null,
+      parking: row ? num(row.totPkngCnt) : null,
+      bcRat: row ? num(row.bcRat) : null,
+      vlRat: row ? num(row.vlRat) : null,
+      mainBuildings: mains.length,
+      permitCount: permits.length,
+      latestPermitDay: permitDays.length ? permitDays[permitDays.length - 1] : null,
+      createdDay: row ? day(row.crtnDay) : null
+    };
+    return { source: data.source, site: site, existing: existing, info: info };
+  }
+
+  /* 이번 조회가 못 가져온 대지 값은 STEP1 에 이전 주소 값이 그대로 남는다 — patch 에 넣지 않고 kept 로 알려서
+     카드가 '이전 값이 남아 있다'고 정확히 말하게 한다. 기존 건축물 키·법령 적용시점 키는 여기서 건드리지 않는다. */
+  function sitePatch(out, input, CITIES) {
+    var site = out.site;
+    /* 시도 자체를 못 알아보면 시군구·용도지역·대지면적도 이 주소 것인지 믿을 근거가 없다 — 아무것도 건드리지 않는다 */
+    if (site.missing.indexOf('sido') >= 0) {
+      return { patch: {}, kept: { region: (input.sido || '') + ' ' + (input.sigungu || '') } };
+    }
+    var patch = Object.assign({}, site.values);
+    var kept = {};
+    if (site.missing.indexOf('siteArea') >= 0) patch.siteArea = '';
+    if (patch.sido && !patch.sigungu) {
+      patch.sigungu = (CITIES[patch.sido] || [])[0];
+      kept.sigungu = patch.sigungu;
+    }
+    if (site.missing.indexOf('zone') >= 0) {
+      delete patch.zone;
+      kept.zone = input.zone;
+    }
+    if (site.values.dupZone !== true && input.dupZone === true) {
+      delete patch.dupZone;
+      kept.dupZone = true;
+    }
+    return { patch: patch, kept: kept };
+  }
+
+  function getJSON(path) {
+    var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, TIMEOUT_MS) : null;
+    return fetch(API + path, ctl ? { signal: ctl.signal } : {})
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok) throw new Error(j.error || ('서버 응답 ' + r.status));
+          return j;
+        });
+      })
+      .finally(function () { if (timer) clearTimeout(timer); });
+  }
+  function geocode(q) {
+    return getJSON('/geocode?q=' + encodeURIComponent(q)).then(function (j) { return j.results || []; });
+  }
+  function lookup(a) {
+    return getJSON('/lookup?sigunguCd=' + a.sigunguCd + '&bjdongCd=' + a.bjdongCd +
+      '&platGbCd=' + a.platGbCd + '&bun=' + a.bun + '&ji=' + a.ji);
+  }
+
+  /* ── 화면 ── */
+  var SKIN = {
+    desktop: { wrap: 'card tight aa-card', head: 'card-head', hint: 'hint', body: 'card-body', go: 'btn btn-primary', ghost: 'btn btn-ghost' },
+    mobile: { wrap: 'm-card aa-card', head: 'm-card-head', hint: 'm-hint', body: 'm-card-body', go: 'm-btn primary', ghost: 'm-btn ghost' }
+  };
+  var SITE_KEYS = ['sido', 'sigungu', 'zone', 'dupZone', 'siteArea'];
+  var EXISTING_KEYS = ['useType', 'buildingArea', 'totalArea', 'farArea', 'units', 'floors'];
+  var LABEL = {
+    sido: '광역시·도', sigungu: '시·군·구', zone: '용도지역', dupZone: '지구단위계획구역', siteArea: '대지면적',
+    useType: '주용도', buildingArea: '건축면적', totalArea: '전체연면적', farArea: '용적률 산정용 연면적',
+    units: '세대수', floors: '최고층수'
+  };
+  var SOURCE = { ledger: '건축HUB 건축물대장', permit: '건축HUB 건축인허가' };
+
+  function fmt(k, v, ZONE_L) {
+    if (k === 'zone') return ZONE_L[v] || v;
+    if (k === 'dupZone') return v ? '해당' : '해당 없음';
+    if (typeof v === 'number') {
+      return v.toLocaleString('ko-KR') + (/Area$/.test(k) ? '㎡' : k === 'floors' ? '층' : k === 'units' ? '세대' : '');
+    }
+    return String(v);
+  }
+
+  function friendly(e) {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return '인터넷에 연결되어 있지 않습니다 — 직접 입력해 주세요';
+    if (e && e.name === 'AbortError') return '자동채움 서버 응답이 늦습니다 — 잠시 뒤 다시 시도하거나 직접 입력해 주세요';
+    if (e && /Failed to fetch|NetworkError|Load failed/i.test(e.message || '')) return '자동채움 서버에 연결할 수 없습니다 — 직접 입력해 주세요';
+    return (e && e.message) || '알 수 없는 오류';
+  }
+
+  function Card(props) {
+    var h = React.createElement;
+    var pair = React.useState({ q: '', busy: false, msg: '', kind: '', results: null, out: null, kept: null, filled: false });
+    var S = pair[0];
+    function set(p) { pair[1](function (o) { return Object.assign({}, o, p); }); }
+    var sk = SKIN[props.skin] || SKIN.desktop;
+    var T = { CITIES: CITIES, ZONE_L: ZONE_L, USE_L: USE_L };
+
+    /* STEP1 은 STEP2~4 로 넘어가면 언마운트된다 — 그때 도착하는 응답이 화면에 아무것도 바꾸지 않게 막는다.
+       alive 는 언마운트 이후, seq 는 그 사이 새 조회가 시작된 경우(오래된 응답이 최신 것을 덮어쓰지 않게)를 막는다. */
+    var alive = React.useRef(true);
+    var seq = React.useRef(0);
+    React.useEffect(function () {
+      alive.current = true;
+      return function () { alive.current = false; };
+    }, []);
+
+    function choose(a) {
+      var id = ++seq.current;
+      /* 시도·시군구만 먼저 반영하면 이전 지번의 용도지역·대지면적과 새 지역이 섞인다 — 지번이 있어야만 STEP1 을 건드린다 */
+      if (!a.hasLot) {
+        set({ busy: false, results: null, out: null, kept: null, msg: '지번까지 입력해 주세요 — 건축물대장을 조회해야 대지 정보를 채울 수 있습니다', kind: 'warn' });
+        return;
+      }
+      var inputAtCall = props.input;
+      set({ busy: true, results: null, out: null, kept: null, filled: false, msg: '건축물대장 조회 중…', kind: '' });
+      lookup(a).then(function (data) {
+        if (!alive.current || id !== seq.current) return;
+        var out = normalize(data, a, T);
+        var sp = sitePatch(out, inputAtCall, T.CITIES);
+        props.setInput(sp.patch);
+        set({ busy: false, out: out, kept: sp.kept, msg: '', kind: '' });
+      }).catch(function (e) {
+        if (!alive.current || id !== seq.current) return;
+        set({ busy: false, msg: friendly(e), kind: 'bad' });
+      });
+    }
+
+    function search(e) {
+      e.preventDefault();
+      var q = S.q.trim();
+      if (!q || S.busy) return;
+      var id = ++seq.current;
+      set({ busy: true, results: null, out: null, kept: null, filled: false, msg: '주소 검색 중…', kind: '' });
+      geocode(q).then(function (list) {
+        if (!alive.current || id !== seq.current) return;
+        if (!list.length) { set({ busy: false, msg: '주소를 찾을 수 없습니다 — 도로명 또는 지번 주소로 다시 입력해 주세요', kind: 'warn' }); return; }
+        if (list.length === 1) { choose(list[0]); return; }
+        set({ busy: false, results: list, msg: list.length + '건이 검색됐습니다 — 해당 주소를 고르세요', kind: '' });
+      }).catch(function (e2) {
+        if (!alive.current || id !== seq.current) return;
+        set({ busy: false, msg: friendly(e2), kind: 'bad' });
+      });
+    }
+
+    /* kept[k] 는 조회 시점엔 STEP1 에 이전 값(또는 대체값)이 남아 있었다는 뜻이지만, 그 뒤 사용자가 STEP1 을 직접 고치면
+       더는 사실이 아니다 — 지금 props.input 과 비교해 아직도 같을 때만 '살아있다'고 본다 */
+    function keptFresh(k, kept) {
+      if (!kept || !Object.prototype.hasOwnProperty.call(kept, k)) return false;
+      if (k === 'zone') return props.input.zone === kept.zone;
+      if (k === 'sigungu') return props.input.sigungu === kept.sigungu;
+      if (k === 'dupZone') return props.input.dupZone === true;
+      return false;
+    }
+    function keptNote(k, kept) {
+      if (k === 'zone') return "STEP1 에 이전 값 '" + (T.ZONE_L[kept.zone] || kept.zone) + "'이 남아 있습니다 — 직접 고르세요";
+      if (k === 'sigungu') return "목록 첫 항목 '" + kept.sigungu + "'로 두었습니다 — 직접 고르세요";
+      if (k === 'dupZone') return '이 대지 기록에는 지구단위계획구역이 없는데 STEP1 에는 켜져 있습니다 — 직접 확인하세요';
+      return '';
+    }
+
+    function rows(keys, values, missing, notes, kept) {
+      var out = [];
+      keys.forEach(function (k) {
+        var has = Object.prototype.hasOwnProperty.call(values, k);
+        var fresh = keptFresh(k, kept);
+        if (!has && missing.indexOf(k) < 0 && !fresh) return;
+        out.push(h('dt', { key: k + ':t' }, LABEL[k]));
+        var need = [
+          notes && notes[k],
+          k === 'siteArea' && missing.indexOf('siteArea') >= 0 && 'STEP1 대지면적을 비웠습니다',
+          fresh ? keptNote(k, kept) : ''
+        ].filter(Boolean).join(' · ');
+        out.push(h('dd', { key: k + ':d' }, has ? fmt(k, values[k], T.ZONE_L)
+          : h('span', { className: 'aa-need' }, '확인필요' + (need ? ' · ' + need : ''))));
+      });
+      return out;
+    }
+
+    var body = [];
+    if (typeof navigator !== 'undefined' && navigator.onLine === false && !S.busy) {
+      body.push(h('div', { key: 'off', className: 'aa-msg warn' }, '인터넷 연결 시 사용할 수 있습니다'));
+    }
+    body.push(
+      h('form', { key: 'f', className: 'aa-row', onSubmit: search },
+        h('input', { className: 'aa-q', type: 'search', value: S.q, maxLength: 100, placeholder: '예: 서울 송파구 잠실동 19',
+          'aria-label': '대지 주소', onChange: function (e) { set({ q: e.target.value }); } }),
+        h('button', { className: sk.go, type: 'submit', disabled: S.busy || !S.q.trim() }, S.busy ? '조회 중…' : '조회')),
+      S.msg ? h('div', { key: 'm', className: 'aa-msg ' + S.kind }, S.msg) : null,
+      S.results ? h('ul', { key: 'r', className: 'aa-list' }, S.results.map(function (a, i) {
+        return h('li', { key: i }, h('button', { type: 'button', onClick: function () { choose(a); } },
+          h('b', null, a.addressName), a.roadAddressName ? h('span', null, a.roadAddressName) : null));
+      })) : null
+    );
+
+    var out = S.out;
+    if (out) {
+      var site = out.site, ex = out.existing, info = out.info;
+      /* 시도 자체를 못 알아본 경우엔 sitePatch 가 아무 것도 넣지 않았다 — 필드별 확인필요 대신 그 사실 하나만 말한다 */
+      var siteBody = (S.kept && S.kept.region)
+        ? h('div', { className: 'aa-msg warn' },
+            '지역을 인식하지 못해 STEP1 을 바꾸지 않았습니다 (STEP1 현재 지역: ' + S.kept.region + ') — 직접 입력해 주세요')
+        : h(React.Fragment, null,
+            h('dl', { className: 'aa-grid' }, rows(SITE_KEYS, site.values, site.missing, site.notes, S.kept)),
+            site.candidates.zone ? h('div', { className: 'aa-chips' }, site.candidates.zone.map(function (id) {
+              return h('button', { key: id, type: 'button', className: 'aa-chip', onClick: function () { props.setInput({ zone: id }); } }, T.ZONE_L[id]);
+            })) : null);
+      body.push(h('div', { key: 's', className: 'aa-sec' },
+        h('h4', null, '대지 정보 — 반영했습니다', SOURCE[out.source] ? h('span', { className: 'aa-src' }, ' · ' + SOURCE[out.source]) : null),
+        siteBody));
+
+      body.push(h('div', { key: 'e', className: 'aa-sec' },
+        h('h4', null, '기존 건축물 — 참고'),
+        ex.canFill ? h('dl', { className: 'aa-grid' }, rows(EXISTING_KEYS, ex.values, ex.missing)) : null,
+        ex.candidates.useType ? h('div', { className: 'aa-chips' }, ex.candidates.useType.map(function (label) {
+          return h('button', { key: label, type: 'button', className: 'aa-chip', onClick: function () { props.setInput({ useType: label }); } }, label);
+        })) : null,
+        ex.canFill
+          ? h('div', { className: 'aa-fill' }, h('button', {
+              type: 'button', className: sk.ghost, disabled: S.filled,
+              onClick: function () { props.setInput(ex.values); set({ filled: true }); }
+            }, S.filled ? '기존 건축물 값을 채웠습니다' : '기존 건축물 값으로 채우기'))
+          : h('div', { className: 'aa-msg' }, ex.reason),
+        h('div', { className: 'aa-note' }, [
+          info.buildingName && ('건물명 ' + info.buildingName),
+          info.useApprovalDay && ('사용승인 ' + info.useApprovalDay),
+          info.permitDay && ('허가 ' + info.permitDay),
+          info.parking && ('총주차 ' + info.parking.toLocaleString('ko-KR') + '대'),
+          info.bcRat && ('건폐율 실적 ' + info.bcRat + '%'),
+          info.vlRat && ('용적률 실적 ' + info.vlRat + '%'),
+          info.mainBuildings > 1 && ('주건축물 ' + info.mainBuildings + '동'),
+          info.permitCount && ('인허가 ' + info.permitCount + '건 · 최근 허가 ' + (info.latestPermitDay || '확인필요'))
+        ].filter(Boolean).join(' · ')),
+        h('div', { className: 'aa-note' },
+          'STEP1 은 계획 중인 사업의 값입니다. 기존 건축물 값은 증축·리모델링·용도변경처럼 기존 값이 검토 기준일 때만 채우세요. ' +
+          '법령 적용시점은 이번 사업의 처분일 기준이라 자동으로 바꾸지 않습니다.')));
+    }
+
+    return h('div', { className: sk.wrap },
+      h('div', { className: sk.head }, h('h3', null, '주소로 자동채움'), h('span', { className: sk.hint }, '카카오 · 건축HUB')),
+      h('div', { className: sk.body }, body));
+  }
+
+  var CSS =
+    '.aa-card .aa-row{display:flex;gap:8px;align-items:stretch}' +
+    '.aa-card .aa-q{flex:1;min-width:0;height:40px;padding:0 12px;border:1px solid var(--line-strong);border-radius:8px;font:inherit;font-size:14px;background:#fff;color:var(--ink)}' +
+    '.aa-card .aa-row .m-btn{flex:none;padding:0 18px}' +
+    '.aa-msg{margin-top:10px;font-size:12.5px;color:var(--ink-2);line-height:1.5}' +
+    '.aa-msg.warn{color:var(--warn)}.aa-msg.bad{color:var(--bad)}' +
+    '.aa-list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}' +
+    '.aa-list button{width:100%;text-align:left;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font:inherit;display:flex;flex-direction:column;gap:2px}' +
+    '.aa-list b{font-size:13px;color:var(--ink)}.aa-list span{font-size:11.5px;color:var(--muted)}' +
+    '.aa-sec{margin-top:14px}.aa-sec h4{margin:0 0 6px;font-size:12.5px;font-weight:600;color:var(--ink-2)}' +
+    '.aa-src{font-weight:400;color:var(--muted)}' +
+    '.aa-grid{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:12.5px}' +
+    '.aa-grid dt{color:var(--muted)}.aa-grid dd{margin:0;color:var(--ink)}' +
+    '.aa-need{color:var(--warn);font-weight:600}' +
+    '.aa-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}' +
+    '.aa-chip{padding:4px 10px;border:1px solid var(--accent);border-radius:999px;background:var(--accent-soft);color:var(--accent);font:inherit;font-size:12px;cursor:pointer}' +
+    '.aa-fill{margin-top:10px}' +
+    '.aa-note{margin-top:8px;font-size:11.5px;color:var(--muted);line-height:1.5}';
+
+  if (typeof document !== 'undefined' && document && document.head && !document.getElementById('aa-styles')) {
+    var st = document.createElement('style');
+    st.id = 'aa-styles';
+    st.textContent = CSS;
+    document.head.appendChild(st);
+  }
+
+  root.ArchhubAutofill = { API: API, mapRegion: mapRegion, normalize: normalize, sitePatch: sitePatch, geocode: geocode, lookup: lookup, Card: Card };
+})(window);
+</script>
+
 <script>// 건축법규콘솔 - 공유 UI 컴포넌트 + 스타일 주입
 const {
   useState,
@@ -5391,7 +5822,11 @@ function Step1({
     className: "page-title"
   }, "기본정보 입력"), /*#__PURE__*/React.createElement("div", {
     className: "page-lede"
-  }, "대지·용도·사업 정보를 입력하면 건폐율·용적률이 실시간 계산되어 이후 적합성 검토에 반영됩니다.")), /*#__PURE__*/React.createElement("div", {
+  }, "대지·용도·사업 정보를 입력하면 건폐율·용적률이 실시간 계산되어 이후 적합성 검토에 반영됩니다.")), window.ArchhubAutofill && /*#__PURE__*/React.createElement(window.ArchhubAutofill.Card, {
+    skin: "desktop",
+    input: input,
+    setInput: setInput
+  }), /*#__PURE__*/React.createElement("div", {
     className: "split"
   }, /*#__PURE__*/React.createElement("div", {
     className: "stack"
@@ -6746,6 +7181,10 @@ window.MobileApp = function () {
       eyebrow: "STEP 01 — INPUT",
       title: "기본정보 입력",
       lede: "대지·용도·사업 정보를 입력하면 건폐율·용적률이 실시간 계산됩니다. 비워두면 법정 한도 기준으로 허용 면적을 역산합니다."
+    }), window.ArchhubAutofill && /*#__PURE__*/React.createElement(window.ArchhubAutofill.Card, {
+      skin: "mobile",
+      input: input,
+      setInput: setInput
     }), /*#__PURE__*/React.createElement("div", {
       className: "m-meter-bar"
     }, /*#__PURE__*/React.createElement(MiniMeter, {
